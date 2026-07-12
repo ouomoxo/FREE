@@ -1,0 +1,348 @@
+/* ============================================================
+   rules.css — THE RULES (section 03) · "How to Use It"
+   Death Note :: 死神の手帳
+
+   The canonical rules of the notebook, typeset as if printed on
+   the first aged leaves of the Note itself: a parchment codex
+   with faint ruled lines, a folded corner, hairline dividers and
+   Roman numerals struck in crimson. Two columns on wide screens,
+   collapsing to one on narrow. Consumes tokens from theme.css
+   only — no hard-coded palette. (Layout max-widths follow the
+   note.css precedent of literal px.)
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Section shell — a faint crimson wash bleeds from the top,
+   echoing THE NOTE section for cohesion.
+   -------------------------------------------------------- */
+.dn-rules {
+  max-width: 1040px;   /* wider than the default column to seat two columns */
+  background:
+      radial-gradient(90% 60% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+.dn-rules.dn-section__inner { max-width: 1040px; }  /* win over shell default */
+
+/* --------------------------------------------------------
+   Header — mirrors THE NOTE's centred heading treatment
+   -------------------------------------------------------- */
+.dn-rules__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+.dn-rules__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-rules__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-rules__jp {
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+}
+.dn-rules__lead {
+  max-width: 56ch;
+  margin: var(--space-2) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local to this section; mirrors note.css).
+   The hidden initial state is gated behind .is-js, which
+   js/rules.js adds on boot — so if the script never runs the
+   content is shown normally (no-JS fallback). js/rules.js sets
+   a per-element --d stagger, then toggles .is-revealed.
+   -------------------------------------------------------- */
+.dn-rules.is-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-rules.is-js.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE CODEX — an aged page bearing the printed rules
+   ======================================================== */
+.dn-codex {
+  position: relative;
+  padding: clamp(var(--space-5), 4vw, var(--space-8));
+  border-radius: var(--radius-md);
+  color: var(--note-ink);
+  background-color: var(--note-paper);
+  background-image:
+      /* faint ruled writing lines */
+      repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 33px,
+          var(--note-line) 33px,
+          var(--note-line) 34px),
+      /* aged darkening toward the edges */
+      radial-gradient(130% 120% at 50% 0%,
+          transparent 60%, var(--note-paper-edge) 100%);
+  border: 1px solid var(--color-line-strong);
+  box-shadow:
+      var(--shadow-lg),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+      inset 0 0 80px rgba(0, 0, 0, 0.55);
+}
+/* Parchment grain over the page */
+.dn-codex::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Faux page header stamped along the top edge */
+.dn-codex__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-codex__stamp {
+  display: inline-flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-line-blood);
+  border-radius: var(--radius-sm);
+  transform: rotate(-2.5deg);
+  color: var(--color-blood-bright);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow: inset 0 0 0 1px rgba(179, 18, 27, 0.25);
+}
+.dn-codex__stamp-en {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wider);
+  line-height: 1;
+}
+.dn-codex__stamp-jp {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+  margin-top: 2px;
+}
+.dn-codex__meta {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+  line-height: var(--leading-snug);
+}
+
+/* Folded page corner (decorative) — a triangle peeled at bottom-right */
+.dn-codex__corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 0 0 var(--radius-md) 0;
+  background: linear-gradient(135deg,
+      transparent 50%,
+      var(--note-paper-edge) 50%,
+      var(--color-bg-inset) 100%);
+  box-shadow: -2px -2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ========================================================
+   THE RULES LIST — semantic <ol>, Roman numerals via counter
+   ======================================================== */
+.dn-rules__list {
+  counter-reset: dn-rule;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* Two balanced columns on wide screens */
+  columns: 2;
+  column-gap: var(--space-8);
+}
+
+/* One rule — a numeral column and the rule text */
+.dn-rules__item {
+  counter-increment: dn-rule;
+  break-inside: avoid;          /* keep a rule whole across columns */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-line);
+}
+/* Struck Roman numeral in crimson serif */
+.dn-rules__item::before {
+  content: counter(dn-rule, upper-roman);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-blood);
+  text-shadow: 0 0 18px var(--color-blood-glow);
+  min-width: 2.6ch;
+  padding-top: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dn-rules__text {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: var(--color-text);
+  max-width: 60ch;            /* comfortable measure */
+  text-wrap: pretty;
+}
+.dn-rules__text b {
+  font-weight: var(--weight-normal);
+  color: var(--color-blood-bright);
+  font-variant-numeric: tabular-nums;
+}
+/* The dubious 13-day gloss, set apart in a fainter italic */
+.dn-rules__gloss {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Featured first rule — spans both columns, larger, drop-cap.
+   The single loudest line on the page.
+   -------------------------------------------------------- */
+.dn-rules__item--featured {
+  column-span: all;
+  border-top: 0;
+  padding-top: 0;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-line-strong);
+  grid-template-columns: 1fr;   /* no numeral column — it is rule I */
+  gap: 0;
+}
+.dn-rules__item--featured::before {
+  /* Render "I" as an oversized illuminated numeral, floated left */
+  float: left;
+  min-width: 0;
+  margin-right: var(--space-5);
+  font-size: var(--text-5xl);
+  line-height: 0.8;
+  color: var(--color-blood-bright);
+}
+.dn-rules__item--featured .dn-rules__text {
+  font-size: clamp(var(--text-lg), 3.5vw, var(--text-2xl));
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  max-width: 34ch;
+}
+
+/* ========================================================
+   FOOTER — XIII seal + disclaimer
+   ======================================================== */
+.dn-rules__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+}
+.dn-rules__seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-blood);
+  color: var(--color-blood);
+  box-shadow: inset 0 0 20px rgba(179, 18, 27, 0.18);
+  text-align: center;
+  line-height: 1;
+}
+.dn-rules__seal-roman {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-rules__seal-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-gold-dim);
+  margin-top: 3px;
+}
+.dn-rules__disclaimer {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-loose);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  max-width: 60ch;
+}
+.dn-rules__disclaimer i {
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* ========================================================
+   RESPONSIVE — collapse to a single column
+   ======================================================== */
+@media (max-width: 760px) {
+  .dn-rules__list { columns: 1; }
+  .dn-rules__foot { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .dn-rules__title { font-size: var(--text-2xl); }
+  .dn-codex__head { flex-direction: column; align-items: flex-start; }
+  .dn-codex__meta { text-align: left; }
+  .dn-rules__item--featured::before { font-size: var(--text-4xl); }
+  .dn-rules__item--featured .dn-rules__text { max-width: none; }
+}
+
+/* ========================================================
+   REDUCED MOTION & NO-JS FALLBACK
+   If the user prefers reduced motion, or js/rules.js never
+   runs, the content must be fully visible — never trapped in
+   the hidden reveal state.
+   ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .dn-rules.is-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}

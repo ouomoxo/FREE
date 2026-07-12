@@ -1,0 +1,144 @@
+<!-- INTEGRATE: add to <head> after note.css: <link rel="stylesheet" href="css/rules.css" />  | add after note.js: <script src="js/rules.js" defer></script> -->
+<!--
+  ============================================================
+  RULES (section 03) · INNER CONTENT ONLY
+  Death Note :: 死神の手帳
+
+  This file holds ONLY what goes INSIDE:
+    <section class="dn-section" data-section="rules" …> … </section>
+  Do NOT wrap it in <section>. The existing placeholder markup
+  for data-section="rules" in index.html should be REPLACED by
+  everything below (the root <div class="dn-section__inner dn-rules">).
+
+  Styling: css/rules.css   ·   Behaviour: js/rules.js (optional reveal)
+  ============================================================
+-->
+<div class="dn-section__inner dn-rules" data-rules>
+
+  <!-- ===== Section header (consistent with other sections) ===== -->
+  <header class="dn-rules__head">
+    <p class="dn-rules__index" data-reveal>03 &middot; 規則</p>
+    <h2 class="dn-rules__title" data-reveal>How to Use It</h2>
+    <p class="dn-rules__jp dn-jp" data-reveal>使い方</p>
+    <p class="dn-rules__lead" data-reveal>
+      The laws printed on the first leaves of the notebook &mdash;
+      immutable, indifferent, and binding upon whoever should pick it up.
+    </p>
+  </header>
+
+  <!-- ===== The codex: rules printed on an aged page ===== -->
+  <div class="dn-codex" data-reveal>
+    <!-- Faux page header stamped along the top edge -->
+    <div class="dn-codex__head" aria-hidden="true">
+      <span class="dn-codex__stamp">
+        <span class="dn-codex__stamp-en">DEATH&nbsp;NOTE</span>
+        <span class="dn-codex__stamp-jp">使用規則</span>
+      </span>
+      <span class="dn-codex__meta">HOW&nbsp;TO&nbsp;USE &middot; XIV&nbsp;RULES</span>
+    </div>
+
+    <!-- Semantic ordered list — Roman numerals rendered via CSS counter.
+         The first, most iconic rule is featured (full width + drop-cap). -->
+    <ol class="dn-rules__list" data-rules-list>
+
+      <li class="dn-rules__item dn-rules__item--featured" data-reveal>
+        <p class="dn-rules__text">The human whose name is written in this
+          note shall die.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">This note will not take effect unless the
+          writer has the subject&rsquo;s face in their mind when writing the
+          name. Those who merely share the same name are left unharmed.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">If the cause of death is written within
+          <b>40 seconds</b> of writing the person&rsquo;s name, it will
+          happen.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">If the cause of death is not specified, the
+          person will simply die of a heart attack.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">After writing the cause of death, the
+          details must be entered within the following <b>6 minutes and 40
+          seconds</b>.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">A death takes effect only within human
+          possibility. Suicide is a valid cause &mdash; every human is thought
+          to hold the capacity for it.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">Should a written death be impossible, or
+          would it claim lives beyond the one intended, the subject dies of a
+          heart attack instead.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">You cannot kill a human over <b>124 years</b>
+          of age, nor one with fewer than <b>12 minutes</b> of life left to
+          live.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">A death once written cannot be undone.
+          Crossing out a name or burning the page will not return the dead.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">The owner may trade <b>half of their
+          remaining lifespan</b> for the eyes of a Shinigami &mdash; sight that
+          reveals every human&rsquo;s name and lifespan above their head.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">A Shinigami bound to a human may never tell
+          that human the lifespan its eyes can see, whatever the reason.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">The owner recalls the deaths only while the
+          note is theirs. Relinquish it, and every memory of the note is
+          lost.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">A human who has used the note may go neither
+          to Heaven nor to Hell. Beyond death waits only nothingness &mdash;
+          <span class="dn-jp dn-accent">無</span>.</p>
+      </li>
+
+      <li class="dn-rules__item" data-reveal>
+        <p class="dn-rules__text">Whoever ceases to own the note must write a
+          name within <b>13 days</b>, or they will die.
+          <span class="dn-rules__gloss">&mdash; a rule of dubious authorship,
+          forged to shield the guilty.</span></p>
+      </li>
+
+    </ol>
+
+    <!-- Folded page corner (decorative) -->
+    <span class="dn-codex__corner" aria-hidden="true"></span>
+  </div>
+
+  <!-- ===== Footer: XIII seal + disclaimer ===== -->
+  <footer class="dn-rules__foot" data-reveal>
+    <span class="dn-rules__seal" aria-hidden="true">
+      <span class="dn-rules__seal-roman">XIII</span>
+      <span class="dn-rules__seal-num">13</span>
+    </span>
+    <p class="dn-rules__disclaimer">
+      These are the rules of a notebook that does not exist &mdash; drawn
+      faithfully from the fiction <i>Death&nbsp;Note</i>. No name written
+      here will ever come true.
+    </p>
+  </footer>
+
+</div>
