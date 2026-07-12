@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+# Publishes the site (repo root — index.html and its css/js) to GitHub Pages.
+# All asset references are relative, so the app works correctly under the
+# project subpath (https://<owner>.github.io/FREE/).
+
+on:
+  push:
+    branches: ["claude/roleplay-dev-session-jmu5sh"]
+  workflow_dispatch:
+
+# Least-privilege permissions required by the Pages deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress publish.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        # enablement: true turns Pages on for the repo (source = GitHub Actions)
+        # on the very first run, so no manual settings step is needed.
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
