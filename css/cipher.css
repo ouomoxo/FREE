@@ -1,0 +1,454 @@
+/* ============================================================
+   cipher.css — CIPHER (section 04) · the cryptographer's desk
+   Death Note :: 暗号 / 復号
+
+   A cinematic encode/decode workbench: a method tablist, a
+   twin-panel INPUT / OUTPUT well, method-specific controls and
+   a row of actions. Consumes tokens from theme.css only — no
+   hard-coded palette, spacing or type.
+   ============================================================ */
+
+.dn-cipher {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  /* faint crimson wash from the top, echoing THE NOTE */
+  background:
+      radial-gradient(90% 60% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+
+/* --------------------------------------------------------
+   Section header
+   -------------------------------------------------------- */
+.dn-cipher__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dn-cipher__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-cipher__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-cipher__lead {
+  max-width: 56ch;
+  margin: var(--space-1) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local to this section, mirrors note.css)
+   -------------------------------------------------------- */
+.dn-cipher [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-cipher.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE DESK — the framed workbench panel
+   ======================================================== */
+.dn-desk {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: clamp(var(--space-4), 2.4vw, var(--space-6));
+  background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 26%),
+      var(--color-bg-raised);
+  border: 1px solid var(--color-line-strong);
+  box-shadow:
+      var(--shadow-lg),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+      inset 0 0 70px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+/* Grain overlay on the desk surface */
+.dn-desk::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ========================================================
+   METHOD TABLIST
+   ======================================================== */
+.dn-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dn-method {
+  flex: 1 1 auto;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+      color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+}
+.dn-method:hover {
+  border-color: var(--color-line-strong);
+  background: var(--color-bg-elevated);
+}
+.dn-method.is-active {
+  border-color: var(--color-line-blood);
+  background: linear-gradient(180deg, var(--color-blood-wash), transparent);
+  box-shadow: inset 0 -2px 0 0 var(--color-blood-bright);
+}
+.dn-method__en {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.dn-method.is-active .dn-method__en { color: var(--color-text); }
+.dn-method__jp {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.dn-method.is-active .dn-method__jp { color: var(--color-blood); }
+
+/* Blurb explaining the active method */
+.dn-cipher__blurb {
+  min-height: 1.4em;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: var(--color-text-faint);
+}
+
+/* ========================================================
+   CONTROLS — method-specific parameter row
+   ======================================================== */
+.dn-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+}
+.dn-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dn-ctl__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-ctl__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dn-ctl__hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* Range slider — crimson accent, tuned to the palette */
+.dn-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: clamp(140px, 30vw, 240px);
+  height: 2px;
+  background: var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.dn-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  border: 0;
+  cursor: pointer;
+}
+.dn-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  cursor: pointer;
+}
+.dn-range:focus-visible { outline-offset: 6px; }
+
+/* Number / text control inputs */
+.dn-num,
+.dn-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.dn-num { width: 4.5em; text-align: center; font-variant-numeric: tabular-nums; }
+.dn-text { width: clamp(160px, 40vw, 280px); letter-spacing: var(--tracking-wide); }
+.dn-num:focus,
+.dn-text:focus {
+  outline: none;
+  border-color: var(--color-line-blood);
+  box-shadow: 0 0 0 1px var(--color-line-blood);
+}
+
+/* Small ghost button (ROT13 preset, etc.) */
+.dn-chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.dn-chip:hover {
+  color: var(--color-blood-bright);
+  border-color: var(--color-line-blood);
+}
+
+/* ========================================================
+   THE WELLS — INPUT / OUTPUT twin panels
+   ======================================================== */
+.dn-wells {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.dn-well {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-inset);
+  overflow: hidden;
+}
+.dn-well__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-well__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-well__jp { color: var(--color-blood); letter-spacing: var(--tracking-wide); }
+.dn-well__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-ghost);
+}
+
+/* The text areas */
+.dn-cipher__field {
+  width: 100%;
+  flex: 1;
+  min-height: 168px;
+  resize: vertical;
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--note-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow-wrap: anywhere;
+}
+.dn-cipher__field::placeholder { color: var(--color-text-ghost); }
+.dn-cipher__field:focus { outline: none; }
+/* Keyboard focus lands on the containing well */
+.dn-cipher__field:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--color-line-blood);
+}
+
+/* Output is read-only, tinted faintly warmer (the "decoded ink") */
+.dn-cipher__field[readonly] {
+  color: var(--color-text);
+  cursor: text;
+}
+.dn-well--out { position: relative; }
+.dn-well--out.is-error { border-color: var(--color-line-blood); }
+.dn-cipher__field.is-error::placeholder { color: var(--color-blood); }
+
+/* ========================================================
+   STATUS LINE — aria-live for copied / decoded / errors
+   ======================================================== */
+.dn-cipher__status {
+  min-height: 1.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.dn-cipher__status[data-kind="error"] { color: var(--color-blood-bright); }
+
+/* ========================================================
+   ACTIONS
+   ======================================================== */
+.dn-cipher__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* The encode/decode toggle pair sits first, then a spacer */
+.dn-cipher__modes {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+.dn-cipher__spacer { flex: 1 1 auto; }
+
+/* Mode buttons reuse the shared .dn-btn; active gets crimson fill */
+.dn-cipher .dn-btn.is-active {
+  --_bg: var(--color-blood);
+  --_fg: #fff;
+  --_border: var(--color-blood);
+  box-shadow: var(--shadow-glow);
+}
+.dn-btn__jp { color: rgba(255, 255, 255, 0.7); font-size: var(--text-xs); }
+/* On ghost (inactive) mode buttons, keep the JP tag legible */
+.dn-cipher .dn-btn:not(.is-active):not(.dn-btn--primary) .dn-btn__jp {
+  color: var(--color-text-faint);
+}
+
+/* Utility buttons (copy/swap/sample/clear) — quiet ghost chips */
+.dn-util {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.dn-util:hover {
+  color: var(--color-text);
+  border-color: var(--color-line-blood);
+}
+.dn-util__ico { width: 14px; height: 14px; flex: none; }
+/* Copy confirmation state */
+.dn-util.is-copied {
+  color: var(--color-gold);
+  border-color: var(--color-gold-dim);
+}
+
+/* Disclaimer footnote */
+.dn-cipher__foot {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   RESPONSIVE — stack wells + controls on narrow screens
+   ======================================================== */
+@media (max-width: 720px) {
+  .dn-wells { grid-template-columns: 1fr; }
+  .dn-method { min-width: calc(50% - var(--space-2)); }
+}
+
+@media (max-width: 480px) {
+  .dn-cipher__title { font-size: var(--text-2xl); }
+  .dn-controls { gap: var(--space-4); }
+  .dn-method { min-width: 100%; }
+  .dn-cipher__modes { width: 100%; }
+  .dn-cipher__modes .dn-btn { flex: 1; justify-content: center; }
+  .dn-cipher__spacer { display: none; }
+  .dn-cipher__actions { gap: var(--space-2); }
+  .dn-util { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 360px) {
+  .dn-text { width: 100%; }
+  .dn-controls { padding: var(--space-3); }
+}
