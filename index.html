@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/theme.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/intro.css" />
+  <link rel="stylesheet" href="css/note.css" />
 
   <!-- Inline favicon (a crimson dot) so we make zero external requests -->
   <link rel="icon"
@@ -153,21 +154,166 @@
           </div>
         </section>
 
-        <!-- ========== 02 · THE NOTE (placeholder) ========== -->
-        <section class="dn-section" data-section="note" aria-label="The Note" aria-hidden="true">
-          <div class="dn-section__inner dn-placeholder">
-            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1" aria-hidden="true">
-              <path d="M4 3h13l3 3v15H4z"/><path d="M8 8h8M8 12h8M8 16h5"/>
-            </svg>
-            <span class="dn-placeholder__index">02 · 手帳</span>
-            <h2 class="dn-placeholder__title">The Note</h2>
-            <p class="dn-placeholder__jp">デスノート</p>
-            <p class="dn-placeholder__desc">
-              An interactive notebook. Turn its pages, write within its rules,
-              and watch consequences unfold.
+        <!-- ========== 02 · THE NOTE (centrepiece) ========== -->
+        <section class="dn-section dn-note" data-section="note"
+                 aria-label="The Note" aria-hidden="true">
+          <div class="dn-note__inner">
+
+            <!-- Section header -->
+            <header class="dn-note__head" data-reveal style="--d:80ms">
+              <span class="dn-note__index">02 · 手帳</span>
+              <h2 class="dn-note__title">The Note</h2>
+              <p class="dn-note__lead">
+                Write a name while picturing the face, and the notebook does
+                the rest. A fictional ritual, rendered in ink and shadow.
+              </p>
+            </header>
+
+            <!-- The open notebook: leather cover, two-leaf spread -->
+            <div class="dn-book" data-reveal style="--d:220ms">
+              <div class="dn-book__spread">
+
+                <!-- ===== LEFT LEAF · the writing page ===== -->
+                <div class="dn-book__leaf dn-book__leaf--left">
+                  <div class="dn-page__head">
+                    <span class="dn-stamp" aria-hidden="true">
+                      <span class="dn-stamp__en">DEATH NOTE</span>
+                      <span class="dn-stamp__jp">死神の手帳</span>
+                    </span>
+                    <span class="dn-page__caption">
+                      How&nbsp;to<br />use&nbsp;it
+                    </span>
+                  </div>
+
+                  <form class="dn-form" data-note-form novalidate>
+                    <!-- Name (required) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-name">
+                        Name <span class="req" aria-hidden="true">*</span>
+                      </label>
+                      <input class="dn-input dn-input--name" id="dn-name"
+                             type="text" data-field-name
+                             autocomplete="off" spellcheck="false"
+                             maxlength="80" placeholder="Write a name&hellip;"
+                             aria-required="true" />
+                    </div>
+
+                    <!-- Cause of death (optional) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-cause">
+                        Cause of death <span class="dn-muted">— optional</span>
+                      </label>
+                      <input class="dn-input" id="dn-cause" type="text"
+                             data-field-cause autocomplete="off"
+                             maxlength="80" placeholder="heart attack" />
+                    </div>
+
+                    <!-- Details (optional) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-details">
+                        Details <span class="dn-muted">— optional</span>
+                      </label>
+                      <textarea class="dn-textarea" id="dn-details"
+                                data-field-details rows="2" maxlength="240"
+                                placeholder="The circumstances, written before the time runs out&hellip;"></textarea>
+                    </div>
+
+                    <!-- The face rule (required) -->
+                    <label class="dn-check">
+                      <input class="dn-check__input" type="checkbox"
+                             data-field-face aria-required="true" />
+                      <span class="dn-check__box" aria-hidden="true"></span>
+                      <span class="dn-check__text">
+                        <b>I can picture their face.</b>
+                        <span class="dn-tip" tabindex="0" role="note"
+                              aria-label="Rule: you must know the face">?
+                          <span class="dn-tip__body">
+                            The notebook&rsquo;s rule: writing a name only works
+                            if you hold the person&rsquo;s face in mind — so
+                            those who share a name are unharmed.
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+
+                    <div class="dn-form__actions">
+                      <button class="dn-btn dn-btn--primary" type="submit"
+                              data-inscribe disabled>
+                        刻む
+                        <span class="dn-btn__jp">/ INSCRIBE</span>
+                      </button>
+                      <span class="dn-form__note">
+                        Requires a name &amp; the face
+                      </span>
+                    </div>
+                  </form>
+
+                  <!-- Inscription ceremony (animation layer) -->
+                  <div class="dn-ceremony" data-ceremony hidden aria-hidden="true">
+                    <div class="dn-ceremony__pulse" aria-hidden="true"></div>
+                    <div class="dn-ceremony__name" data-ceremony-name></div>
+                    <div class="dn-ring" role="img"
+                         aria-label="The lore countdown window">
+                      <svg viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="dn-ring__track" cx="60" cy="60" r="52"
+                                fill="none" stroke-width="4" />
+                        <circle class="dn-ring__prog" data-ring-prog
+                                cx="60" cy="60" r="52" fill="none"
+                                stroke-width="4" stroke-linecap="round" />
+                      </svg>
+                      <span class="dn-ring__count" data-ring-count>40</span>
+                    </div>
+                    <p class="dn-ceremony__status" data-ceremony-status></p>
+                  </div>
+                </div>
+
+                <!-- ===== RIGHT LEAF · the ledger ===== -->
+                <div class="dn-book__leaf dn-book__leaf--right">
+                  <aside class="dn-ledger" aria-label="The ledger of inscribed names">
+                    <div class="dn-ledger__head">
+                      <span class="dn-ledger__titles">
+                        <span class="dn-ledger__title">The Ledger</span>
+                        <span class="dn-ledger__jp">記録 · Record</span>
+                      </span>
+                      <span class="dn-ledger__count" data-ledger-count aria-live="off">
+                        0 names
+                      </span>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div class="dn-ledger__empty" data-ledger-empty>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="1" aria-hidden="true">
+                        <path d="M4 3h13l3 3v15H4z" /><path d="M8 8h8M8 12h8M8 16h5" />
+                      </svg>
+                      <p>The pages are blank. For now.</p>
+                    </div>
+
+                    <!-- Entries (newest first, injected by note.js) -->
+                    <ul class="dn-ledger__list" data-ledger-list hidden></ul>
+
+                    <!-- Footer: clear + inline confirm -->
+                    <div class="dn-ledger__foot" data-ledger-foot hidden>
+                      <button class="dn-ledger__clear" type="button"
+                              data-ledger-clear>Clear the note</button>
+                      <span class="dn-ledger__confirm" data-ledger-confirm hidden>
+                        <span>Erase every name?</span>
+                        <button class="yes" type="button" data-confirm-yes>Erase</button>
+                        <button class="no" type="button" data-confirm-no>Keep</button>
+                      </span>
+                    </div>
+                  </aside>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Live region + disclaimer -->
+            <p class="sr-only" role="status" aria-live="polite" data-note-live></p>
+            <p class="dn-note__disclaimer" data-reveal style="--d:360ms">
+              A fictional tribute. Nothing here is real.
             </p>
-            <span class="dn-placeholder__badge">Coming Soon</span>
+
           </div>
         </section>
 
@@ -232,5 +378,6 @@
   <!-- Scripts: app router first (defines DN), then intro behaviour -->
   <script src="js/app.js" defer></script>
   <script src="js/intro.js" defer></script>
+  <script src="js/note.js" defer></script>
 </body>
 </html>
