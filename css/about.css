@@ -1,0 +1,313 @@
+/* ============================================================
+   about.css — ABOUT / 奥付 (section 05) · Colophon & Credits
+   Death Note :: 死神の手帳
+
+   The closing leaf of the experience: an honest colophon that
+   credits the fiction, names the craft, indexes the sections,
+   and signs off with atmosphere. Restrained and typographic —
+   comfortable measure (~60ch), hairline dividers, one small
+   crimson/gold ornament. Consumes tokens from theme.css only;
+   no hard-coded palette. Reveal pattern mirrors rules.css.
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Section shell — a faint crimson wash bleeds from the top,
+   echoing THE NOTE / RULES sections for cohesion.
+   -------------------------------------------------------- */
+.dn-about {
+  background:
+      radial-gradient(90% 55% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+
+/* --------------------------------------------------------
+   Header — mirrors the other sections' centred treatment
+   -------------------------------------------------------- */
+.dn-about__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+.dn-about__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-about__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-about__jp {
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+}
+.dn-about__lead {
+  max-width: 56ch;
+  margin: var(--space-2) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local; mirrors rules.css). Hidden state is
+   gated behind .is-js which js/about.js adds on boot — so if
+   the script never runs the content shows normally (no-JS
+   fallback). about.js sets a per-element --d stagger, then
+   toggles .is-revealed on this same .dn-about element.
+   -------------------------------------------------------- */
+.dn-about.is-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-about.is-js.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE COLOPHON BODY — a single readable column of blocks
+   separated by hairline rules.
+   ======================================================== */
+.dn-about__body {
+  max-width: 64ch;
+  margin: 0 auto;
+}
+
+/* One credited block — a small caps heading + prose */
+.dn-about__block {
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-line);
+}
+.dn-about__block:first-child { border-top: 0; padding-top: 0; }
+
+.dn-about__h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+/* Crimson tick before each heading */
+.dn-about__h::before {
+  content: "";
+  flex: none;
+  width: var(--space-4);
+  height: 1px;
+  background: var(--color-line-blood);
+}
+.dn-about__h-jp {
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  text-transform: none;
+}
+
+.dn-about__p {
+  margin: 0;
+  max-width: 60ch;            /* comfortable measure */
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: var(--color-text);
+  text-wrap: pretty;
+}
+.dn-about__p + .dn-about__p { margin-top: var(--space-4); }
+.dn-about__p em { color: var(--color-text-muted); font-style: italic; }
+.dn-about__p b {
+  font-weight: var(--weight-normal);
+  color: var(--color-blood-bright);
+}
+
+/* --------------------------------------------------------
+   "Built with" — a definition-style colophon list
+   -------------------------------------------------------- */
+.dn-about__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+.dn-about__li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  align-items: baseline;
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+/* A small ballot mark ■ struck in crimson */
+.dn-about__li::before {
+  content: "\25A0";           /* ■ */
+  font-size: var(--text-2xs);
+  line-height: 1.6;
+  color: var(--color-blood);
+  transform: translateY(-0.15em);
+}
+.dn-about__li b {
+  font-weight: var(--weight-normal);
+  color: var(--color-text);
+}
+.dn-about__li code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-gold);
+}
+
+/* --------------------------------------------------------
+   "The sections" — a compact in-app index/legend of links
+   -------------------------------------------------------- */
+.dn-about__index-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+.dn-about__link {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-3);
+  margin: 0 calc(-1 * var(--space-3));
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+      color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+}
+.dn-about__link:hover {
+  color: var(--color-text);
+  background: linear-gradient(90deg, var(--color-blood-wash), transparent);
+}
+.dn-about__link-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-blood);
+  min-width: 2em;
+}
+.dn-about__link-en {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wide);
+  flex: 1;
+}
+.dn-about__link:hover .dn-about__link-en { color: var(--color-text); }
+.dn-about__link-jp {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+/* Trailing arrow that nudges on hover */
+.dn-about__link-go {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-ghost);
+  transition: transform var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.dn-about__link:hover .dn-about__link-go {
+  color: var(--color-blood-bright);
+  transform: translateX(4px);
+}
+
+/* ========================================================
+   CLOSING — the ornament + atmospheric sign-off, centred
+   ======================================================== */
+.dn-about__close {
+  text-align: center;
+  margin-top: var(--space-8);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* The shinigami-eye ornament (original inline SVG, line-art) */
+.dn-about__ornament {
+  width: 84px;
+  height: 84px;
+  color: var(--color-blood);
+  filter: drop-shadow(0 0 14px var(--color-blood-glow));
+}
+.dn-about__ornament .dn-about__eye-iris { color: var(--color-gold); }
+
+.dn-about__sign {
+  max-width: 42ch;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(var(--text-lg), 3.5vw, var(--text-xl));
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  text-wrap: balance;
+}
+.dn-about__sign .dn-jp {
+  display: block;
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+
+/* ========================================================
+   FINE PRINT — the legal footer line
+   ======================================================== */
+.dn-about__fineprint {
+  margin: var(--space-8) auto 0;
+  max-width: 64ch;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-loose);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   RESPONSIVE
+   ======================================================== */
+@media (max-width: 480px) {
+  .dn-about__title { font-size: var(--text-2xl); }
+  .dn-about__link-jp { display: none; }   /* keep the row compact at ~360px */
+}
+
+/* ========================================================
+   REDUCED MOTION & NO-JS FALLBACK
+   If motion is reduced, or about.js never runs, the content
+   must be fully visible — never trapped in the hidden state.
+   ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .dn-about.is-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .dn-about__link-go { transition: none; }
+}

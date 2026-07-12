@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="css/note.css" />
   <link rel="stylesheet" href="css/rules.css" />
   <link rel="stylesheet" href="css/cipher.css" />
+  <link rel="stylesheet" href="css/about.css" />
 
   <!-- Inline favicon (a crimson dot) so we make zero external requests -->
   <link rel="icon"
@@ -639,19 +640,143 @@
 
         <!-- ========== 05 · ABOUT (placeholder) ========== -->
         <section class="dn-section" data-section="about" aria-label="About" aria-hidden="true">
-          <div class="dn-section__inner dn-placeholder">
-            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1" aria-hidden="true">
-              <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>
-            </svg>
-            <span class="dn-placeholder__index">05 · 奥付</span>
-            <h2 class="dn-placeholder__title">About</h2>
-            <p class="dn-placeholder__jp">クレジット</p>
-            <p class="dn-placeholder__desc">
-              Credits and colophon. A fan tribute built with zero dependencies —
-              pure HTML, CSS, and vanilla JavaScript.
+          <div class="dn-section__inner dn-about" data-about>
+
+            <!-- ===== Section header (consistent with other sections) ===== -->
+            <header class="dn-about__head">
+              <p class="dn-about__index" data-reveal>05 &middot; 奥付</p>
+              <h2 class="dn-about__title" data-reveal>About</h2>
+              <p class="dn-about__jp dn-jp" data-reveal>クレジット</p>
+              <p class="dn-about__lead" data-reveal>
+                A colophon for a notebook that never was &mdash; what this is,
+                how it was made, and where it leads.
+              </p>
+            </header>
+
+            <!-- ===== The colophon body ===== -->
+            <div class="dn-about__body">
+
+              <!-- 1 · What this is -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  What this is <span class="dn-about__h-jp dn-jp">これは何か</span>
+                </h3>
+                <p class="dn-about__p">
+                  A fan-made, non-commercial tribute to the fictional manga and anime
+                  <em>Death&nbsp;Note</em>, created by <b>Tsugumi&nbsp;Ohba</b> and
+                  <b>Takeshi&nbsp;Obata</b>. Everything on these pages is invention and
+                  interactive fiction: the notebook, its rules, the ledger you may keep.
+                  No real person is named, targeted, or harmed &mdash; nothing written
+                  here reaches beyond the screen.
+                </p>
+              </section>
+
+              <!-- 2 · Built with -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  Built with <span class="dn-about__h-jp dn-jp">作り</span>
+                </h3>
+                <ul class="dn-about__list">
+                  <li class="dn-about__li">
+                    <span><b>Zero dependencies.</b> Hand-written HTML, CSS, and vanilla
+                    JavaScript &mdash; no frameworks, no libraries.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>No build step.</b> The files you download are the files
+                    that run. Nothing is compiled or bundled.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>No network.</b> Not a single external request &mdash; no
+                    CDN, no fonts, no analytics. It works fully offline.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>Your data stays yours.</b> The Ledger and your cipher
+                    preferences live only in your own browser, via
+                    <code>localStorage</code>. Clear it and they are gone.</span>
+                  </li>
+                </ul>
+              </section>
+
+              <!-- 3 · The sections — real in-app links (router handles data-go) -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  The sections <span class="dn-about__h-jp dn-jp">目次</span>
+                </h3>
+                <ul class="dn-about__index-list">
+                  <li>
+                    <a class="dn-about__link" href="#intro" data-go="intro">
+                      <span class="dn-about__link-num">01</span>
+                      <span class="dn-about__link-en">Intro</span>
+                      <span class="dn-about__link-jp dn-jp">序章</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#note" data-go="note">
+                      <span class="dn-about__link-num">02</span>
+                      <span class="dn-about__link-en">The Note</span>
+                      <span class="dn-about__link-jp dn-jp">手帳</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#rules" data-go="rules">
+                      <span class="dn-about__link-num">03</span>
+                      <span class="dn-about__link-en">Rules</span>
+                      <span class="dn-about__link-jp dn-jp">規則</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#cipher" data-go="cipher">
+                      <span class="dn-about__link-num">04</span>
+                      <span class="dn-about__link-en">Cipher</span>
+                      <span class="dn-about__link-jp dn-jp">暗号</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                </ul>
+              </section>
+
+            </div>
+
+            <!-- ===== Closing: ornament + atmospheric sign-off ===== -->
+            <div class="dn-about__close" data-reveal>
+              <!-- Original line-art ornament: a stylised shinigami eye.
+                   Symbolic, not a character likeness. Crimson stroke, gold iris. -->
+              <svg class="dn-about__ornament" viewBox="0 0 100 100" role="img"
+                   aria-label="A stylised shinigami eye">
+                <g fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                  <!-- Almond eye outline -->
+                  <path d="M8 50 Q50 20 92 50 Q50 80 8 50 Z" />
+                  <!-- Iris -->
+                  <circle class="dn-about__eye-iris" cx="50" cy="50" r="15"
+                          stroke-width="2.4" />
+                  <!-- Cross-slit pupil -->
+                  <path class="dn-about__eye-iris" d="M50 42 V58 M42 50 H58"
+                        stroke-width="2.4" />
+                  <!-- Radiating lashes / rays above and below -->
+                  <path d="M50 20 V10 M31 27 L26 18 M69 27 L74 18" />
+                  <path d="M50 80 V90 M31 73 L26 82 M69 73 L74 82"
+                        opacity="0.55" />
+                </g>
+              </svg>
+
+              <!-- An atmospheric sign-off — original phrasing, no long quotation. -->
+              <p class="dn-about__sign">
+                In the end a name is only ink, and even gods of death
+                grow bored of watching it dry.
+                <span class="dn-jp">名前とは、乾いてゆく墨にすぎない</span>
+              </p>
+            </div>
+
+            <!-- ===== Fine print ===== -->
+            <p class="dn-about__fineprint">
+              A fan tribute &middot; not affiliated with or endorsed by the rights
+              holders &middot; &copy; their respective owners.
             </p>
-            <span class="dn-placeholder__badge">Coming Soon</span>
+
           </div>
         </section>
 
@@ -665,5 +790,6 @@
   <script src="js/note.js" defer></script>
   <script src="js/rules.js" defer></script>
   <script src="js/cipher.js" defer></script>
+  <script src="js/about.js" defer></script>
 </body>
 </html>
