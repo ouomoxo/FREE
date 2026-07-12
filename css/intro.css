@@ -178,10 +178,39 @@
   text-transform: uppercase;
   color: var(--color-text-ghost);
 }
+/* The hint adapts to the nav layout: a left sidebar on desktop,
+   a top-bar menu once the sidebar collapses (<= 820px, see layout.css). */
+.dn-intro__hint--narrow { display: none; }
+.dn-intro__hint--wide { display: inline; }
 
 /* --------------------------------------------------------
    Responsive tuning
    -------------------------------------------------------- */
+/* Once the sidebar collapses into the top-bar menu, swap the hint copy
+   so it never points "to the left" at a menu that isn't there. */
+@media (max-width: 820px) {
+  .dn-intro__hint--wide { display: none; }
+  .dn-intro__hint--narrow { display: inline; }
+}
+
+/* The kicker's wide tracking + flanking rules overflow on small screens,
+   orphaning a letter onto its own line. Tighten tracking and shrink the
+   rules; drop them entirely on the narrowest widths. */
+@media (max-width: 560px) {
+  .dn-intro__kicker {
+    letter-spacing: 0.16em;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .dn-intro__kicker::before,
+  .dn-intro__kicker::after { width: 16px; }
+}
+@media (max-width: 400px) {
+  .dn-intro__kicker { flex-wrap: wrap; justify-content: center; }
+  .dn-intro__kicker::before,
+  .dn-intro__kicker::after { display: none; }
+}
+
 @media (max-width: 480px) {
   .dn-intro__stage { gap: var(--space-4); }
   .dn-intro__apple { width: 60px; height: 60px; }
