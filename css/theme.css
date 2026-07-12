@@ -44,6 +44,21 @@
   --color-focus:         #d4232d;
 
   /* --------------------------------------------------------
+     THE NOTE (section 02) — notebook material surfaces.
+     A black leather cover opening onto aged, near-black pages.
+     Kept dim + warm so the spread reads as parchment in the
+     dark without ever going "bright"; ink is bone-coloured.
+     -------------------------------------------------------- */
+  --note-leather:    #0b0a0b;   /* cover leather (outer frame) */
+  --note-leather-hi: #17151600; /* leather bevel highlight (transparent-safe) */
+  --note-paper:      #14110d;   /* aged page surface (centre) */
+  --note-paper-edge: #0d0b09;   /* page darkened toward its edges */
+  --note-line:       rgba(232, 230, 224, 0.055); /* faint ruled lines */
+  --note-ink:        #ded9cd;   /* written "ink" (warm bone) */
+  --note-ink-faint:  rgba(222, 217, 205, 0.45);  /* placeholder ink */
+  --note-spine:      rgba(0, 0, 0, 0.72);         /* centre spine shadow */
+
+  /* --------------------------------------------------------
      TYPOGRAPHY — system stacks only, modular scale (~1.25)
      -------------------------------------------------------- */
   --font-serif:  Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
@@ -52,6 +67,11 @@
                  "Yu Gothic", "Meiryo", sans-serif;
   --font-mono:   ui-monospace, "SFMono-Regular", "Menlo", "Consolas",
                  "Liberation Mono", monospace;
+  /* Ornamental hand — approximates ink handwriting on the Note's page.
+     Purely decorative; degrades to the serif where scripts are absent. */
+  --font-script: "Segoe Script", "Bradley Hand", "Snell Roundhand",
+                 "Brush Script MT", "Apple Chancery", cursive,
+                 var(--font-serif);
 
   /* Modular type scale (base 16px, ratio ~1.25 major third) */
   --text-2xs:  0.6875rem;   /* 11px — micro labels */

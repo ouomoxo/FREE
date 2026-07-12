@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description"
+        content="DEATH NOTE — 死神の手帳. A dark, cinematic, zero-dependency interactive experience themed around the Shinigami's Notebook." />
+  <meta name="theme-color" content="#08080a" />
+  <title>DEATH NOTE ─ 死神の手帳</title>
+
+  <!-- Design system: reset -> tokens -> shell -> section styles -->
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/intro.css" />
+
+  <!-- Inline favicon (a crimson dot) so we make zero external requests -->
+  <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2308080a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23b3121b'/%3E%3C/svg%3E" />
+</head>
+
+<body>
+  <!-- Skip link for keyboard / screen-reader users -->
+  <a class="sr-only" href="#main">Skip to content</a>
+
+  <div class="dn-app" data-app>
+
+    <!-- Ambient particle canvas (painted by intro.js) -->
+    <canvas id="dn-ambient" aria-hidden="true"></canvas>
+
+    <!-- Vignette + grain frame overlay -->
+    <div class="dn-frame-overlay" aria-hidden="true"></div>
+
+    <!-- ===================================================
+         MOBILE TOP BAR (hidden on desktop via CSS)
+         =================================================== -->
+    <header class="dn-topbar">
+      <button class="dn-burger" type="button"
+              data-burger aria-expanded="false"
+              aria-controls="dn-nav" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="dn-topbar__title">
+        DEATH&nbsp;NOTE <span class="dn-brand__jp">死神の手帳</span>
+      </span>
+      <span aria-hidden="true" style="width:44px"></span>
+    </header>
+
+    <!-- Scrim behind mobile drawer -->
+    <div class="dn-scrim" data-scrim aria-hidden="true"></div>
+
+    <!-- ===================================================
+         SIDEBAR NAVIGATION
+         =================================================== -->
+    <nav class="dn-nav" id="dn-nav" aria-label="Primary">
+      <div class="dn-brand">
+        <span class="dn-brand__mark">
+          <span class="dn-brand__title">DEATH NOTE</span>
+          <span class="dn-brand__jp">死神</span>
+        </span>
+        <span class="dn-brand__sub">The Shinigami's Notebook</span>
+      </div>
+
+      <ul class="dn-nav__list" role="list">
+        <li>
+          <a class="dn-nav__link" href="#intro" data-nav="intro">
+            <span class="dn-nav__num">01</span>
+            <span class="dn-nav__label">Intro</span>
+            <span class="dn-nav__jp">序</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#note" data-nav="note">
+            <span class="dn-nav__num">02</span>
+            <span class="dn-nav__label">The Note</span>
+            <span class="dn-nav__jp">手帳</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#rules" data-nav="rules">
+            <span class="dn-nav__num">03</span>
+            <span class="dn-nav__label">Rules</span>
+            <span class="dn-nav__jp">規則</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#cipher" data-nav="cipher">
+            <span class="dn-nav__num">04</span>
+            <span class="dn-nav__label">Cipher</span>
+            <span class="dn-nav__jp">暗号</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#about" data-nav="about">
+            <span class="dn-nav__num">05</span>
+            <span class="dn-nav__label">About</span>
+            <span class="dn-nav__jp">奥付</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="dn-nav__foot">
+        <hr class="dn-rule" />
+        <p class="dn-nav__note">
+          &ldquo;The human whose name is written in this note shall die.&rdquo;
+        </p>
+      </div>
+    </nav>
+
+    <!-- ===================================================
+         MAIN CONTENT — stacked sections (single active)
+         =================================================== -->
+    <main class="dn-main" id="main">
+      <div class="dn-sections">
+
+        <!-- ========== 01 · INTRO (fully built) ========== -->
+        <section class="dn-section dn-intro is-active"
+                 data-section="intro"
+                 aria-label="Introduction">
+          <div class="dn-intro__stage">
+            <p class="dn-intro__kicker dn-reveal" style="--d:120ms">
+              死神界 &nbsp;·&nbsp; Realm of the Shinigami
+            </p>
+
+            <h1 class="dn-intro__title">
+              <span class="en dn-reveal" style="--d:320ms">DEATH NOTE</span>
+              <span class="jp dn-reveal" style="--d:640ms">死神の手帳</span>
+            </h1>
+
+            <p class="dn-intro__subtitle dn-reveal" style="--d:900ms">
+              The Shinigami&rsquo;s Notebook
+            </p>
+
+            <div class="dn-intro__apple dn-reveal" style="--d:1120ms"
+                 aria-hidden="true"><!-- apple SVG injected by intro.js --></div>
+
+            <p class="dn-intro__tagline dn-reveal" style="--d:1320ms">
+              <span class="jp">この世は、退屈だ。</span>
+              <span class="en">This world&hellip; is rotten. Yet a single name can change everything.</span>
+            </p>
+
+            <div class="dn-intro__cta dn-reveal" style="--d:1560ms">
+              <a class="dn-btn dn-btn--primary" href="#note" data-go="note">
+                手帳を開く
+                <span class="dn-intro__cta-jp">/ OPEN THE NOTE</span>
+              </a>
+            </div>
+
+            <p class="dn-intro__hint dn-reveal" style="--d:1800ms">
+              Choose a chapter from the left
+            </p>
+          </div>
+        </section>
+
+        <!-- ========== 02 · THE NOTE (placeholder) ========== -->
+        <section class="dn-section" data-section="note" aria-label="The Note" aria-hidden="true">
+          <div class="dn-section__inner dn-placeholder">
+            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <path d="M4 3h13l3 3v15H4z"/><path d="M8 8h8M8 12h8M8 16h5"/>
+            </svg>
+            <span class="dn-placeholder__index">02 · 手帳</span>
+            <h2 class="dn-placeholder__title">The Note</h2>
+            <p class="dn-placeholder__jp">デスノート</p>
+            <p class="dn-placeholder__desc">
+              An interactive notebook. Turn its pages, write within its rules,
+              and watch consequences unfold.
+            </p>
+            <span class="dn-placeholder__badge">Coming Soon</span>
+          </div>
+        </section>
+
+        <!-- ========== 03 · RULES (placeholder) ========== -->
+        <section class="dn-section" data-section="rules" aria-label="Rules" aria-hidden="true">
+          <div class="dn-section__inner dn-placeholder">
+            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>
+            </svg>
+            <span class="dn-placeholder__index">03 · 規則</span>
+            <h2 class="dn-placeholder__title">The Rules</h2>
+            <p class="dn-placeholder__jp">使い方</p>
+            <p class="dn-placeholder__desc">
+              How to use it. The immutable laws that bind the notebook,
+              its owner, and the god of death who follows.
+            </p>
+            <span class="dn-placeholder__badge">Coming Soon</span>
+          </div>
+        </section>
+
+        <!-- ========== 04 · CIPHER (placeholder) ========== -->
+        <section class="dn-section" data-section="cipher" aria-label="Cipher" aria-hidden="true">
+          <div class="dn-section__inner dn-placeholder">
+            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+            </svg>
+            <span class="dn-placeholder__index">04 · 暗号</span>
+            <h2 class="dn-placeholder__title">Cipher</h2>
+            <p class="dn-placeholder__jp">暗号化</p>
+            <p class="dn-placeholder__desc">
+              Encode and decode hidden messages. A detective&rsquo;s tool,
+              or a criminal&rsquo;s — depending on whose hand holds it.
+            </p>
+            <span class="dn-placeholder__badge">Coming Soon</span>
+          </div>
+        </section>
+
+        <!-- ========== 05 · ABOUT (placeholder) ========== -->
+        <section class="dn-section" data-section="about" aria-label="About" aria-hidden="true">
+          <div class="dn-section__inner dn-placeholder">
+            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>
+            </svg>
+            <span class="dn-placeholder__index">05 · 奥付</span>
+            <h2 class="dn-placeholder__title">About</h2>
+            <p class="dn-placeholder__jp">クレジット</p>
+            <p class="dn-placeholder__desc">
+              Credits and colophon. A fan tribute built with zero dependencies —
+              pure HTML, CSS, and vanilla JavaScript.
+            </p>
+            <span class="dn-placeholder__badge">Coming Soon</span>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts: app router first (defines DN), then intro behaviour -->
+  <script src="js/app.js" defer></script>
+  <script src="js/intro.js" defer></script>
+</body>
+</html>
