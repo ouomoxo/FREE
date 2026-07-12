@@ -15,6 +15,9 @@
   min-height: 100vh;
   min-height: 100svh;
   isolation: isolate;
+  /* Safety net: never let a stray wide child scroll the page sideways.
+     The off-canvas nav is position:fixed, so it is unaffected by this. */
+  overflow-x: hidden;
 }
 
 /* Ambient particle canvas painted by intro.js, fixed full-bleed */
@@ -257,12 +260,17 @@
   min-height: 100svh;
 }
 
-/* Each section stacks in the same grid cell for crossfade */
+/* Each section stacks in the same grid cell for crossfade.
+   The track is pinned to minmax(0, 1fr): without the 0 minimum, the grid
+   would size the shared cell to the widest overlapped section's max-content
+   and burst past narrow viewports. */
 .dn-sections {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 .dn-section {
   grid-area: 1 / 1;            /* overlap all sections */
+  min-width: 0;               /* allow the cell to shrink below content width */
   min-height: 100vh;
   min-height: 100svh;
   padding: var(--space-8) var(--space-7);
