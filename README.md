@@ -1,79 +1,74 @@
-# FREE — PROJECT MAYHEM
+# FREE — SOAP
 
-> You were sold a story that you are what you own, what you scroll, what you buy next.
-> It is a lie, and it is expensive. This is where you stop being their business.
+> The stuff you post is covered in fingerprints. You can't see them.
+> Everyone else can. This washes them off.
 
-**Project Mayhem** is a local-first liberation engine. One small assignment a day —
-chosen by you, done fully — that breaks the autopilot of consumption and comfort.
-Let something go. Kill a feed. Sit in the silence you've been running from. Talk to
-the stranger. Give without being seen. None of it is heroic. All of it is a crack
-in the wall.
+**SOAP** is a scrubbing station for your own files. Drop in a photo and it does two things,
+in this order:
 
-It is not about hating things. It's about ending the trance where things quietly run
-your life while you call it freedom.
+1. **Exposes** the surveillance metadata you didn't know you were broadcasting — the exact
+   GPS coordinates where you stood, the make, model and serial of the device in your pocket,
+   the timestamp down to the second, the software that touched it, your name if the camera
+   wrote it in.
+2. **Washes** it out — strips every metadata block and hands the file back, byte-verified
+   clean, so you can post it naked of tracking data.
 
-## What it does
-
-- **TODAY** — a single assignment, front and center. Accept it, do it, log a field report.
-- **ASSIGNMENTS** — 50 small mutinies across five disciplines. Pick your fight.
-- **LEDGER** — what you've let go of and what you took back. It only counts up.
-- **MANIFESTO** — why we do this, and the eight rules.
-
-### The five disciplines
-
-| | | |
-|---|---|---|
-| **DETACHMENT** | The things you own end up owning you. | purge, donate, one-in-one-out |
-| **SIGNAL** | Kill the feeds that feed on you. | unfollow, unplug, cancel |
-| **PRESENCE** | This is your life and it is ending one minute at a time. | silence, slowness, attention |
-| **COURAGE** | Do the thing that scares the comfortable version of you. | strangers, solitude, cold |
-| **GENEROSITY** | You are not the money in your account. | give, thank, tip, teach |
-
-Every assignment is a **healthy, non-harmful** act of self-liberation. Nothing here
-hurts anyone. You pick a fight with your comfort, not a person.
+First the truth. Then you disappear.
 
 ## The first rule
 
-**You own this.** No accounts. No tracking. No servers. No corporation holding your
-data hostage. Everything lives in your browser's `localStorage`, on your machine.
-Export it whenever you want — it's a plain JSON file, and it's yours. Self-destruct
-wipes it clean in one click. When you close the tab, it owes you nothing.
+**It sends nothing.** No upload. No server. No account. No telemetry. No CDN, no remote
+font, no map tile — zero outbound requests of any kind. Every byte is read, exposed and
+scrubbed inside your own browser, on your own machine. Close the tab and there is no trace,
+because there was never a copy anywhere but here. A privacy tool that phones home is a lie.
+This one doesn't have a mouth.
+
+Ironic, isn't it — everything else you touch renders you down and sells you back to yourself.
+This just cleans you off and lets you go.
+
+## What it reads (and removes)
+
+| Format | Exposed | Scrubbed |
+|---|---|---|
+| **JPEG** | EXIF (GPS location, camera make/model/serial, lens, date-taken, software, artist, copyright), XMP, IPTC, ICC, embedded comments | all `APP1`–`APP15` + comment segments dropped; image data kept byte-for-byte |
+| **PNG** | `tEXt` / `zTXt` / `iTXt` text records, embedded `eXIf`, `tIME` | those chunks dropped; every critical & rendering chunk kept byte-for-byte |
+
+Everything else passes through untouched — it will never corrupt a file it doesn't understand.
 
 ## Run it
 
-No build step. No `npm install`. No dependencies. It's HTML, CSS, and three small
-ES modules. Serve the folder any way you like:
+No build step. No `npm install`. No dependencies. Static HTML, CSS and two ES modules.
 
 ```bash
 python3 -m http.server 8080
-# then open http://localhost:8080
+# then open http://localhost:8080 and drag a photo in
 ```
 
-Or open it behind any static host. It works fully offline — no CDNs, no remote
-fonts, no network calls. Ever.
+Works fully offline. Pull your network cable — it doesn't care. That's the point.
 
 ## How it's built
 
 ```
-index.html         app shell + view containers
-css/mayhem.css     the whole design system (industrial, monochrome, one acid accent)
-js/data.js         content — 50 assignments, 5 disciplines, 8 rules, the manifesto
-js/store.js        state, streaks, ledger, export/import — persists to localStorage
-js/app.js          hash router + rendering + wiring
+index.html         drop zone, interrogation cards, wash controls
+css/soap.css       darkroom design system — amber for what you leak, cyan for what's washed
+js/exif.js         the engine: analyze() reads metadata, scrub() removes it. Pure, never throws.
+js/soap.js         drag/drop, exposé rendering, wash + download, re-scan-to-prove-clean
 ```
 
-`store.js` is decoupled from `data.js`: assignments carry their own category and any
-`tracks` (things released / money reclaimed), and the store snapshots that when you
-accept one. Streaks are computed in local time — no UTC drift. Import validates its
-input and never throws. `getState()` hands back a copy so nothing can mutate the store
-behind its back.
+`exif.js` is a pure binary engine — no DOM, no network. It walks JPEG marker segments and
+PNG chunks by hand, parses the EXIF TIFF tree (IFD0 → Exif SubIFD → GPS IFD, both
+endiannesses) to turn GPS rationals into signed decimal degrees, and removes metadata by
+dropping whole segments/chunks so the pixel data is never re-encoded and never degraded.
+It is fuzzed against garbage input and refuses to throw or corrupt.
 
-## The rules of Project Mayhem
+After every wash, SOAP re-scans the cleaned bytes and shows you the count of fingerprints
+left. It should say zero. Don't take my word for it — the tool checks its own work in front
+of you.
 
-Open the app. Read the MANIFESTO. Then set one thing down, and feel how light your
-own two hands actually are.
+## Why
 
-Start today. Start badly. Start with one thing. The life you keep putting off is the
-only one you get, and it is already running.
+You are not your location history. You are not the serial number of your phone. You are not
+the metadata a company reads off your vacation photo to know where you sleep. They built a
+machine to render every trace of you into a product. So here's a bar of soap.
 
-Begin.
+Wash up. Leave no trace.

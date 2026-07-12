@@ -4,57 +4,87 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
-  <meta name="description" content="Project Mayhem — a local-first liberation engine. Shed the things that own you. No accounts. No tracking. You own your data." />
-  <title>PROJECT MAYHEM // FREE</title>
-  <link rel="stylesheet" href="./css/mayhem.css" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0a'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='22' fill='%23c8ff00' text-anchor='middle'%3E%E2%98%A2%3C/text%3E%3C/svg%3E" />
+  <meta name="description" content="SOAP — wash the hidden tracking data (GPS, device, timestamps) out of your photos. 100% offline. Sends nothing. Leave no trace." />
+  <meta name="referrer" content="no-referrer" />
+  <title>SOAP // wash your files</title>
+  <link rel="stylesheet" href="./css/soap.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111110'/%3E%3Crect x='7' y='9' width='18' height='13' rx='5' fill='%23e9e3d2'/%3E%3Ccircle cx='16' cy='15' r='2.4' fill='%2339d0c4'/%3E%3C/svg%3E" />
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="brand" href="#/today" aria-label="Project Mayhem home">
-      <span class="brand-mark" aria-hidden="true">☢</span>
-      <span class="brand-text">PROJECT&nbsp;MAYHEM</span>
+    <a class="brand" href="#" aria-label="SOAP home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">SOAP</span>
     </a>
-    <nav class="nav" aria-label="Primary">
-      <a href="#/today" data-route="today">TODAY</a>
-      <a href="#/assignments" data-route="assignments">ASSIGNMENTS</a>
-      <a href="#/ledger" data-route="ledger">LEDGER</a>
-      <a href="#/manifesto" data-route="manifesto">MANIFESTO</a>
-    </nav>
-    <div class="streak" title="Consecutive days awake">
-      <span class="flame" aria-hidden="true">▲</span>
-      <span class="streak-num" id="streakNum">0</span>
+    <p class="tagline">WASH YOUR FILES. LEAVE NO TRACE.</p>
+    <div class="offline-badge" title="This tool sends nothing. All processing happens on your machine.">
+      <span class="dot" aria-hidden="true"></span> OFFLINE · 0 BYTES LEAVE THIS MACHINE
     </div>
   </header>
 
-  <main id="view" class="view" tabindex="-1" aria-live="polite">
-    <!-- rendered by app.js -->
+  <main id="app" class="wrap">
+    <section class="intro">
+      <h1 class="hero-h1">EVERY PHOTO YOU POST IS COVERED IN FINGERPRINTS.</h1>
+      <p class="hero-p">The exact ground you stood on. The serial number in your pocket. The second you pressed the button. You hand it to everyone who sees the picture, and you never knew you were doing it. Drop it here. See what you've been broadcasting. Then wash it off.</p>
+    </section>
+
+    <section
+      id="drop"
+      class="dropzone"
+      tabindex="0"
+      role="button"
+      aria-label="Drop images here or press Enter to choose files"
+    >
+      <div class="drop-inner">
+        <div class="drop-icon" aria-hidden="true">▚</div>
+        <p class="drop-title">DROP THE EVIDENCE</p>
+        <p class="drop-sub">JPEG &amp; PNG · drag here or <span class="link">choose files</span></p>
+        <p class="drop-fine">Nothing is uploaded. Nothing leaves this browser. Ever.</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden />
+    </section>
+
+    <section id="bulkbar" class="bulkbar" hidden>
+      <span class="bulk-count" id="bulkCount">0 FILES</span>
+      <div class="bulk-actions">
+        <button class="btn" id="clearAll" type="button">CLEAR</button>
+        <button class="btn primary" id="washAll" type="button">WASH ALL &amp; DOWNLOAD</button>
+      </div>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
   </main>
 
   <footer class="footer">
-    <span class="foot-left">YOU OWN THIS. NO ACCOUNTS. NO TRACKING. NO EXITS BUT THE ONE YOU CHOOSE.</span>
-    <span class="foot-right">
-      <button class="link-btn" id="footExport" type="button">EXPORT</button>
-      <span aria-hidden="true">·</span>
-      <button class="link-btn" id="footImport" type="button">IMPORT</button>
-      <span aria-hidden="true">·</span>
-      <button class="link-btn danger" id="footReset" type="button">SELF-DESTRUCT</button>
-    </span>
+    <span>SOAP — a scrubbing station for your own files. It exposes what you leak, then removes it. No accounts. No servers. No trace.</span>
+    <span class="foot-note">Made by hand. Runs on your machine. Sends nothing.</span>
   </footer>
 
-  <input type="file" id="importFile" accept="application/json,.json" hidden />
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- modal host -->
-  <div class="modal-host" id="modalHost" hidden></div>
+  <template id="cardTpl">
+    <article class="card" data-state="scanning">
+      <div class="card-head">
+        <div class="thumb"><img alt="" /></div>
+        <div class="card-meta">
+          <p class="fname"></p>
+          <p class="fsize"></p>
+          <p class="verdict"></p>
+        </div>
+        <button class="card-x btn ghost" type="button" aria-label="Remove">✕</button>
+      </div>
+      <div class="findings"></div>
+      <div class="card-foot">
+        <button class="btn primary wash-btn" type="button">WASH IT</button>
+        <a class="btn dl-btn" hidden>DOWNLOAD CLEAN</a>
+        <span class="wash-note"></span>
+      </div>
+    </article>
+  </template>
 
-  <script type="module" src="./js/app.js"></script>
-  <noscript>
-    <p style="padding:24px;color:#ededed;background:#0a0a0a;">
-      Project Mayhem runs on your machine, in your browser, with JavaScript.
-      Turn it on. Freedom isn't passive.
-    </p>
-  </noscript>
+  <script type="module" src="./js/soap.js"></script>
+  <noscript><p style="padding:24px;color:#eae7df;background:#080807">SOAP runs on your machine, in your browser, with JavaScript. Turn it on.</p></noscript>
 </body>
 </html>
