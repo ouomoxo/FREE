@@ -1,0 +1,5371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description"
+        content="DEATH NOTE — 死神の手帳. A dark, cinematic, zero-dependency interactive experience themed around the Shinigami's Notebook." />
+  <meta name="theme-color" content="#08080a" />
+  <title>DEATH NOTE ─ 死神の手帳</title>
+
+  <!-- Design system: reset -> tokens -> shell -> section styles -->
+  <style>
+/* css/reset.css */
+/* ============================================================
+   reset.css — minimal modern CSS reset
+   Death Note :: 死神の手帳
+   Keeps the cascade predictable so theme.css owns all styling.
+   ============================================================ */
+
+/* Box sizing everywhere, no surprise widths */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Strip default margins from the usual suspects */
+html,
+body,
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote,
+dl, dd, ul, ol,
+fieldset {
+  margin: 0;
+}
+
+/* Remove list styling when a list has a role (nav lists, etc.) */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* Core document defaults */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Media should never overflow its container */
+img,
+picture,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+svg {
+  height: auto;
+}
+
+/* Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Buttons: strip the chrome, we style from scratch */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Anchors inherit colour by default; theme decides accents */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Avoid text overflow on long words */
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Remove animations/transitions for users who ask for calm */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+  </style>
+  <style>
+/* css/theme.css */
+/* ============================================================
+   theme.css — DESIGN SYSTEM / SINGLE SOURCE OF TRUTH
+   Death Note :: 死神の手帳
+
+   All colour, spacing, type, motion, elevation and z-index
+   tokens live here as CSS custom properties. Every other
+   stylesheet consumes these — never hard-code a value there.
+   ============================================================ */
+
+:root {
+  /* --------------------------------------------------------
+     COLOUR — near-black canvas, bone text, one crimson accent,
+     restrained gothic gold. Muted grays for secondary text.
+     -------------------------------------------------------- */
+
+  /* Backgrounds (darkest -> raised surfaces) */
+  --color-bg:            #08080a;   /* app void */
+  --color-bg-raised:     #0a0a0b;   /* panels / sidebar */
+  --color-bg-elevated:   #101013;   /* cards, hovered surfaces */
+  --color-bg-inset:      #050506;   /* wells, insets */
+
+  /* Text */
+  --color-text:          #e8e6e0;   /* bone / parchment — primary */
+  --color-text-muted:    #a09e98;   /* secondary */
+  --color-text-faint:    #6b6a66;   /* tertiary / captions */
+  --color-text-ghost:    #3a3a3d;   /* disabled / hairline labels */
+
+  /* Crimson accent — the single loud colour */
+  --color-blood:         #b3121b;   /* deep blood */
+  --color-blood-bright:  #d4232d;   /* bright crimson (hover/active) */
+  --color-blood-glow:    rgba(211, 35, 45, 0.45);
+  --color-blood-wash:    rgba(179, 18, 27, 0.10);
+
+  /* Gothic gold — sparing, ornamental */
+  --color-gold:          #b8963e;
+  --color-gold-dim:      #7d6733;
+
+  /* Lines & borders — fine hairlines */
+  --color-line:          rgba(232, 230, 224, 0.08);
+  --color-line-strong:   rgba(232, 230, 224, 0.16);
+  --color-line-blood:    rgba(179, 18, 27, 0.55);
+
+  /* Focus ring */
+  --color-focus:         #d4232d;
+
+  /* --------------------------------------------------------
+     THE NOTE (section 02) — notebook material surfaces.
+     A black leather cover opening onto aged, near-black pages.
+     Kept dim + warm so the spread reads as parchment in the
+     dark without ever going "bright"; ink is bone-coloured.
+     -------------------------------------------------------- */
+  --note-leather:    #0b0a0b;   /* cover leather (outer frame) */
+  --note-leather-hi: #17151600; /* leather bevel highlight (transparent-safe) */
+  --note-paper:      #14110d;   /* aged page surface (centre) */
+  --note-paper-edge: #0d0b09;   /* page darkened toward its edges */
+  --note-line:       rgba(232, 230, 224, 0.055); /* faint ruled lines */
+  --note-ink:        #ded9cd;   /* written "ink" (warm bone) */
+  --note-ink-faint:  rgba(222, 217, 205, 0.45);  /* placeholder ink */
+  --note-spine:      rgba(0, 0, 0, 0.72);         /* centre spine shadow */
+
+  /* --------------------------------------------------------
+     TYPOGRAPHY — system stacks only, modular scale (~1.25)
+     -------------------------------------------------------- */
+  --font-serif:  Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+  --font-sans:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, "Hiragino Kaku Gothic ProN",
+                 "Yu Gothic", "Meiryo", sans-serif;
+  --font-mono:   ui-monospace, "SFMono-Regular", "Menlo", "Consolas",
+                 "Liberation Mono", monospace;
+  /* Ornamental hand — approximates ink handwriting on the Note's page.
+     Purely decorative; degrades to the serif where scripts are absent. */
+  --font-script: "Segoe Script", "Bradley Hand", "Snell Roundhand",
+                 "Brush Script MT", "Apple Chancery", cursive,
+                 var(--font-serif);
+
+  /* Modular type scale (base 16px, ratio ~1.25 major third) */
+  --text-2xs:  0.6875rem;   /* 11px — micro labels */
+  --text-xs:   0.78rem;     /* 12.5px */
+  --text-sm:   0.875rem;    /* 14px */
+  --text-base: 1rem;        /* 16px */
+  --text-md:   1.125rem;    /* 18px */
+  --text-lg:   1.375rem;    /* 22px */
+  --text-xl:   1.75rem;     /* 28px */
+  --text-2xl:  2.25rem;     /* 36px */
+  --text-3xl:  3rem;        /* 48px */
+  --text-4xl:  4rem;        /* 64px */
+  --text-5xl:  5.5rem;      /* 88px — hero */
+
+  /* Line heights */
+  --leading-tight:  1.1;
+  --leading-snug:   1.28;
+  --leading-normal: 1.5;
+  --leading-loose:  1.8;
+
+  /* Letter spacing (gothic display wants air) */
+  --tracking-tight:  -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.08em;
+  --tracking-wider:   0.18em;
+  --tracking-widest:  0.34em;
+
+  /* Weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold:   700;
+
+  /* --------------------------------------------------------
+     SPACING — 4px base scale
+     -------------------------------------------------------- */
+  --space-0:   0;
+  --space-1:   0.25rem;   /* 4  */
+  --space-2:   0.5rem;    /* 8  */
+  --space-3:   0.75rem;   /* 12 */
+  --space-4:   1rem;      /* 16 */
+  --space-5:   1.5rem;    /* 24 */
+  --space-6:   2rem;      /* 32 */
+  --space-7:   3rem;      /* 48 */
+  --space-8:   4rem;      /* 64 */
+  --space-9:   6rem;      /* 96 */
+  --space-10:  8rem;      /* 128 */
+
+  /* --------------------------------------------------------
+     RADII
+     -------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+  --radius-pill: 999px;
+
+  /* --------------------------------------------------------
+     ELEVATION / SHADOWS — deep, soft, occasional crimson glow
+     -------------------------------------------------------- */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg:   0 24px 60px rgba(0, 0, 0, 0.65);
+  --shadow-inset: inset 0 0 0 1px var(--color-line);
+  --shadow-glow: 0 0 24px var(--color-blood-glow);
+
+  /* Vignette used on the app frame */
+  --vignette: radial-gradient(
+      120% 120% at 50% 42%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.55) 100%);
+
+  /* --------------------------------------------------------
+     MOTION — cinematic easings & durations
+     -------------------------------------------------------- */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);    /* expo-out, silky */
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);   /* dramatic swell */
+  --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);   /* entrances */
+  --ease-linear:   linear;
+
+  --dur-fast:   160ms;
+  --dur-base:   280ms;
+  --dur-slow:   520ms;
+  --dur-slower: 900ms;
+  --dur-cinema: 1600ms;   /* intro reveals */
+
+  /* --------------------------------------------------------
+     Z-INDEX SCALE
+     -------------------------------------------------------- */
+  --z-base:      0;
+  --z-canvas:    1;    /* ambient background canvas */
+  --z-content:   10;
+  --z-vignette:  20;   /* frame overlay above content, below chrome */
+  --z-nav:       100;
+  --z-overlay:   1000;
+  --z-toast:     2000;
+
+  /* --------------------------------------------------------
+     LAYOUT METRICS
+     -------------------------------------------------------- */
+  --nav-width:      248px;   /* fixed sidebar width (desktop) */
+  --nav-bar-height: 60px;    /* top bar height (mobile) */
+  --content-max:    920px;   /* readable content column */
+}
+
+/* ============================================================
+   PAPER / GRAIN TEXTURE
+   Reusable inline-SVG fractal-noise as a data-URI. Applied as a
+   faint overlay to give surfaces a tactile parchment grain.
+   ============================================================ */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   BASE ELEMENT STYLING (consumes tokens)
+   ============================================================ */
+html {
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+/* Display headings default to the gothic serif */
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* --------------------------------------------------------
+   Utility text roles (shared across sections)
+   -------------------------------------------------------- */
+.dn-kicker {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.dn-jp {
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-wide);
+}
+
+.dn-accent { color: var(--color-blood-bright); }
+.dn-gold   { color: var(--color-gold); }
+.dn-muted  { color: var(--color-text-muted); }
+
+/* Hairline rule with a faint gradient falloff */
+.dn-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-line-strong) 20%,
+      var(--color-line-strong) 80%,
+      transparent);
+}
+
+/* --------------------------------------------------------
+   Shared button system
+   -------------------------------------------------------- */
+.dn-btn {
+  --_bg: transparent;
+  --_fg: var(--color-text);
+  --_border: var(--color-line-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--_fg);
+  background: var(--_bg);
+  border: 1px solid var(--_border);
+  border-radius: var(--radius-sm);
+  transition:
+      color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+}
+
+.dn-btn:hover {
+  --_border: var(--color-line-blood);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+.dn-btn:active {
+  transform: translateY(1px);
+}
+
+.dn-btn--primary {
+  --_bg: var(--color-blood);
+  --_fg: #fff;
+  --_border: var(--color-blood);
+}
+
+.dn-btn--primary:hover {
+  --_bg: var(--color-blood-bright);
+  --_border: var(--color-blood-bright);
+}
+
+/* --------------------------------------------------------
+   Global focus-visible treatment (accessibility)
+   -------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+/* Only show the ring for keyboard users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-blood);
+  color: #fff;
+}
+
+/* Screen-reader-only helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Custom scrollbar (WebKit) tuned to the palette */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg-inset); }
+::-webkit-scrollbar-thumb {
+  background: #1a1a1e;
+  border: 2px solid var(--color-bg-inset);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-blood); }
+
+  </style>
+  <style>
+/* css/layout.css */
+/* ============================================================
+   layout.css — APP SHELL
+   Death Note :: 死神の手帳
+
+   Fixed sidebar navigation + main content area.
+   Responsive: sidebar collapses to a top bar + hamburger drawer
+   on narrow screens (<= 820px). Consumes tokens from theme.css.
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Root frame: ambient canvas + vignette live behind content
+   -------------------------------------------------------- */
+.dn-app {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  isolation: isolate;
+  /* Safety net: never let a stray wide child scroll the page sideways.
+     The off-canvas nav is position:fixed, so it is unaffected by this. */
+  overflow-x: hidden;
+}
+
+/* Ambient particle canvas painted by intro.js, fixed full-bleed */
+#dn-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+  pointer-events: none;
+  display: block;
+}
+
+/* Vignette + grain overlay across the whole frame */
+.dn-frame-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+}
+.dn-frame-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vignette);
+}
+.dn-frame-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+}
+
+/* --------------------------------------------------------
+   SIDEBAR NAV (desktop default)
+   -------------------------------------------------------- */
+.dn-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  z-index: var(--z-nav);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-5);
+  background: linear-gradient(
+      180deg,
+      var(--color-bg-raised),
+      var(--color-bg));
+  border-right: 1px solid var(--color-line);
+  overflow-y: auto;
+}
+
+/* Brand / logotype */
+.dn-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+.dn-brand__mark {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.dn-brand__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+}
+.dn-brand__jp {
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-blood-bright);
+}
+.dn-brand__sub {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* Nav list */
+.dn-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dn-nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  transition:
+      color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+}
+
+/* Crimson index number */
+.dn-nav__num {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--color-text-ghost);
+  min-width: 1.4em;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.dn-nav__label { flex: 1; }
+
+.dn-nav__jp {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+/* Active indicator bar */
+.dn-nav__link::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-5));
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 2px;
+  height: 60%;
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  transition: transform var(--dur-base) var(--ease-emphasis);
+}
+
+.dn-nav__link:hover {
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+}
+.dn-nav__link:hover .dn-nav__num { color: var(--color-blood-bright); }
+
+.dn-nav__link[aria-current="page"] {
+  color: var(--color-text);
+  background: linear-gradient(
+      90deg,
+      var(--color-blood-wash),
+      transparent);
+}
+.dn-nav__link[aria-current="page"]::before {
+  transform: translateY(-50%) scaleY(1);
+}
+.dn-nav__link[aria-current="page"] .dn-nav__num { color: var(--color-blood-bright); }
+.dn-nav__link[aria-current="page"] .dn-nav__jp  { color: var(--color-text-faint); }
+
+/* Nav footer sits at the bottom */
+.dn-nav__foot {
+  margin-top: auto;
+  padding-top: var(--space-6);
+}
+.dn-nav__note {
+  font-size: var(--text-2xs);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* --------------------------------------------------------
+   TOP BAR (mobile only) — hidden on desktop
+   -------------------------------------------------------- */
+.dn-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-bar-height);
+  z-index: var(--z-nav);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background: var(--color-bg-raised);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-topbar__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-topbar__title .dn-brand__jp { font-size: var(--text-xs); }
+
+/* Hamburger */
+.dn-burger {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+}
+.dn-burger span {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  background: var(--color-text);
+  transition: transform var(--dur-base) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out);
+}
+.dn-app.is-nav-open .dn-burger span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.dn-app.is-nav-open .dn-burger span:nth-child(2) { opacity: 0; }
+.dn-app.is-nav-open .dn-burger span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* Scrim behind the mobile drawer */
+.dn-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* --------------------------------------------------------
+   MAIN CONTENT AREA
+   -------------------------------------------------------- */
+.dn-main {
+  position: relative;
+  z-index: var(--z-content);
+  margin-left: var(--nav-width);
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* Each section stacks in the same grid cell for crossfade.
+   The track is pinned to minmax(0, 1fr): without the 0 minimum, the grid
+   would size the shared cell to the widest overlapped section's max-content
+   and burst past narrow viewports. */
+.dn-sections {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.dn-section {
+  grid-area: 1 / 1;            /* overlap all sections */
+  min-width: 0;               /* allow the cell to shrink below content width */
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: var(--space-8) var(--space-7);
+  /* Hidden state: faded + slightly displaced + non-interactive */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      visibility 0s linear var(--dur-slow);
+}
+
+.dn-section.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      visibility 0s;
+}
+
+/* Generic section inner wrapper for placeholder sections */
+.dn-section__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------
+   PLACEHOLDER "COMING SOON" STATE (note/rules/cipher/about)
+   -------------------------------------------------------- */
+.dn-placeholder {
+  min-height: calc(100vh - 2 * var(--space-8));
+  min-height: calc(100svh - 2 * var(--space-8));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-5);
+}
+.dn-placeholder__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-placeholder__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-placeholder__jp {
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+}
+.dn-placeholder__desc {
+  max-width: 46ch;
+  color: var(--color-text-faint);
+  line-height: var(--leading-loose);
+  font-size: var(--text-sm);
+}
+.dn-placeholder__badge {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-gold);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+}
+.dn-placeholder__ornament {
+  width: 40px;
+  height: 40px;
+  color: var(--color-line-strong);
+}
+
+/* --------------------------------------------------------
+   RESPONSIVE — collapse to top bar + drawer
+   -------------------------------------------------------- */
+@media (max-width: 820px) {
+  .dn-topbar { display: flex; }
+
+  .dn-nav {
+    transform: translateX(-100%);
+    width: min(84vw, 300px);
+    padding-top: calc(var(--nav-bar-height) + var(--space-5));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .dn-app.is-nav-open .dn-nav { transform: translateX(0); }
+
+  .dn-scrim { display: block; }
+  .dn-app.is-nav-open .dn-scrim { opacity: 1; }
+  .dn-app:not(.is-nav-open) .dn-scrim { pointer-events: none; }
+
+  .dn-main {
+    margin-left: 0;
+    padding-top: var(--nav-bar-height);
+  }
+
+  .dn-section { padding: var(--space-6) var(--space-5); }
+}
+
+@media (max-width: 480px) {
+  .dn-section { padding: var(--space-5) var(--space-4); }
+  .dn-placeholder__title { font-size: var(--text-2xl); }
+}
+
+  </style>
+  <style>
+/* css/intro.css */
+/* ============================================================
+   intro.css — INTRO / CINEMATIC LANDING
+   Death Note :: 死神の手帳
+
+   The intro section fills the viewport with a centred, staged
+   reveal: kicker -> title -> subtitle -> tagline -> apple -> CTA.
+   Reveal is choreographed with staggered delays. Consumes tokens.
+   ============================================================ */
+
+.dn-intro {
+  /* Intro paints its own deeper void behind the ambient canvas glow */
+  background:
+      radial-gradient(80% 60% at 50% 30%,
+          rgba(179, 18, 27, 0.06), transparent 60%),
+      radial-gradient(120% 100% at 50% 120%,
+          rgba(0, 0, 0, 0.7), transparent 70%);
+}
+
+.dn-intro__stage {
+  min-height: calc(100vh - 2 * var(--space-8));
+  min-height: calc(100svh - 2 * var(--space-8));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-5);
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------
+   Staged reveal primitive
+   Each element carries .dn-reveal and a --d delay custom prop.
+   The section adds .is-revealed once the intro becomes active.
+   -------------------------------------------------------- */
+.dn-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(6px);
+  transition:
+      opacity var(--dur-cinema) var(--ease-emphasis),
+      transform var(--dur-cinema) var(--ease-emphasis),
+      filter var(--dur-cinema) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-intro.is-revealed .dn-reveal {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* --------------------------------------------------------
+   Kicker
+   -------------------------------------------------------- */
+.dn-intro__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-intro__kicker::before,
+.dn-intro__kicker::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--color-line-strong);
+}
+
+/* --------------------------------------------------------
+   Title — the loud gothic wordmark
+   -------------------------------------------------------- */
+.dn-intro__title {
+  font-family: var(--font-serif);
+  font-size: clamp(var(--text-4xl), 12vw, var(--text-5xl));
+  line-height: 0.94;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  margin: var(--space-2) 0;
+}
+.dn-intro__title .en {
+  display: block;
+  position: relative;
+}
+/* Blood underline stroke beneath the English title */
+.dn-intro__title .en::after {
+  content: "";
+  display: block;
+  width: 92px;
+  height: 2px;
+  margin: var(--space-4) auto 0;
+  background: linear-gradient(90deg,
+      transparent, var(--color-blood-bright), transparent);
+  box-shadow: var(--shadow-glow);
+}
+.dn-intro__title .jp {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: clamp(var(--text-lg), 5vw, var(--text-2xl));
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood-bright);
+  margin-top: var(--space-5);
+  text-shadow: 0 0 24px var(--color-blood-glow);
+}
+
+/* --------------------------------------------------------
+   Subtitle
+   -------------------------------------------------------- */
+.dn-intro__subtitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  font-style: italic;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------
+   Apple motif (inline SVG injected by intro.js)
+   -------------------------------------------------------- */
+.dn-intro__apple {
+  width: 76px;
+  height: 76px;
+  margin: var(--space-2) 0;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6));
+}
+.dn-intro__apple svg { width: 100%; height: 100%; }
+/* Gentle idle bob on the apple */
+@media (prefers-reduced-motion: no-preference) {
+  .dn-intro.is-revealed .dn-intro__apple {
+    animation: dn-apple-bob 6s var(--ease-in-out) infinite;
+  }
+}
+@keyframes dn-apple-bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-8px) rotate(1deg); }
+}
+
+/* --------------------------------------------------------
+   Tagline (JP + EN)
+   -------------------------------------------------------- */
+.dn-intro__tagline {
+  max-width: 44ch;
+  line-height: var(--leading-loose);
+}
+.dn-intro__tagline .jp {
+  display: block;
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+}
+.dn-intro__tagline .en {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   CTA
+   -------------------------------------------------------- */
+.dn-intro__cta {
+  margin-top: var(--space-4);
+}
+.dn-intro__cta .dn-btn { font-size: var(--text-sm); padding: var(--space-4) var(--space-7); }
+.dn-intro__cta-jp { color: rgba(255, 255, 255, 0.75); }
+
+/* Scroll / continue hint */
+.dn-intro__hint {
+  margin-top: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+}
+/* The hint adapts to the nav layout: a left sidebar on desktop,
+   a top-bar menu once the sidebar collapses (<= 820px, see layout.css). */
+.dn-intro__hint--narrow { display: none; }
+.dn-intro__hint--wide { display: inline; }
+
+/* --------------------------------------------------------
+   Responsive tuning
+   -------------------------------------------------------- */
+/* Once the sidebar collapses into the top-bar menu, swap the hint copy
+   so it never points "to the left" at a menu that isn't there. */
+@media (max-width: 820px) {
+  .dn-intro__hint--wide { display: none; }
+  .dn-intro__hint--narrow { display: inline; }
+}
+
+/* The kicker's wide tracking + flanking rules overflow on small screens,
+   orphaning a letter onto its own line. Tighten tracking and shrink the
+   rules; drop them entirely on the narrowest widths. */
+@media (max-width: 560px) {
+  .dn-intro__kicker {
+    letter-spacing: 0.16em;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .dn-intro__kicker::before,
+  .dn-intro__kicker::after { width: 16px; }
+}
+@media (max-width: 400px) {
+  .dn-intro__kicker { flex-wrap: wrap; justify-content: center; }
+  .dn-intro__kicker::before,
+  .dn-intro__kicker::after { display: none; }
+}
+
+@media (max-width: 480px) {
+  .dn-intro__stage { gap: var(--space-4); }
+  .dn-intro__apple { width: 60px; height: 60px; }
+}
+
+  </style>
+  <style>
+/* css/note.css */
+/* ============================================================
+   note.css — THE NOTE (section 02) · centrepiece
+   Death Note :: 死神の手帳
+
+   A realistic open notebook: black leather cover framing a
+   two-leaf spread with a spine shadow down the middle. The
+   left leaf is the writing page (a lore-accurate form); the
+   right leaf is THE LEDGER — the record of inscribed names.
+
+   Consumes tokens from theme.css only. No hard-coded palette.
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Section shell + staged entrance
+   The section reveals its blocks once .is-active is applied
+   (mirrors the intro's .dn-reveal pattern, self-contained).
+   -------------------------------------------------------- */
+.dn-note {
+  background:
+      radial-gradient(90% 70% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+
+.dn-note__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Header on the section */
+.dn-note__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dn-note__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-note__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-note__lead {
+  max-width: 54ch;
+  margin: var(--space-1) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local to this section)
+   -------------------------------------------------------- */
+.dn-note [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-note.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE BOOK — leather cover + two-leaf spread
+   ======================================================== */
+.dn-book {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: clamp(var(--space-3), 2vw, var(--space-5));
+  background:
+      linear-gradient(180deg, var(--note-leather-hi), transparent 30%),
+      linear-gradient(160deg, #17151680, transparent 60%),
+      var(--note-leather);
+  border: 1px solid var(--color-line-strong);
+  box-shadow:
+      var(--shadow-lg),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+      inset 0 0 60px rgba(0, 0, 0, 0.7);
+}
+/* Grain on the leather */
+.dn-book::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* The open spread: two leaves side by side */
+.dn-book__spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+
+/* A single page leaf: aged paper + ruled lines + edge shading */
+.dn-book__leaf {
+  position: relative;
+  min-height: 460px;
+  padding: clamp(var(--space-4), 2.4vw, var(--space-6));
+  background-color: var(--note-paper);
+  background-image:
+      /* faint ruled writing lines */
+      repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 31px,
+          var(--note-line) 31px,
+          var(--note-line) 32px),
+      /* aged darkening toward the outer edge + top */
+      radial-gradient(140% 120% at 100% 0%,
+          transparent 55%, var(--note-paper-edge) 100%);
+}
+.dn-book__leaf--right {
+  background-image:
+      repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 31px,
+          var(--note-line) 31px,
+          var(--note-line) 32px),
+      radial-gradient(140% 120% at 0% 0%,
+          transparent 55%, var(--note-paper-edge) 100%);
+}
+/* Paper grain on each leaf */
+.dn-book__leaf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 150px 150px;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Centre spine shadow bridging the two leaves */
+.dn-book__spread::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 44px;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--note-spine) 42%,
+      rgba(0, 0, 0, 0.85) 50%,
+      var(--note-spine) 58%,
+      transparent);
+}
+
+/* ========================================================
+   PAGE HEADER — the worn "DEATH NOTE" stamp + caption
+   ======================================================== */
+.dn-page__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.dn-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-line-blood);
+  border-radius: var(--radius-sm);
+  transform: rotate(-3deg);
+  /* worn ink-stamp look */
+  color: var(--color-blood-bright);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+  box-shadow: inset 0 0 0 1px rgba(179, 18, 27, 0.25);
+}
+.dn-stamp__en {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wider);
+  line-height: 1;
+}
+.dn-stamp__jp {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+  margin-top: 2px;
+}
+.dn-page__caption {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+  line-height: var(--leading-snug);
+}
+
+/* ========================================================
+   THE FORM — writing on the page
+   ======================================================== */
+.dn-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.dn-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.dn-field__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-field__label .req { color: var(--color-blood-bright); }
+
+/* Inputs written along a ruled line — transparent, underlined */
+.dn-input,
+.dn-textarea {
+  width: 100%;
+  padding: var(--space-2) 0;
+  color: var(--note-ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-line-strong);
+  border-radius: 0;
+  transition: border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.dn-input::placeholder,
+.dn-textarea::placeholder { color: var(--note-ink-faint); }
+.dn-input:focus,
+.dn-textarea:focus {
+  outline: none;
+  border-bottom-color: var(--color-line-blood);
+  box-shadow: 0 1px 0 0 var(--color-line-blood);
+}
+/* The name reads like a written signature */
+.dn-input--name {
+  font-family: var(--font-script);
+  font-size: var(--text-xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-textarea {
+  min-height: 3.4em;
+  resize: vertical;
+  line-height: 32px;      /* aligns typed text to the ruled lines */
+  font-family: var(--font-serif);
+}
+
+/* The lore checkbox — "I can picture their face" */
+.dn-check {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  cursor: pointer;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.18);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+.dn-check:hover { border-color: var(--color-line-strong); }
+.dn-check__box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.dn-check__box::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease-emphasis);
+}
+.dn-check__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.dn-check__input:checked + .dn-check__box { border-color: var(--color-line-blood); }
+.dn-check__input:checked + .dn-check__box::after { transform: scale(1); }
+.dn-check__input:focus-visible + .dn-check__box {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.dn-check__text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-snug);
+}
+.dn-check__text b { color: var(--color-text); font-weight: var(--weight-medium); }
+
+/* Tooltip explaining the face rule */
+.dn-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  cursor: help;
+  vertical-align: middle;
+}
+.dn-tip__body {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 5;
+  width: max-content;
+  max-width: 240px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+  line-height: var(--leading-snug);
+  color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.dn-tip:hover .dn-tip__body,
+.dn-tip:focus-visible .dn-tip__body {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Actions */
+.dn-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.dn-form__actions .dn-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.dn-form__actions .dn-btn:disabled:hover {
+  --_border: var(--color-blood);
+  color: #fff;
+}
+.dn-btn__jp { color: rgba(255, 255, 255, 0.7); font-size: var(--text-xs); }
+.dn-form__note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   THE CEREMONY — inscription animation layer (per page)
+   ======================================================== */
+.dn-ceremony {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  text-align: center;
+  padding: var(--space-5);
+  background:
+      radial-gradient(70% 60% at 50% 45%,
+          rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.92));
+  backdrop-filter: blur(2px);
+}
+.dn-ceremony[hidden] { display: none; }
+
+/* The written name bleeding into the page */
+.dn-ceremony__name {
+  font-family: var(--font-script);
+  font-size: clamp(var(--text-2xl), 7vw, var(--text-4xl));
+  line-height: 1.05;
+  color: var(--note-ink);
+  text-shadow: 0 0 22px rgba(0, 0, 0, 0.9);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+/* Ink-bleed keyframe: the name spreads + a crimson pulse blooms */
+.dn-ceremony.is-writing .dn-ceremony__name {
+  animation: dn-ink-bleed var(--dur-slower) var(--ease-out) both;
+}
+.dn-ceremony.is-sealing .dn-ceremony__name {
+  color: var(--color-blood-bright);
+  text-shadow: 0 0 30px var(--color-blood-glow);
+  transition: color var(--dur-slow) var(--ease-out),
+              text-shadow var(--dur-slow) var(--ease-out);
+}
+@keyframes dn-ink-bleed {
+  0%   { opacity: 0; filter: blur(10px); letter-spacing: 0.3em; }
+  60%  { opacity: 1; filter: blur(1.5px); }
+  100% { opacity: 1; filter: blur(0); letter-spacing: var(--tracking-wide); }
+}
+
+/* Countdown ring */
+.dn-ring {
+  position: relative;
+  width: 116px;
+  height: 116px;
+}
+.dn-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dn-ring__track { stroke: var(--color-line-strong); }
+.dn-ring__prog  { stroke: var(--color-blood-bright); filter: drop-shadow(0 0 6px var(--color-blood-glow)); }
+.dn-ring__count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--note-ink);
+  font-variant-numeric: tabular-nums;
+}
+.dn-ceremony__status {
+  min-height: 1.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.dn-ceremony__status .lore { color: var(--color-blood-bright); }
+
+/* Crimson pulse bloom behind the ceremony */
+.dn-ceremony__pulse {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(40% 40% at 50% 48%,
+      var(--color-blood-glow), transparent 70%);
+}
+.dn-ceremony.is-sealing .dn-ceremony__pulse {
+  animation: dn-pulse var(--dur-slow) var(--ease-out) both;
+}
+@keyframes dn-pulse {
+  0%   { opacity: 0; transform: scale(0.7); }
+  40%  { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* ========================================================
+   THE LEDGER — record of inscribed names (right leaf)
+   ======================================================== */
+.dn-ledger {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.dn-ledger__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-ledger__titles { display: flex; flex-direction: column; gap: 2px; }
+.dn-ledger__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+}
+.dn-ledger__jp {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+}
+.dn-ledger__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-blood);
+}
+
+/* Scrolling list of entries */
+.dn-ledger__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  max-height: 360px;
+  padding-right: var(--space-1);
+}
+
+/* One inscribed row */
+.dn-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-line-blood);
+  border-radius: var(--radius-sm);
+}
+/* Only freshly inscribed rows animate in (not on initial load) */
+.dn-entry.is-fresh {
+  animation: dn-entry-in var(--dur-slow) var(--ease-emphasis) both;
+}
+@keyframes dn-entry-in {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.dn-entry__name {
+  grid-column: 1;
+  font-family: var(--font-script);
+  font-size: var(--text-lg);
+  color: var(--note-ink);
+  overflow-wrap: anywhere;
+}
+.dn-entry__cause {
+  grid-column: 1;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.dn-entry__cause .k {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+  margin-right: var(--space-1);
+}
+.dn-entry__details {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+  overflow-wrap: anywhere;
+}
+.dn-entry__time {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-ghost);
+}
+/* Sealed wax mark */
+.dn-entry__seal {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-blood);
+  opacity: 0.8;
+}
+/* Remove one entry */
+.dn-entry__remove {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  align-self: end;
+  justify-self: end;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-size: var(--text-sm);
+  line-height: 1;
+  color: var(--color-text-ghost);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.dn-entry__remove:hover {
+  color: var(--color-blood-bright);
+  border-color: var(--color-line-blood);
+}
+
+/* Empty state */
+.dn-ledger__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-height: 200px;
+  text-align: center;
+  color: var(--color-text-ghost);
+}
+.dn-ledger__empty svg { width: 34px; height: 34px; color: var(--color-line-strong); }
+.dn-ledger__empty p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+}
+
+/* Ledger footer — clear action + confirm */
+.dn-ledger__foot {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+}
+.dn-ledger__clear {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.dn-ledger__clear:hover {
+  color: var(--color-blood-bright);
+  border-color: var(--color-line-blood);
+}
+.dn-ledger__confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dn-ledger__confirm span {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.dn-ledger__confirm button {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.dn-ledger__confirm .yes { color: var(--color-blood-bright); }
+.dn-ledger__confirm .no  { color: var(--color-text-faint); }
+[hidden] { display: none !important; }
+
+/* Disclaimer */
+.dn-note__disclaimer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   RESPONSIVE — stack the leaves on narrow screens
+   ======================================================== */
+@media (max-width: 720px) {
+  .dn-book__spread { grid-template-columns: 1fr; }
+  /* Spine becomes a horizontal seam between stacked leaves */
+  .dn-book__spread::before {
+    top: 50%;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 44px;
+    transform: translateY(-50%);
+    background: linear-gradient(
+        180deg,
+        transparent,
+        var(--note-spine) 42%,
+        rgba(0, 0, 0, 0.85) 50%,
+        var(--note-spine) 58%,
+        transparent);
+  }
+  .dn-book__leaf { min-height: 0; }
+  .dn-book__leaf--right {
+    border-top: 1px solid rgba(0, 0, 0, 0.6);
+    background-image:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 31px,
+            var(--note-line) 31px,
+            var(--note-line) 32px),
+        radial-gradient(140% 120% at 100% 0%,
+            transparent 55%, var(--note-paper-edge) 100%);
+  }
+  .dn-ledger__list { max-height: 300px; }
+}
+
+@media (max-width: 400px) {
+  .dn-note__title { font-size: var(--text-2xl); }
+  .dn-page__head { flex-direction: column; align-items: flex-start; }
+  .dn-page__caption { text-align: left; }
+  .dn-form__actions { gap: var(--space-3); }
+}
+
+  </style>
+  <style>
+/* css/rules.css */
+/* ============================================================
+   rules.css — THE RULES (section 03) · "How to Use It"
+   Death Note :: 死神の手帳
+
+   The canonical rules of the notebook, typeset as if printed on
+   the first aged leaves of the Note itself: a parchment codex
+   with faint ruled lines, a folded corner, hairline dividers and
+   Roman numerals struck in crimson. Two columns on wide screens,
+   collapsing to one on narrow. Consumes tokens from theme.css
+   only — no hard-coded palette. (Layout max-widths follow the
+   note.css precedent of literal px.)
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Section shell — a faint crimson wash bleeds from the top,
+   echoing THE NOTE section for cohesion.
+   -------------------------------------------------------- */
+.dn-rules {
+  max-width: 1040px;   /* wider than the default column to seat two columns */
+  background:
+      radial-gradient(90% 60% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+.dn-rules.dn-section__inner { max-width: 1040px; }  /* win over shell default */
+
+/* --------------------------------------------------------
+   Header — mirrors THE NOTE's centred heading treatment
+   -------------------------------------------------------- */
+.dn-rules__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+.dn-rules__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-rules__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-rules__jp {
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+}
+.dn-rules__lead {
+  max-width: 56ch;
+  margin: var(--space-2) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local to this section; mirrors note.css).
+   The hidden initial state is gated behind .is-js, which
+   js/rules.js adds on boot — so if the script never runs the
+   content is shown normally (no-JS fallback). js/rules.js sets
+   a per-element --d stagger, then toggles .is-revealed.
+   -------------------------------------------------------- */
+.dn-rules.is-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-rules.is-js.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE CODEX — an aged page bearing the printed rules
+   ======================================================== */
+.dn-codex {
+  position: relative;
+  padding: clamp(var(--space-5), 4vw, var(--space-8));
+  border-radius: var(--radius-md);
+  color: var(--note-ink);
+  background-color: var(--note-paper);
+  background-image:
+      /* faint ruled writing lines */
+      repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 33px,
+          var(--note-line) 33px,
+          var(--note-line) 34px),
+      /* aged darkening toward the edges */
+      radial-gradient(130% 120% at 50% 0%,
+          transparent 60%, var(--note-paper-edge) 100%);
+  border: 1px solid var(--color-line-strong);
+  box-shadow:
+      var(--shadow-lg),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+      inset 0 0 80px rgba(0, 0, 0, 0.55);
+}
+/* Parchment grain over the page */
+.dn-codex::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Faux page header stamped along the top edge */
+.dn-codex__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-codex__stamp {
+  display: inline-flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-line-blood);
+  border-radius: var(--radius-sm);
+  transform: rotate(-2.5deg);
+  color: var(--color-blood-bright);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  box-shadow: inset 0 0 0 1px rgba(179, 18, 27, 0.25);
+}
+.dn-codex__stamp-en {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wider);
+  line-height: 1;
+}
+.dn-codex__stamp-jp {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+  margin-top: 2px;
+}
+.dn-codex__meta {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+  line-height: var(--leading-snug);
+}
+
+/* Folded page corner (decorative) — a triangle peeled at bottom-right */
+.dn-codex__corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 0 0 var(--radius-md) 0;
+  background: linear-gradient(135deg,
+      transparent 50%,
+      var(--note-paper-edge) 50%,
+      var(--color-bg-inset) 100%);
+  box-shadow: -2px -2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ========================================================
+   THE RULES LIST — semantic <ol>, Roman numerals via counter
+   ======================================================== */
+.dn-rules__list {
+  counter-reset: dn-rule;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* Two balanced columns on wide screens */
+  columns: 2;
+  column-gap: var(--space-8);
+}
+
+/* One rule — a numeral column and the rule text */
+.dn-rules__item {
+  counter-increment: dn-rule;
+  break-inside: avoid;          /* keep a rule whole across columns */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-line);
+}
+/* Struck Roman numeral in crimson serif */
+.dn-rules__item::before {
+  content: counter(dn-rule, upper-roman);
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-blood);
+  text-shadow: 0 0 18px var(--color-blood-glow);
+  min-width: 2.6ch;
+  padding-top: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dn-rules__text {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: var(--color-text);
+  max-width: 60ch;            /* comfortable measure */
+  text-wrap: pretty;
+}
+.dn-rules__text b {
+  font-weight: var(--weight-normal);
+  color: var(--color-blood-bright);
+  font-variant-numeric: tabular-nums;
+}
+/* The dubious 13-day gloss, set apart in a fainter italic */
+.dn-rules__gloss {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Featured first rule — spans both columns, larger, drop-cap.
+   The single loudest line on the page.
+   -------------------------------------------------------- */
+.dn-rules__item--featured {
+  column-span: all;
+  border-top: 0;
+  padding-top: 0;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-line-strong);
+  grid-template-columns: 1fr;   /* no numeral column — it is rule I */
+  gap: 0;
+}
+.dn-rules__item--featured::before {
+  /* Render "I" as an oversized illuminated numeral, floated left */
+  float: left;
+  min-width: 0;
+  margin-right: var(--space-5);
+  font-size: var(--text-5xl);
+  line-height: 0.8;
+  color: var(--color-blood-bright);
+}
+.dn-rules__item--featured .dn-rules__text {
+  font-size: clamp(var(--text-lg), 3.5vw, var(--text-2xl));
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  max-width: 34ch;
+}
+
+/* ========================================================
+   FOOTER — XIII seal + disclaimer
+   ======================================================== */
+.dn-rules__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+}
+.dn-rules__seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-blood);
+  color: var(--color-blood);
+  box-shadow: inset 0 0 20px rgba(179, 18, 27, 0.18);
+  text-align: center;
+  line-height: 1;
+}
+.dn-rules__seal-roman {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-rules__seal-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-gold-dim);
+  margin-top: 3px;
+}
+.dn-rules__disclaimer {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-loose);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  max-width: 60ch;
+}
+.dn-rules__disclaimer i {
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* ========================================================
+   RESPONSIVE — collapse to a single column
+   ======================================================== */
+@media (max-width: 760px) {
+  .dn-rules__list { columns: 1; }
+  .dn-rules__foot { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .dn-rules__title { font-size: var(--text-2xl); }
+  .dn-codex__head { flex-direction: column; align-items: flex-start; }
+  .dn-codex__meta { text-align: left; }
+  .dn-rules__item--featured::before { font-size: var(--text-4xl); }
+  .dn-rules__item--featured .dn-rules__text { max-width: none; }
+}
+
+/* ========================================================
+   REDUCED MOTION & NO-JS FALLBACK
+   If the user prefers reduced motion, or js/rules.js never
+   runs, the content must be fully visible — never trapped in
+   the hidden reveal state.
+   ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .dn-rules.is-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+  </style>
+  <style>
+/* css/cipher.css */
+/* ============================================================
+   cipher.css — CIPHER (section 04) · the cryptographer's desk
+   Death Note :: 暗号 / 復号
+
+   A cinematic encode/decode workbench: a method tablist, a
+   twin-panel INPUT / OUTPUT well, method-specific controls and
+   a row of actions. Consumes tokens from theme.css only — no
+   hard-coded palette, spacing or type.
+   ============================================================ */
+
+.dn-cipher {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  /* faint crimson wash from the top, echoing THE NOTE */
+  background:
+      radial-gradient(90% 60% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+
+/* --------------------------------------------------------
+   Section header
+   -------------------------------------------------------- */
+.dn-cipher__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dn-cipher__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-cipher__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-cipher__lead {
+  max-width: 56ch;
+  margin: var(--space-1) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local to this section, mirrors note.css)
+   -------------------------------------------------------- */
+.dn-cipher [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-cipher.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE DESK — the framed workbench panel
+   ======================================================== */
+.dn-desk {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: clamp(var(--space-4), 2.4vw, var(--space-6));
+  background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 26%),
+      var(--color-bg-raised);
+  border: 1px solid var(--color-line-strong);
+  box-shadow:
+      var(--shadow-lg),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+      inset 0 0 70px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+/* Grain overlay on the desk surface */
+.dn-desk::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  background-size: 160px 160px;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ========================================================
+   METHOD TABLIST
+   ======================================================== */
+.dn-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dn-method {
+  flex: 1 1 auto;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+      color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+}
+.dn-method:hover {
+  border-color: var(--color-line-strong);
+  background: var(--color-bg-elevated);
+}
+.dn-method.is-active {
+  border-color: var(--color-line-blood);
+  background: linear-gradient(180deg, var(--color-blood-wash), transparent);
+  box-shadow: inset 0 -2px 0 0 var(--color-blood-bright);
+}
+.dn-method__en {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.dn-method.is-active .dn-method__en { color: var(--color-text); }
+.dn-method__jp {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.dn-method.is-active .dn-method__jp { color: var(--color-blood); }
+
+/* Blurb explaining the active method */
+.dn-cipher__blurb {
+  min-height: 1.4em;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: var(--color-text-faint);
+}
+
+/* ========================================================
+   CONTROLS — method-specific parameter row
+   ======================================================== */
+.dn-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+}
+.dn-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dn-ctl__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-ctl__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dn-ctl__hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* Range slider — crimson accent, tuned to the palette */
+.dn-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: clamp(140px, 30vw, 240px);
+  height: 2px;
+  background: var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.dn-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  border: 0;
+  cursor: pointer;
+}
+.dn-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-blood-bright);
+  box-shadow: var(--shadow-glow);
+  cursor: pointer;
+}
+.dn-range:focus-visible { outline-offset: 6px; }
+
+/* Number / text control inputs */
+.dn-num,
+.dn-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.dn-num { width: 4.5em; text-align: center; font-variant-numeric: tabular-nums; }
+.dn-text { width: clamp(160px, 40vw, 280px); letter-spacing: var(--tracking-wide); }
+.dn-num:focus,
+.dn-text:focus {
+  outline: none;
+  border-color: var(--color-line-blood);
+  box-shadow: 0 0 0 1px var(--color-line-blood);
+}
+
+/* Small ghost button (ROT13 preset, etc.) */
+.dn-chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.dn-chip:hover {
+  color: var(--color-blood-bright);
+  border-color: var(--color-line-blood);
+}
+
+/* ========================================================
+   THE WELLS — INPUT / OUTPUT twin panels
+   ======================================================== */
+.dn-wells {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.dn-well {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-inset);
+  overflow: hidden;
+}
+.dn-well__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+}
+.dn-well__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-well__jp { color: var(--color-blood); letter-spacing: var(--tracking-wide); }
+.dn-well__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-ghost);
+}
+
+/* The text areas */
+.dn-cipher__field {
+  width: 100%;
+  flex: 1;
+  min-height: 168px;
+  resize: vertical;
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--note-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow-wrap: anywhere;
+}
+.dn-cipher__field::placeholder { color: var(--color-text-ghost); }
+.dn-cipher__field:focus { outline: none; }
+/* Keyboard focus lands on the containing well */
+.dn-cipher__field:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--color-line-blood);
+}
+
+/* Output is read-only, tinted faintly warmer (the "decoded ink") */
+.dn-cipher__field[readonly] {
+  color: var(--color-text);
+  cursor: text;
+}
+.dn-well--out { position: relative; }
+.dn-well--out.is-error { border-color: var(--color-line-blood); }
+.dn-cipher__field.is-error::placeholder { color: var(--color-blood); }
+
+/* ========================================================
+   STATUS LINE — aria-live for copied / decoded / errors
+   ======================================================== */
+.dn-cipher__status {
+  min-height: 1.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.dn-cipher__status[data-kind="error"] { color: var(--color-blood-bright); }
+
+/* ========================================================
+   ACTIONS
+   ======================================================== */
+.dn-cipher__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* The encode/decode toggle pair sits first, then a spacer */
+.dn-cipher__modes {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+.dn-cipher__spacer { flex: 1 1 auto; }
+
+/* Mode buttons reuse the shared .dn-btn; active gets crimson fill */
+.dn-cipher .dn-btn.is-active {
+  --_bg: var(--color-blood);
+  --_fg: #fff;
+  --_border: var(--color-blood);
+  box-shadow: var(--shadow-glow);
+}
+.dn-btn__jp { color: rgba(255, 255, 255, 0.7); font-size: var(--text-xs); }
+/* On ghost (inactive) mode buttons, keep the JP tag legible */
+.dn-cipher .dn-btn:not(.is-active):not(.dn-btn--primary) .dn-btn__jp {
+  color: var(--color-text-faint);
+}
+
+/* Utility buttons (copy/swap/sample/clear) — quiet ghost chips */
+.dn-util {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.dn-util:hover {
+  color: var(--color-text);
+  border-color: var(--color-line-blood);
+}
+.dn-util__ico { width: 14px; height: 14px; flex: none; }
+/* Copy confirmation state */
+.dn-util.is-copied {
+  color: var(--color-gold);
+  border-color: var(--color-gold-dim);
+}
+
+/* Disclaimer footnote */
+.dn-cipher__foot {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   RESPONSIVE — stack wells + controls on narrow screens
+   ======================================================== */
+@media (max-width: 720px) {
+  .dn-wells { grid-template-columns: 1fr; }
+  .dn-method { min-width: calc(50% - var(--space-2)); }
+}
+
+@media (max-width: 480px) {
+  .dn-cipher__title { font-size: var(--text-2xl); }
+  .dn-controls { gap: var(--space-4); }
+  .dn-method { min-width: 100%; }
+  .dn-cipher__modes { width: 100%; }
+  .dn-cipher__modes .dn-btn { flex: 1; justify-content: center; }
+  .dn-cipher__spacer { display: none; }
+  .dn-cipher__actions { gap: var(--space-2); }
+  .dn-util { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 360px) {
+  .dn-text { width: 100%; }
+  .dn-controls { padding: var(--space-3); }
+}
+
+  </style>
+  <style>
+/* css/about.css */
+/* ============================================================
+   about.css — ABOUT / 奥付 (section 05) · Colophon & Credits
+   Death Note :: 死神の手帳
+
+   The closing leaf of the experience: an honest colophon that
+   credits the fiction, names the craft, indexes the sections,
+   and signs off with atmosphere. Restrained and typographic —
+   comfortable measure (~60ch), hairline dividers, one small
+   crimson/gold ornament. Consumes tokens from theme.css only;
+   no hard-coded palette. Reveal pattern mirrors rules.css.
+   ============================================================ */
+
+/* --------------------------------------------------------
+   Section shell — a faint crimson wash bleeds from the top,
+   echoing THE NOTE / RULES sections for cohesion.
+   -------------------------------------------------------- */
+.dn-about {
+  background:
+      radial-gradient(90% 55% at 50% 0%,
+          var(--color-blood-wash), transparent 55%);
+}
+
+/* --------------------------------------------------------
+   Header — mirrors the other sections' centred treatment
+   -------------------------------------------------------- */
+.dn-about__head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+.dn-about__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+.dn-about__title {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-wide);
+}
+.dn-about__jp {
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-muted);
+}
+.dn-about__lead {
+  max-width: 56ch;
+  margin: var(--space-2) auto 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-loose);
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   Staged reveal (local; mirrors rules.css). Hidden state is
+   gated behind .is-js which js/about.js adds on boot — so if
+   the script never runs the content shows normally (no-JS
+   fallback). about.js sets a per-element --d stagger, then
+   toggles .is-revealed on this same .dn-about element.
+   -------------------------------------------------------- */
+.dn-about.is-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(5px);
+  transition:
+      opacity var(--dur-slower) var(--ease-emphasis),
+      transform var(--dur-slower) var(--ease-emphasis),
+      filter var(--dur-slower) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-about.is-js.is-revealed [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ========================================================
+   THE COLOPHON BODY — a single readable column of blocks
+   separated by hairline rules.
+   ======================================================== */
+.dn-about__body {
+  max-width: 64ch;
+  margin: 0 auto;
+}
+
+/* One credited block — a small caps heading + prose */
+.dn-about__block {
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-line);
+}
+.dn-about__block:first-child { border-top: 0; padding-top: 0; }
+
+.dn-about__h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+/* Crimson tick before each heading */
+.dn-about__h::before {
+  content: "";
+  flex: none;
+  width: var(--space-4);
+  height: 1px;
+  background: var(--color-line-blood);
+}
+.dn-about__h-jp {
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+  text-transform: none;
+}
+
+.dn-about__p {
+  margin: 0;
+  max-width: 60ch;            /* comfortable measure */
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: var(--color-text);
+  text-wrap: pretty;
+}
+.dn-about__p + .dn-about__p { margin-top: var(--space-4); }
+.dn-about__p em { color: var(--color-text-muted); font-style: italic; }
+.dn-about__p b {
+  font-weight: var(--weight-normal);
+  color: var(--color-blood-bright);
+}
+
+/* --------------------------------------------------------
+   "Built with" — a definition-style colophon list
+   -------------------------------------------------------- */
+.dn-about__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+.dn-about__li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  align-items: baseline;
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+/* A small ballot mark ■ struck in crimson */
+.dn-about__li::before {
+  content: "\25A0";           /* ■ */
+  font-size: var(--text-2xs);
+  line-height: 1.6;
+  color: var(--color-blood);
+  transform: translateY(-0.15em);
+}
+.dn-about__li b {
+  font-weight: var(--weight-normal);
+  color: var(--color-text);
+}
+.dn-about__li code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-gold);
+}
+
+/* --------------------------------------------------------
+   "The sections" — a compact in-app index/legend of links
+   -------------------------------------------------------- */
+.dn-about__index-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+.dn-about__link {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-3);
+  margin: 0 calc(-1 * var(--space-3));
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+      color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+}
+.dn-about__link:hover {
+  color: var(--color-text);
+  background: linear-gradient(90deg, var(--color-blood-wash), transparent);
+}
+.dn-about__link-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-blood);
+  min-width: 2em;
+}
+.dn-about__link-en {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wide);
+  flex: 1;
+}
+.dn-about__link:hover .dn-about__link-en { color: var(--color-text); }
+.dn-about__link-jp {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+/* Trailing arrow that nudges on hover */
+.dn-about__link-go {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-ghost);
+  transition: transform var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.dn-about__link:hover .dn-about__link-go {
+  color: var(--color-blood-bright);
+  transform: translateX(4px);
+}
+
+/* ========================================================
+   CLOSING — the ornament + atmospheric sign-off, centred
+   ======================================================== */
+.dn-about__close {
+  text-align: center;
+  margin-top: var(--space-8);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* The shinigami-eye ornament (original inline SVG, line-art) */
+.dn-about__ornament {
+  width: 84px;
+  height: 84px;
+  color: var(--color-blood);
+  filter: drop-shadow(0 0 14px var(--color-blood-glow));
+}
+.dn-about__ornament .dn-about__eye-iris { color: var(--color-gold); }
+
+.dn-about__sign {
+  max-width: 42ch;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(var(--text-lg), 3.5vw, var(--text-xl));
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  text-wrap: balance;
+}
+.dn-about__sign .dn-jp {
+  display: block;
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood);
+}
+
+/* ========================================================
+   FINE PRINT — the legal footer line
+   ======================================================== */
+.dn-about__fineprint {
+  margin: var(--space-8) auto 0;
+  max-width: 64ch;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-loose);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-ghost);
+}
+
+/* ========================================================
+   RESPONSIVE
+   ======================================================== */
+@media (max-width: 480px) {
+  .dn-about__title { font-size: var(--text-2xl); }
+  .dn-about__link-jp { display: none; }   /* keep the row compact at ~360px */
+}
+
+/* ========================================================
+   REDUCED MOTION & NO-JS FALLBACK
+   If motion is reduced, or about.js never runs, the content
+   must be fully visible — never trapped in the hidden state.
+   ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .dn-about.is-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .dn-about__link-go { transition: none; }
+}
+
+  </style>
+
+  <!-- Inline favicon (a crimson dot) so we make zero external requests -->
+  <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2308080a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23b3121b'/%3E%3C/svg%3E" />
+</head>
+
+<body>
+  <!-- Skip link for keyboard / screen-reader users -->
+  <a class="sr-only" href="#main">Skip to content</a>
+
+  <div class="dn-app" data-app>
+
+    <!-- Ambient particle canvas (painted by intro.js) -->
+    <canvas id="dn-ambient" aria-hidden="true"></canvas>
+
+    <!-- Vignette + grain frame overlay -->
+    <div class="dn-frame-overlay" aria-hidden="true"></div>
+
+    <!-- ===================================================
+         MOBILE TOP BAR (hidden on desktop via CSS)
+         =================================================== -->
+    <header class="dn-topbar">
+      <button class="dn-burger" type="button"
+              data-burger aria-expanded="false"
+              aria-controls="dn-nav" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="dn-topbar__title">
+        DEATH&nbsp;NOTE <span class="dn-brand__jp">死神の手帳</span>
+      </span>
+      <span aria-hidden="true" style="width:44px"></span>
+    </header>
+
+    <!-- Scrim behind mobile drawer -->
+    <div class="dn-scrim" data-scrim aria-hidden="true"></div>
+
+    <!-- ===================================================
+         SIDEBAR NAVIGATION
+         =================================================== -->
+    <nav class="dn-nav" id="dn-nav" aria-label="Primary">
+      <div class="dn-brand">
+        <span class="dn-brand__mark">
+          <span class="dn-brand__title">DEATH NOTE</span>
+          <span class="dn-brand__jp">死神</span>
+        </span>
+        <span class="dn-brand__sub">The Shinigami's Notebook</span>
+      </div>
+
+      <ul class="dn-nav__list" role="list">
+        <li>
+          <a class="dn-nav__link" href="#intro" data-nav="intro">
+            <span class="dn-nav__num">01</span>
+            <span class="dn-nav__label">Intro</span>
+            <span class="dn-nav__jp">序</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#note" data-nav="note">
+            <span class="dn-nav__num">02</span>
+            <span class="dn-nav__label">The Note</span>
+            <span class="dn-nav__jp">手帳</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#rules" data-nav="rules">
+            <span class="dn-nav__num">03</span>
+            <span class="dn-nav__label">Rules</span>
+            <span class="dn-nav__jp">規則</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#cipher" data-nav="cipher">
+            <span class="dn-nav__num">04</span>
+            <span class="dn-nav__label">Cipher</span>
+            <span class="dn-nav__jp">暗号</span>
+          </a>
+        </li>
+        <li>
+          <a class="dn-nav__link" href="#about" data-nav="about">
+            <span class="dn-nav__num">05</span>
+            <span class="dn-nav__label">About</span>
+            <span class="dn-nav__jp">奥付</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="dn-nav__foot">
+        <hr class="dn-rule" />
+        <p class="dn-nav__note">
+          &ldquo;The human whose name is written in this note shall die.&rdquo;
+        </p>
+      </div>
+    </nav>
+
+    <!-- ===================================================
+         MAIN CONTENT — stacked sections (single active)
+         =================================================== -->
+    <main class="dn-main" id="main">
+      <div class="dn-sections">
+
+        <!-- ========== 01 · INTRO (fully built) ========== -->
+        <section class="dn-section dn-intro is-active"
+                 data-section="intro"
+                 aria-label="Introduction">
+          <div class="dn-intro__stage">
+            <p class="dn-intro__kicker dn-reveal" style="--d:120ms">
+              死神界 &nbsp;·&nbsp; Realm of the Shinigami
+            </p>
+
+            <h1 class="dn-intro__title">
+              <span class="en dn-reveal" style="--d:320ms">DEATH NOTE</span>
+              <span class="jp dn-reveal" style="--d:640ms">死神の手帳</span>
+            </h1>
+
+            <p class="dn-intro__subtitle dn-reveal" style="--d:900ms">
+              The Shinigami&rsquo;s Notebook
+            </p>
+
+            <div class="dn-intro__apple dn-reveal" style="--d:1120ms"
+                 aria-hidden="true"><!-- apple SVG injected by intro.js --></div>
+
+            <p class="dn-intro__tagline dn-reveal" style="--d:1320ms">
+              <span class="jp">この世は、退屈だ。</span>
+              <span class="en">This world&hellip; is rotten. Yet a single name can change everything.</span>
+            </p>
+
+            <div class="dn-intro__cta dn-reveal" style="--d:1560ms">
+              <a class="dn-btn dn-btn--primary" href="#note" data-go="note">
+                手帳を開く
+                <span class="dn-intro__cta-jp">/ OPEN THE NOTE</span>
+              </a>
+            </div>
+
+            <p class="dn-intro__hint dn-reveal" style="--d:1800ms">
+              <span class="dn-intro__hint--wide">Choose a chapter from the left</span>
+              <span class="dn-intro__hint--narrow">Open the menu to choose a chapter</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- ========== 02 · THE NOTE (centrepiece) ========== -->
+        <section class="dn-section dn-note" data-section="note"
+                 aria-label="The Note" aria-hidden="true">
+          <div class="dn-note__inner">
+
+            <!-- Section header -->
+            <header class="dn-note__head" data-reveal style="--d:80ms">
+              <span class="dn-note__index">02 · 手帳</span>
+              <h2 class="dn-note__title">The Note</h2>
+              <p class="dn-note__lead">
+                Write a name while picturing the face, and the notebook does
+                the rest. A fictional ritual, rendered in ink and shadow.
+              </p>
+            </header>
+
+            <!-- The open notebook: leather cover, two-leaf spread -->
+            <div class="dn-book" data-reveal style="--d:220ms">
+              <div class="dn-book__spread">
+
+                <!-- ===== LEFT LEAF · the writing page ===== -->
+                <div class="dn-book__leaf dn-book__leaf--left">
+                  <div class="dn-page__head">
+                    <span class="dn-stamp" aria-hidden="true">
+                      <span class="dn-stamp__en">DEATH NOTE</span>
+                      <span class="dn-stamp__jp">死神の手帳</span>
+                    </span>
+                    <span class="dn-page__caption">
+                      How&nbsp;to<br />use&nbsp;it
+                    </span>
+                  </div>
+
+                  <form class="dn-form" data-note-form novalidate>
+                    <!-- Name (required) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-name">
+                        Name <span class="req" aria-hidden="true">*</span>
+                      </label>
+                      <input class="dn-input dn-input--name" id="dn-name"
+                             type="text" data-field-name
+                             autocomplete="off" spellcheck="false"
+                             maxlength="80" placeholder="Write a name&hellip;"
+                             aria-required="true" />
+                    </div>
+
+                    <!-- Cause of death (optional) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-cause">
+                        Cause of death <span class="dn-muted">— optional</span>
+                      </label>
+                      <input class="dn-input" id="dn-cause" type="text"
+                             data-field-cause autocomplete="off"
+                             maxlength="80" placeholder="heart attack" />
+                    </div>
+
+                    <!-- Details (optional) -->
+                    <div class="dn-field">
+                      <label class="dn-field__label" for="dn-details">
+                        Details <span class="dn-muted">— optional</span>
+                      </label>
+                      <textarea class="dn-textarea" id="dn-details"
+                                data-field-details rows="2" maxlength="240"
+                                placeholder="The circumstances, written before the time runs out&hellip;"></textarea>
+                    </div>
+
+                    <!-- The face rule (required) -->
+                    <label class="dn-check">
+                      <input class="dn-check__input" type="checkbox"
+                             data-field-face aria-required="true" />
+                      <span class="dn-check__box" aria-hidden="true"></span>
+                      <span class="dn-check__text">
+                        <b>I can picture their face.</b>
+                        <span class="dn-tip" tabindex="0" role="note"
+                              aria-label="Rule: you must know the face">?
+                          <span class="dn-tip__body">
+                            The notebook&rsquo;s rule: writing a name only works
+                            if you hold the person&rsquo;s face in mind — so
+                            those who share a name are unharmed.
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+
+                    <div class="dn-form__actions">
+                      <button class="dn-btn dn-btn--primary" type="submit"
+                              data-inscribe disabled>
+                        刻む
+                        <span class="dn-btn__jp">/ INSCRIBE</span>
+                      </button>
+                      <span class="dn-form__note">
+                        Requires a name &amp; the face
+                      </span>
+                    </div>
+                  </form>
+
+                  <!-- Inscription ceremony (animation layer) -->
+                  <div class="dn-ceremony" data-ceremony hidden aria-hidden="true">
+                    <div class="dn-ceremony__pulse" aria-hidden="true"></div>
+                    <div class="dn-ceremony__name" data-ceremony-name></div>
+                    <div class="dn-ring" role="img"
+                         aria-label="The lore countdown window">
+                      <svg viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="dn-ring__track" cx="60" cy="60" r="52"
+                                fill="none" stroke-width="4" />
+                        <circle class="dn-ring__prog" data-ring-prog
+                                cx="60" cy="60" r="52" fill="none"
+                                stroke-width="4" stroke-linecap="round" />
+                      </svg>
+                      <span class="dn-ring__count" data-ring-count>40</span>
+                    </div>
+                    <p class="dn-ceremony__status" data-ceremony-status></p>
+                  </div>
+                </div>
+
+                <!-- ===== RIGHT LEAF · the ledger ===== -->
+                <div class="dn-book__leaf dn-book__leaf--right">
+                  <aside class="dn-ledger" aria-label="The ledger of inscribed names">
+                    <div class="dn-ledger__head">
+                      <span class="dn-ledger__titles">
+                        <span class="dn-ledger__title">The Ledger</span>
+                        <span class="dn-ledger__jp">記録 · Record</span>
+                      </span>
+                      <span class="dn-ledger__count" data-ledger-count aria-live="off">
+                        0 names
+                      </span>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div class="dn-ledger__empty" data-ledger-empty>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="1" aria-hidden="true">
+                        <path d="M4 3h13l3 3v15H4z" /><path d="M8 8h8M8 12h8M8 16h5" />
+                      </svg>
+                      <p>The pages are blank. For now.</p>
+                    </div>
+
+                    <!-- Entries (newest first, injected by note.js) -->
+                    <ul class="dn-ledger__list" data-ledger-list hidden></ul>
+
+                    <!-- Footer: clear + inline confirm -->
+                    <div class="dn-ledger__foot" data-ledger-foot hidden>
+                      <button class="dn-ledger__clear" type="button"
+                              data-ledger-clear>Clear the note</button>
+                      <span class="dn-ledger__confirm" data-ledger-confirm hidden>
+                        <span>Erase every name?</span>
+                        <button class="yes" type="button" data-confirm-yes>Erase</button>
+                        <button class="no" type="button" data-confirm-no>Keep</button>
+                      </span>
+                    </div>
+                  </aside>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Live region + disclaimer -->
+            <p class="sr-only" role="status" aria-live="polite" data-note-live></p>
+            <p class="dn-note__disclaimer" data-reveal style="--d:360ms">
+              A fictional tribute. Nothing here is real.
+            </p>
+
+          </div>
+        </section>
+
+        <!-- ========== 03 · RULES (placeholder) ========== -->
+        <section class="dn-section" data-section="rules" aria-label="Rules" aria-hidden="true">
+          <div class="dn-section__inner dn-rules" data-rules>
+
+            <!-- ===== Section header (consistent with other sections) ===== -->
+            <header class="dn-rules__head">
+              <p class="dn-rules__index" data-reveal>03 &middot; 規則</p>
+              <h2 class="dn-rules__title" data-reveal>How to Use It</h2>
+              <p class="dn-rules__jp dn-jp" data-reveal>使い方</p>
+              <p class="dn-rules__lead" data-reveal>
+                The laws printed on the first leaves of the notebook &mdash;
+                immutable, indifferent, and binding upon whoever should pick it up.
+              </p>
+            </header>
+
+            <!-- ===== The codex: rules printed on an aged page ===== -->
+            <div class="dn-codex" data-reveal>
+              <!-- Faux page header stamped along the top edge -->
+              <div class="dn-codex__head" aria-hidden="true">
+                <span class="dn-codex__stamp">
+                  <span class="dn-codex__stamp-en">DEATH&nbsp;NOTE</span>
+                  <span class="dn-codex__stamp-jp">使用規則</span>
+                </span>
+                <span class="dn-codex__meta">HOW&nbsp;TO&nbsp;USE &middot; XIV&nbsp;RULES</span>
+              </div>
+
+              <!-- Semantic ordered list — Roman numerals rendered via CSS counter.
+                   The first, most iconic rule is featured (full width + drop-cap). -->
+              <ol class="dn-rules__list" data-rules-list>
+
+                <li class="dn-rules__item dn-rules__item--featured" data-reveal>
+                  <p class="dn-rules__text">The human whose name is written in this
+                    note shall die.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">This note will not take effect unless the
+                    writer has the subject&rsquo;s face in their mind when writing the
+                    name. Those who merely share the same name are left unharmed.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">If the cause of death is written within
+                    <b>40 seconds</b> of writing the person&rsquo;s name, it will
+                    happen.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">If the cause of death is not specified, the
+                    person will simply die of a heart attack.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">After writing the cause of death, the
+                    details must be entered within the following <b>6 minutes and 40
+                    seconds</b>.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A death takes effect only within human
+                    possibility. Suicide is a valid cause &mdash; every human is thought
+                    to hold the capacity for it.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">Should a written death be impossible, or
+                    would it claim lives beyond the one intended, the subject dies of a
+                    heart attack instead.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">You cannot kill a human over <b>124 years</b>
+                    of age, nor one with fewer than <b>12 minutes</b> of life left to
+                    live.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A death once written cannot be undone.
+                    Crossing out a name or burning the page will not return the dead.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">The owner may trade <b>half of their
+                    remaining lifespan</b> for the eyes of a Shinigami &mdash; sight that
+                    reveals every human&rsquo;s name and lifespan above their head.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A Shinigami bound to a human may never tell
+                    that human the lifespan its eyes can see, whatever the reason.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">The owner recalls the deaths only while the
+                    note is theirs. Relinquish it, and every memory of the note is
+                    lost.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A human who has used the note may go neither
+                    to Heaven nor to Hell. Beyond death waits only nothingness &mdash;
+                    <span class="dn-jp dn-accent">無</span>.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">Whoever ceases to own the note must write a
+                    name within <b>13 days</b>, or they will die.
+                    <span class="dn-rules__gloss">&mdash; a rule of dubious authorship,
+                    forged to shield the guilty.</span></p>
+                </li>
+
+              </ol>
+
+              <!-- Folded page corner (decorative) -->
+              <span class="dn-codex__corner" aria-hidden="true"></span>
+            </div>
+
+            <!-- ===== Footer: XIII seal + disclaimer ===== -->
+            <footer class="dn-rules__foot" data-reveal>
+              <span class="dn-rules__seal" aria-hidden="true">
+                <span class="dn-rules__seal-roman">XIII</span>
+                <span class="dn-rules__seal-num">13</span>
+              </span>
+              <p class="dn-rules__disclaimer">
+                These are the rules of a notebook that does not exist &mdash; drawn
+                faithfully from the fiction <i>Death&nbsp;Note</i>. No name written
+                here will ever come true.
+              </p>
+            </footer>
+
+          </div>
+        </section>
+
+        <!-- ========== 04 · CIPHER (placeholder) ========== -->
+        <section class="dn-section" data-section="cipher" aria-label="Cipher" aria-hidden="true">
+          <div class="dn-section__inner dn-cipher">
+
+            <!-- Section header -->
+            <header class="dn-cipher__head" data-reveal style="--d:80ms">
+              <span class="dn-cipher__index">04 · 暗号</span>
+              <h2 class="dn-cipher__title">Cipher</h2>
+              <p class="dn-cipher__lead">
+                A message can be hidden in plain sight — spread across pages, mirrored,
+                shifted, keyed. Encode a line, or decode one left for you. Every method
+                here is exact and reversible.
+              </p>
+            </header>
+
+            <!-- The cryptographer's desk -->
+            <div class="dn-desk" data-reveal style="--d:220ms">
+
+              <!-- Method tablist -->
+              <div class="dn-methods" role="tablist" aria-label="Cipher method"
+                   data-cipher-tablist>
+                <button class="dn-method is-active" type="button" role="tab"
+                        data-method="caesar" aria-selected="true">
+                  <span class="dn-method__en">Caesar shift</span>
+                  <span class="dn-method__jp">シフト</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="atbash" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Atbash</span>
+                  <span class="dn-method__jp">反転</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="base64" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Base64</span>
+                  <span class="dn-method__jp">符号</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="vigenere" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Shinigami key</span>
+                  <span class="dn-method__jp">鍵</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="acrostic" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Hidden acrostic</span>
+                  <span class="dn-method__jp">折句</span>
+                </button>
+              </div>
+
+              <!-- Blurb for the active method (populated by JS) -->
+              <p class="dn-cipher__blurb" data-cipher-blurb aria-live="off"></p>
+
+              <!-- Method-specific controls -->
+              <div class="dn-controls">
+                <!-- Caesar -->
+                <div class="dn-ctl" data-for="caesar">
+                  <label class="dn-ctl__label" for="dn-cipher-shift">Shift (N)</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-range" id="dn-cipher-shift" type="range"
+                           min="0" max="25" step="1" value="3"
+                           data-cipher-shift-range
+                           aria-label="Caesar shift amount" />
+                    <input class="dn-num" type="number" min="0" max="25" step="1"
+                           value="3" data-cipher-shift-num
+                           aria-label="Caesar shift amount (number)" />
+                    <button class="dn-chip" type="button" data-cipher-rot13>ROT13</button>
+                  </div>
+                </div>
+
+                <!-- Vigenère -->
+                <div class="dn-ctl" data-for="vigenere" hidden>
+                  <label class="dn-ctl__label" for="dn-cipher-keyword">Keyword</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-text" id="dn-cipher-keyword" type="text"
+                           value="SHINIGAMI" maxlength="40" autocomplete="off"
+                           spellcheck="false" placeholder="e.g. KIRA"
+                           data-cipher-keyword aria-label="Vigenere keyword" />
+                    <span class="dn-ctl__hint">A–Z only; other letters are ignored</span>
+                  </div>
+                </div>
+
+                <!-- Acrostic -->
+                <div class="dn-ctl" data-for="acrostic" hidden>
+                  <label class="dn-ctl__label" for="dn-cipher-n">Every Nth</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-num" id="dn-cipher-n" type="number"
+                           min="1" max="99" step="1" value="5"
+                           data-cipher-n aria-label="Reveal every Nth character" />
+                    <span class="dn-ctl__hint">
+                      Encode hides your text; Decode reveals every Nth character
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Atbash (no params) -->
+                <div class="dn-ctl" data-for="atbash" hidden>
+                  <span class="dn-ctl__label">No settings</span>
+                  <span class="dn-ctl__hint">Atbash is symmetric — encode equals decode.</span>
+                </div>
+
+                <!-- Base64 (no params) -->
+                <div class="dn-ctl" data-for="base64" hidden>
+                  <span class="dn-ctl__label">No settings</span>
+                  <span class="dn-ctl__hint">UTF-8 safe; invalid Base64 on decode is flagged.</span>
+                </div>
+              </div>
+
+              <!-- INPUT / OUTPUT wells -->
+              <div class="dn-wells">
+                <div class="dn-well dn-well--in">
+                  <div class="dn-well__head">
+                    <span class="dn-well__label">
+                      Input <span class="dn-well__jp">入力</span>
+                    </span>
+                    <span class="dn-well__count" data-cipher-incount aria-hidden="true">0 chars</span>
+                  </div>
+                  <label class="sr-only" for="dn-cipher-input">Cipher input text</label>
+                  <textarea class="dn-cipher__field" id="dn-cipher-input"
+                            data-cipher-input autocomplete="off" spellcheck="false"
+                            placeholder="Type or paste a message&hellip;"></textarea>
+                </div>
+
+                <div class="dn-well dn-well--out" data-cipher-outpanel>
+                  <div class="dn-well__head">
+                    <span class="dn-well__label">
+                      Output <span class="dn-well__jp">出力</span>
+                    </span>
+                    <span class="dn-well__count" data-cipher-outcount aria-hidden="true">0 chars</span>
+                  </div>
+                  <label class="sr-only" for="dn-cipher-output">Cipher output text (read only)</label>
+                  <textarea class="dn-cipher__field" id="dn-cipher-output"
+                            data-cipher-output readonly
+                            placeholder="The result appears here&hellip;"></textarea>
+                </div>
+              </div>
+
+              <!-- aria-live status: copied / decoded / errors -->
+              <p class="dn-cipher__status" data-cipher-status
+                 role="status" aria-live="polite" data-kind="info"></p>
+
+              <!-- Actions -->
+              <div class="dn-cipher__actions">
+                <div class="dn-cipher__modes" role="group" aria-label="Direction">
+                  <button class="dn-btn is-active" type="button"
+                          data-cipher-encode aria-pressed="true">
+                    暗号化 <span class="dn-btn__jp">/ ENCODE</span>
+                  </button>
+                  <button class="dn-btn" type="button"
+                          data-cipher-decode aria-pressed="false">
+                    復号 <span class="dn-btn__jp">/ DECODE</span>
+                  </button>
+                </div>
+
+                <span class="dn-cipher__spacer" aria-hidden="true"></span>
+
+                <button class="dn-util" type="button" data-cipher-sample>Sample</button>
+                <button class="dn-util" type="button" data-cipher-swap
+                        aria-label="Move output into input">
+                  <svg class="dn-util__ico" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <path d="M17 4l3 3-3 3M20 7H8M7 20l-3-3 3-3M4 17h12"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Swap
+                </button>
+                <button class="dn-util" type="button" data-cipher-copy>
+                  <svg class="dn-util__ico" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="1.5" />
+                    <path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <span data-copy-label>COPY</span>
+                </button>
+                <button class="dn-util" type="button" data-cipher-clear>Clear</button>
+              </div>
+
+            </div>
+
+            <p class="dn-cipher__foot">
+              All processing happens in your browser — nothing is sent anywhere.
+            </p>
+          </div>
+        </section>
+
+        <!-- ========== 05 · ABOUT (placeholder) ========== -->
+        <section class="dn-section" data-section="about" aria-label="About" aria-hidden="true">
+          <div class="dn-section__inner dn-about" data-about>
+
+            <!-- ===== Section header (consistent with other sections) ===== -->
+            <header class="dn-about__head">
+              <p class="dn-about__index" data-reveal>05 &middot; 奥付</p>
+              <h2 class="dn-about__title" data-reveal>About</h2>
+              <p class="dn-about__jp dn-jp" data-reveal>クレジット</p>
+              <p class="dn-about__lead" data-reveal>
+                A colophon for a notebook that never was &mdash; what this is,
+                how it was made, and where it leads.
+              </p>
+            </header>
+
+            <!-- ===== The colophon body ===== -->
+            <div class="dn-about__body">
+
+              <!-- 1 · What this is -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  What this is <span class="dn-about__h-jp dn-jp">これは何か</span>
+                </h3>
+                <p class="dn-about__p">
+                  A fan-made, non-commercial tribute to the fictional manga and anime
+                  <em>Death&nbsp;Note</em>, created by <b>Tsugumi&nbsp;Ohba</b> and
+                  <b>Takeshi&nbsp;Obata</b>. Everything on these pages is invention and
+                  interactive fiction: the notebook, its rules, the ledger you may keep.
+                  No real person is named, targeted, or harmed &mdash; nothing written
+                  here reaches beyond the screen.
+                </p>
+              </section>
+
+              <!-- 2 · Built with -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  Built with <span class="dn-about__h-jp dn-jp">作り</span>
+                </h3>
+                <ul class="dn-about__list">
+                  <li class="dn-about__li">
+                    <span><b>Zero dependencies.</b> Hand-written HTML, CSS, and vanilla
+                    JavaScript &mdash; no frameworks, no libraries.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>No build step.</b> The files you download are the files
+                    that run. Nothing is compiled or bundled.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>No network.</b> Not a single external request &mdash; no
+                    CDN, no fonts, no analytics. It works fully offline.</span>
+                  </li>
+                  <li class="dn-about__li">
+                    <span><b>Your data stays yours.</b> The Ledger and your cipher
+                    preferences live only in your own browser, via
+                    <code>localStorage</code>. Clear it and they are gone.</span>
+                  </li>
+                </ul>
+              </section>
+
+              <!-- 3 · The sections — real in-app links (router handles data-go) -->
+              <section class="dn-about__block" data-reveal>
+                <h3 class="dn-about__h">
+                  The sections <span class="dn-about__h-jp dn-jp">目次</span>
+                </h3>
+                <ul class="dn-about__index-list">
+                  <li>
+                    <a class="dn-about__link" href="#intro" data-go="intro">
+                      <span class="dn-about__link-num">01</span>
+                      <span class="dn-about__link-en">Intro</span>
+                      <span class="dn-about__link-jp dn-jp">序章</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#note" data-go="note">
+                      <span class="dn-about__link-num">02</span>
+                      <span class="dn-about__link-en">The Note</span>
+                      <span class="dn-about__link-jp dn-jp">手帳</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#rules" data-go="rules">
+                      <span class="dn-about__link-num">03</span>
+                      <span class="dn-about__link-en">Rules</span>
+                      <span class="dn-about__link-jp dn-jp">規則</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dn-about__link" href="#cipher" data-go="cipher">
+                      <span class="dn-about__link-num">04</span>
+                      <span class="dn-about__link-en">Cipher</span>
+                      <span class="dn-about__link-jp dn-jp">暗号</span>
+                      <span class="dn-about__link-go" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                </ul>
+              </section>
+
+            </div>
+
+            <!-- ===== Closing: ornament + atmospheric sign-off ===== -->
+            <div class="dn-about__close" data-reveal>
+              <!-- Original line-art ornament: a stylised shinigami eye.
+                   Symbolic, not a character likeness. Crimson stroke, gold iris. -->
+              <svg class="dn-about__ornament" viewBox="0 0 100 100" role="img"
+                   aria-label="A stylised shinigami eye">
+                <g fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                  <!-- Almond eye outline -->
+                  <path d="M8 50 Q50 20 92 50 Q50 80 8 50 Z" />
+                  <!-- Iris -->
+                  <circle class="dn-about__eye-iris" cx="50" cy="50" r="15"
+                          stroke-width="2.4" />
+                  <!-- Cross-slit pupil -->
+                  <path class="dn-about__eye-iris" d="M50 42 V58 M42 50 H58"
+                        stroke-width="2.4" />
+                  <!-- Radiating lashes / rays above and below -->
+                  <path d="M50 20 V10 M31 27 L26 18 M69 27 L74 18" />
+                  <path d="M50 80 V90 M31 73 L26 82 M69 73 L74 82"
+                        opacity="0.55" />
+                </g>
+              </svg>
+
+              <!-- An atmospheric sign-off — original phrasing, no long quotation. -->
+              <p class="dn-about__sign">
+                In the end a name is only ink, and even gods of death
+                grow bored of watching it dry.
+                <span class="dn-jp">名前とは、乾いてゆく墨にすぎない</span>
+              </p>
+            </div>
+
+            <!-- ===== Fine print ===== -->
+            <p class="dn-about__fineprint">
+              A fan tribute &middot; not affiliated with or endorsed by the rights
+              holders &middot; &copy; their respective owners.
+            </p>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts: app router first (defines DN), then intro behaviour -->
+  <script>
+// js/app.js
+/* ============================================================
+   app.js — APP BOOTSTRAP + SECTION ROUTER
+   Death Note :: 死神の手帳
+
+   Responsibilities:
+     - Single-page section switching (crossfade via CSS classes)
+     - Nav active states + aria-current
+     - Deep-linking via location.hash, back/forward support
+     - Mobile drawer toggle
+     - Small utility helpers
+   Everything is namespaced under the global `DN`. No other globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  /* --------------------------------------------------------
+     Tiny DOM helpers
+     -------------------------------------------------------- */
+  const $  = (sel, ctx) => (ctx || document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
+
+  /* Known section ids, in nav order. First is the default. */
+  const SECTIONS = ["intro", "note", "rules", "cipher", "about"];
+
+  /* --------------------------------------------------------
+     Router state + elements (resolved on init)
+     -------------------------------------------------------- */
+  const state = {
+    current: null,
+    els: {
+      app: null,
+      sections: {},   // id -> <section>
+      navLinks: {},   // id -> <a>
+    },
+    listeners: [],    // subscribers to section changes
+    ready: false,
+  };
+
+  /* --------------------------------------------------------
+     Normalise a raw hash/id into a valid section id.
+     Falls back to the first section when unknown.
+     -------------------------------------------------------- */
+  function normalize(raw) {
+    const id = String(raw || "").replace(/^#/, "").trim().toLowerCase();
+    return SECTIONS.includes(id) ? id : SECTIONS[0];
+  }
+
+  /* --------------------------------------------------------
+     Core: activate a section by id.
+     `pushHash` controls whether we update location.hash
+     (false when reacting to a hashchange to avoid loops).
+     -------------------------------------------------------- */
+  function go(rawId, pushHash) {
+    const id = normalize(rawId);
+    if (!state.ready) return;
+    if (id === state.current) {
+      // Already here — still ensure the hash reflects it.
+      if (pushHash !== false) writeHash(id);
+      return;
+    }
+
+    const prev = state.current;
+
+    // Toggle section visibility classes
+    Object.entries(state.els.sections).forEach(([sid, el]) => {
+      const active = sid === id;
+      el.classList.toggle("is-active", active);
+      el.setAttribute("aria-hidden", active ? "false" : "true");
+    });
+
+    // Toggle nav active states / aria-current
+    Object.entries(state.els.navLinks).forEach(([sid, link]) => {
+      const active = sid === id;
+      link.classList.toggle("is-active", active);
+      if (active) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
+
+    state.current = id;
+
+    // Scroll the freshly shown section back to the top
+    const target = state.els.sections[id];
+    if (target) target.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    // Update the URL hash for deep-linking / history
+    if (pushHash !== false) writeHash(id);
+
+    // Close the mobile drawer on navigation
+    closeNav();
+
+    // Notify subscribers (e.g. intro.js triggers its reveal)
+    emit(id, prev);
+  }
+
+  /* Write the hash without triggering our own hashchange handler twice */
+  function writeHash(id) {
+    const next = "#" + id;
+    if (location.hash !== next) {
+      // Use replaceState for intro (default) to keep history clean,
+      // pushState-like behaviour comes naturally from hash assignment.
+      history.pushState(null, "", next);
+    }
+  }
+
+  /* --------------------------------------------------------
+     Pub/sub for section changes
+     -------------------------------------------------------- */
+  function onSection(fn) {
+    if (typeof fn === "function") state.listeners.push(fn);
+  }
+  function emit(id, prev) {
+    state.listeners.forEach((fn) => {
+      try { fn(id, prev); } catch (err) { /* isolate subscriber errors */ }
+    });
+  }
+
+  /* --------------------------------------------------------
+     Mobile drawer
+     -------------------------------------------------------- */
+  function openNav()   { state.els.app && state.els.app.classList.add("is-nav-open"); syncBurger(); }
+  function closeNav()  { state.els.app && state.els.app.classList.remove("is-nav-open"); syncBurger(); }
+  function toggleNav() { state.els.app && state.els.app.classList.toggle("is-nav-open"); syncBurger(); }
+  function syncBurger() {
+    const burger = $("[data-burger]");
+    if (!burger) return;
+    const open = state.els.app.classList.contains("is-nav-open");
+    burger.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  /* --------------------------------------------------------
+     Wire up all event listeners
+     -------------------------------------------------------- */
+  function bindEvents() {
+    // Nav links (delegation-friendly explicit binding)
+    $$("[data-nav]").forEach((link) => {
+      const id = link.getAttribute("data-nav");
+      state.els.navLinks[id] = link;
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        go(id);
+      });
+    });
+
+    // Any element with [data-go] acts as an in-app router link (CTA, etc.)
+    $$("[data-go]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        go(el.getAttribute("data-go"));
+      });
+    });
+
+    // Burger + scrim
+    const burger = $("[data-burger]");
+    if (burger) burger.addEventListener("click", toggleNav);
+    const scrim = $("[data-scrim]");
+    if (scrim) scrim.addEventListener("click", closeNav);
+
+    // Escape closes the drawer
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeNav();
+    });
+
+    // Browser back/forward + manual hash edits
+    window.addEventListener("hashchange", () => go(location.hash, false));
+    window.addEventListener("popstate", () => go(location.hash, false));
+  }
+
+  /* --------------------------------------------------------
+     Boot
+     -------------------------------------------------------- */
+  function init() {
+    state.els.app = $("[data-app]");
+
+    // Resolve section elements
+    $$("[data-section]").forEach((el) => {
+      state.els.sections[el.getAttribute("data-section")] = el;
+    });
+
+    bindEvents();
+    state.ready = true;
+
+    // Initial route from the hash (deep-link) or default to intro
+    const initial = normalize(location.hash);
+    // Force emit even if it equals default by clearing current first
+    state.current = null;
+    go(initial, false);
+
+    // Reflect the resolved section in the URL without adding history noise
+    if (location.hash.replace(/^#/, "") !== initial) {
+      history.replaceState(null, "", "#" + initial);
+    }
+  }
+
+  /* --------------------------------------------------------
+     Public API — the ONLY global this file creates
+     -------------------------------------------------------- */
+  const DN = {
+    /* Navigation */
+    go,
+    onSection,
+    get section() { return state.current; },
+    sections: SECTIONS.slice(),
+
+    /* Drawer controls (exposed for completeness) */
+    nav: { open: openNav, close: closeNav, toggle: toggleNav },
+
+    /* Shared utilities other modules can reuse */
+    util: {
+      $, $$,
+      /* Clamp a number into [min, max] */
+      clamp: (n, min, max) => Math.min(max, Math.max(min, n)),
+      /* Linear interpolate */
+      lerp: (a, b, t) => a + (b - a) * t,
+      /* Random float in [min, max) */
+      rand: (min, max) => min + Math.random() * (max - min),
+      /* Does the user prefer reduced motion? (live query) */
+      reducedMotion: () =>
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    },
+  };
+
+  window.DN = DN;
+
+  /* Kick off once the DOM is parsed */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+  <script>
+// js/intro.js
+/* ============================================================
+   intro.js — INTRO SECTION BEHAVIOUR
+   Death Note :: 死神の手帳
+
+   - Injects the red-apple inline SVG motif
+   - Drives the ambient particle background (drifting motes),
+     performant via requestAnimationFrame + capped count
+   - Triggers the staged cinematic reveal when intro activates
+   - Fully respects prefers-reduced-motion
+   Relies on the global `DN` from app.js. Adds no new globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const DN = window.DN;
+  if (!DN) return; // app.js must load first
+
+  const { $, reducedMotion } = DN.util;
+
+  /* --------------------------------------------------------
+     1) APPLE MOTIF — inline SVG (shinigami nod)
+     A stylised red apple with a leaf, glint and cast sheen.
+     -------------------------------------------------------- */
+  const APPLE_SVG = `
+  <svg viewBox="0 0 64 64" role="img" aria-label="A red apple">
+    <defs>
+      <radialGradient id="dn-apple-body" cx="38%" cy="34%" r="72%">
+        <stop offset="0%"  stop-color="#e5343c"/>
+        <stop offset="55%" stop-color="#b3121b"/>
+        <stop offset="100%" stop-color="#6b0a10"/>
+      </radialGradient>
+      <linearGradient id="dn-apple-leaf" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"  stop-color="#3f6b34"/>
+        <stop offset="100%" stop-color="#20401b"/>
+      </linearGradient>
+    </defs>
+    <!-- stem -->
+    <path d="M32 15 C31 10 33 6 37 4"
+          fill="none" stroke="#4a2f1c" stroke-width="2.4"
+          stroke-linecap="round"/>
+    <!-- leaf -->
+    <path d="M33 13 C40 7 50 8 52 12 C48 18 39 18 33 13 Z"
+          fill="url(#dn-apple-leaf)"/>
+    <!-- body: two lobes -->
+    <path d="M32 16
+             C25 12 14 14 12 26
+             C10 38 18 54 26 57
+             C29 58 31 56 32 56
+             C33 56 35 58 38 57
+             C46 54 54 38 52 26
+             C50 14 39 12 32 16 Z"
+          fill="url(#dn-apple-body)"/>
+    <!-- specular glint -->
+    <ellipse cx="23" cy="27" rx="4.4" ry="6.6"
+             fill="#ffffff" opacity="0.22"
+             transform="rotate(-22 23 27)"/>
+  </svg>`;
+
+  function mountApple() {
+    const host = $(".dn-intro__apple");
+    if (host && !host.childElementCount) host.innerHTML = APPLE_SVG;
+  }
+
+  /* --------------------------------------------------------
+     2) STAGED REVEAL — add .is-revealed to the intro section
+     the first time it becomes active. If reduced-motion is on,
+     we still reveal (CSS neutralises the transition durations).
+     -------------------------------------------------------- */
+  let revealed = false;
+  function revealIntro() {
+    const intro = $('[data-section="intro"]');
+    if (intro && !revealed) {
+      revealed = true;
+      // Next frame so the transition is observed from the hidden state.
+      requestAnimationFrame(() => intro.classList.add("is-revealed"));
+    }
+  }
+
+  /* --------------------------------------------------------
+     3) AMBIENT PARTICLES — drifting motes on a full-bleed canvas
+     Runs only while a section is active AND motion is allowed.
+     Capped particle count; DPR-aware; pauses when tab hidden.
+     -------------------------------------------------------- */
+  const Ambient = (function () {
+    let canvas, ctx, raf = 0;
+    let w = 0, h = 0, dpr = 1;
+    let motes = [];
+    let running = false;
+    let lastT = 0;
+
+    /* Particle budget scales with viewport but is hard-capped */
+    function budget() {
+      const area = window.innerWidth * window.innerHeight;
+      return Math.max(28, Math.min(70, Math.round(area / 26000)));
+    }
+
+    function makeMote() {
+      return {
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: DN.util.rand(0.4, 1.8),          // radius
+        vy: DN.util.rand(4, 16),            // fall speed px/s
+        vx: DN.util.rand(-6, 6),            // drift px/s
+        sway: DN.util.rand(0, Math.PI * 2), // sway phase
+        swaySpeed: DN.util.rand(0.2, 0.7),
+        a: DN.util.rand(0.05, 0.35),        // alpha
+        crimson: Math.random() < 0.12,      // a few embers glow red
+      };
+    }
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const target = budget();
+      if (motes.length < target) {
+        while (motes.length < target) motes.push(makeMote());
+      } else {
+        motes.length = target;
+      }
+    }
+
+    function step(t) {
+      if (!running) return;
+      const dt = Math.min(0.05, (t - lastT) / 1000 || 0);
+      lastT = t;
+
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < motes.length; i++) {
+        const m = motes[i];
+        m.sway += m.swaySpeed * dt;
+        m.y += m.vy * dt;
+        m.x += (m.vx + Math.sin(m.sway) * 6) * dt;
+
+        // Recycle when it drifts off the bottom/sides
+        if (m.y - m.r > h) { m.y = -m.r; m.x = Math.random() * w; }
+        if (m.x < -10) m.x = w + 10;
+        if (m.x > w + 10) m.x = -10;
+
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        if (m.crimson) {
+          ctx.fillStyle = "rgba(211,35,45," + m.a + ")";
+          ctx.shadowColor = "rgba(211,35,45,0.7)";
+          ctx.shadowBlur = 6;
+        } else {
+          ctx.fillStyle = "rgba(232,230,224," + m.a + ")";
+          ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      raf = requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (running || reducedMotion()) return;
+      running = true;
+      lastT = performance.now();
+      raf = requestAnimationFrame(step);
+    }
+    function stop() {
+      running = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    }
+
+    function init() {
+      canvas = $("#dn-ambient");
+      if (!canvas || reducedMotion()) return;
+      ctx = canvas.getContext("2d");
+      resize();
+      window.addEventListener("resize", debounce(resize, 200));
+      // Pause when the tab is hidden to save cycles/battery
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stop();
+        else start();
+      });
+      start();
+    }
+
+    return { init, start, stop };
+  })();
+
+  /* Small debounce util (local, not global) */
+  function debounce(fn, ms) {
+    let id;
+    return function () {
+      clearTimeout(id);
+      id = setTimeout(fn, ms);
+    };
+  }
+
+  /* --------------------------------------------------------
+     Boot the intro module
+     -------------------------------------------------------- */
+  function init() {
+    mountApple();
+    Ambient.init();
+
+    // Reveal now if intro is the active section on load…
+    if (DN.section === "intro") revealIntro();
+    // …and whenever the router switches to intro.
+    DN.onSection((id) => {
+      if (id === "intro") revealIntro();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+  <script>
+// js/note.js
+/* ============================================================
+   note.js — THE NOTE (section 02) behaviour
+   Death Note :: 死神の手帳
+
+   - Staged reveal when the section first activates
+   - The writing form: validation gates the INSCRIBE button
+   - Cinematic inscription "ceremony": ink-bleed, the lore
+     40s / 6:40 windows dramatised on a countdown ring, seal
+   - THE LEDGER: add / remove / clear, persisted to localStorage
+   - aria-live announcements, reduced-motion aware, XSS-safe
+     (all user text is inserted via textContent — never innerHTML)
+
+   Relies on the global `DN` from app.js. Adds no new globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const DN = window.DN;
+  if (!DN) return; // app.js must load first
+
+  const { $, reducedMotion, clamp } = DN.util;
+
+  /* --------------------------------------------------------
+     Persistence — namespaced, versioned localStorage key.
+     Schema (dn.ledger.v1): Array of entries, newest first.
+       { id:string, name:string, cause:string,
+         details:string, ts:number }
+     -------------------------------------------------------- */
+  const STORE_KEY = "dn.ledger.v1";
+
+  function loadLedger() {
+    let raw;
+    try {
+      raw = window.localStorage.getItem(STORE_KEY);
+    } catch (err) {
+      return []; // storage disabled (private mode, etc.)
+    }
+    if (!raw) return [];
+    try {
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data)) return [];
+      // Defensively coerce each record to the known shape.
+      return data
+        .filter((e) => e && typeof e === "object")
+        .map((e) => ({
+          id: String(e.id || uid()),
+          name: String(e.name || ""),
+          cause: String(e.cause || "heart attack"),
+          details: String(e.details || ""),
+          ts: Number(e.ts) || Date.now(),
+        }))
+        .filter((e) => e.name);
+    } catch (err) {
+      return []; // corrupt JSON — start clean rather than throw
+    }
+  }
+
+  function saveLedger(list) {
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    } catch (err) {
+      /* storage unavailable — the session still works in-memory */
+    }
+  }
+
+  /* --------------------------------------------------------
+     Small helpers
+     -------------------------------------------------------- */
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  /* "2026·07·12 · 21:04" */
+  function formatTime(ts) {
+    const d = new Date(ts);
+    return (
+      d.getFullYear() + "·" + pad2(d.getMonth() + 1) + "·" + pad2(d.getDate()) +
+      " · " + pad2(d.getHours()) + ":" + pad2(d.getMinutes())
+    );
+  }
+
+  /* Format a number of seconds as either "40" or "6:40". */
+  function formatSeconds(total, asClock) {
+    if (!asClock) return String(Math.ceil(total));
+    const s = Math.ceil(total);
+    return Math.floor(s / 60) + ":" + pad2(s % 60);
+  }
+
+  const raf = (fn) => window.requestAnimationFrame(fn);
+
+  /* --------------------------------------------------------
+     Module state + resolved elements
+     -------------------------------------------------------- */
+  let ledger = [];
+  let busy = false;     // an inscription ceremony is running
+  let confirmingClear = false;
+  const els = {};
+  let RING_CIRC = 0;
+
+  /* --------------------------------------------------------
+     Validation — INSCRIBE is enabled only when a name is
+     written AND the "I can picture their face" rule is met.
+     -------------------------------------------------------- */
+  function refreshSubmit() {
+    if (!els.submit) return;
+    const ok = els.name.value.trim().length > 0 && els.face.checked;
+    els.submit.disabled = !ok || busy;
+  }
+
+  /* --------------------------------------------------------
+     Ceremony — animate one lore "window" on the ring.
+     Drains the ring from full to empty while counting down
+     from `seconds`. Resolves when the window closes.
+     -------------------------------------------------------- */
+  function animateWindow(seconds, duration, asClock) {
+    return new Promise((resolve) => {
+      if (reducedMotion() || duration <= 0) {
+        els.ringCount.textContent = "0";
+        resolve();
+        return;
+      }
+      const start = performance.now();
+      function tick(now) {
+        const t = clamp((now - start) / duration, 0, 1);
+        // Ring drains: offset grows from 0 (full) to circumference (empty)
+        els.ringProg.style.strokeDashoffset = String(RING_CIRC * t);
+        els.ringCount.textContent = formatSeconds(seconds * (1 - t), asClock);
+        if (t < 1) {
+          raf(tick);
+        } else {
+          resolve();
+        }
+      }
+      els.ringProg.style.strokeDashoffset = "0";
+      raf(tick);
+    });
+  }
+
+  /* A tiny awaitable delay (0 when motion is reduced). */
+  function beat(ms) {
+    return new Promise((resolve) => {
+      if (reducedMotion() || ms <= 0) return resolve();
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function setStatus(html) {
+    // Trusted lore strings only (no user input) — a small red accent span.
+    els.status.innerHTML = html;
+  }
+
+  /* Run the full cinematic inscription, then commit the entry. */
+  async function inscribe() {
+    if (busy) return;
+    const name = els.name.value.trim();
+    if (!name || !els.face.checked) return;
+
+    const causeRaw = els.cause.value.trim();
+    const detailsRaw = els.details.value.trim();
+    const cause = causeRaw || "heart attack";
+
+    busy = true;
+    refreshSubmit();
+    els.form.setAttribute("aria-busy", "true");
+
+    // Open the ceremony layer with the name (XSS-safe: textContent).
+    els.ceremonyName.textContent = name;
+    els.ceremony.hidden = false;
+    els.ceremony.classList.remove("is-sealing");
+    els.ceremony.classList.add("is-writing");
+    els.ringProg.style.strokeDashoffset = "0";
+    els.ringCount.textContent = formatSeconds(40, false);
+    setStatus("The name is written&hellip;");
+
+    // 1) Ink bleeds into the page.
+    await beat(950);
+
+    // 2) The 40-second window — a cause may be specified.
+    setStatus('<span class="lore">40s</span> · specify a cause of death');
+    await animateWindow(40, 1600, false);
+    if (causeRaw) {
+      setStatus("Cause inscribed · " + "the window closes");
+    } else {
+      setStatus("No cause given · it defaults to a heart attack");
+    }
+    await beat(700);
+
+    // 3) The 6-minute-40-second window — details may be added.
+    setStatus('<span class="lore">6:40</span> · the details take hold');
+    els.ringCount.textContent = formatSeconds(400, true);
+    await animateWindow(400, 1400, true);
+
+    // 4) Seal the entry — crimson pulse + colour shift.
+    els.ceremony.classList.remove("is-writing");
+    els.ceremony.classList.add("is-sealing");
+    setStatus("刻む · SEALED");
+    await beat(750);
+
+    // Commit to the ledger (newest first) + persist.
+    const entry = { id: uid(), name, cause, details: detailsRaw, ts: Date.now() };
+    ledger.unshift(entry);
+    saveLedger(ledger);
+    addEntryNode(entry, true);
+    updateCount();
+    toggleEmpty();
+
+    announce(
+      "Inscribed: " + name + ". Cause of death: " + cause + "." +
+      (detailsRaw ? " Details recorded." : "") + " Added to the ledger."
+    );
+
+    // Close the ceremony + reset the page for the next name.
+    els.ceremony.hidden = true;
+    els.ceremony.classList.remove("is-sealing", "is-writing");
+    els.form.reset();
+    els.form.removeAttribute("aria-busy");
+    busy = false;
+    refreshSubmit();
+    els.name.focus();
+  }
+
+  /* --------------------------------------------------------
+     Ledger rendering
+     -------------------------------------------------------- */
+  function createEl(tag, cls, text) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text; // always textContent — safe
+    return el;
+  }
+
+  /* Build one ledger row. All user text goes through textContent. */
+  function createEntryNode(entry, fresh) {
+    const li = createEl("li", "dn-entry" + (fresh ? " is-fresh" : ""));
+    li.setAttribute("data-id", entry.id);
+
+    const name = createEl("span", "dn-entry__name", entry.name);
+
+    const cause = createEl("span", "dn-entry__cause");
+    cause.appendChild(createEl("span", "k", "cause"));
+    cause.appendChild(document.createTextNode(entry.cause));
+
+    const seal = createEl("span", "dn-entry__seal", "封"); // 封 (sealed)
+
+    li.appendChild(name);
+    li.appendChild(seal);
+    li.appendChild(cause);
+
+    if (entry.details) {
+      li.appendChild(createEl("p", "dn-entry__details", entry.details));
+    }
+
+    li.appendChild(createEl("span", "dn-entry__time", formatTime(entry.ts)));
+
+    const remove = createEl("button", "dn-entry__remove", "✕");
+    remove.type = "button";
+    remove.setAttribute(
+      "aria-label",
+      "Remove " + entry.name + " from the ledger"
+    );
+    remove.addEventListener("click", () => removeEntry(entry.id));
+    li.appendChild(remove);
+
+    if (fresh) {
+      li.addEventListener(
+        "animationend",
+        () => li.classList.remove("is-fresh"),
+        { once: true }
+      );
+    }
+    return li;
+  }
+
+  function addEntryNode(entry, fresh) {
+    els.list.insertBefore(createEntryNode(entry, fresh), els.list.firstChild);
+  }
+
+  function renderAll() {
+    els.list.textContent = "";
+    ledger.forEach((entry) => els.list.appendChild(createEntryNode(entry, false)));
+    updateCount();
+    toggleEmpty();
+  }
+
+  function updateCount() {
+    const n = ledger.length;
+    els.count.textContent = n + (n === 1 ? " name" : " names");
+  }
+
+  function toggleEmpty() {
+    const empty = ledger.length === 0;
+    els.empty.hidden = !empty;
+    els.list.hidden = empty;
+    els.foot.hidden = empty;
+  }
+
+  function removeEntry(id) {
+    const node = els.list.querySelector('[data-id="' + id + '"]');
+    const entry = ledger.find((e) => e.id === id);
+    ledger = ledger.filter((e) => e.id !== id);
+    saveLedger(ledger);
+    if (node) node.remove();
+    updateCount();
+    toggleEmpty();
+    if (entry) announce(entry.name + " struck from the ledger.");
+  }
+
+  /* --------------------------------------------------------
+     Clear the note — a two-step confirm inline in the footer.
+     -------------------------------------------------------- */
+  function showClearConfirm(show) {
+    confirmingClear = show;
+    els.clearBtn.hidden = show;
+    els.confirm.hidden = !show;
+    if (show) els.confirmYes.focus();
+    else els.clearBtn.focus();
+  }
+
+  function clearLedger() {
+    ledger = [];
+    saveLedger(ledger);
+    renderAll();
+    showClearConfirm(false);
+    announce("The note is blank. Every name has been erased.");
+  }
+
+  /* --------------------------------------------------------
+     aria-live announcer
+     -------------------------------------------------------- */
+  function announce(msg) {
+    if (!els.live) return;
+    els.live.textContent = "";      // force re-announce of identical text
+    raf(() => (els.live.textContent = msg));
+  }
+
+  /* --------------------------------------------------------
+     Staged reveal on first activation
+     -------------------------------------------------------- */
+  let revealed = false;
+  function reveal() {
+    if (revealed || !els.section) return;
+    revealed = true;
+    raf(() => els.section.classList.add("is-revealed"));
+  }
+
+  /* --------------------------------------------------------
+     Wire up + boot
+     -------------------------------------------------------- */
+  function init() {
+    const section = $('[data-section="note"]');
+    if (!section) return;
+
+    Object.assign(els, {
+      section,
+      form: $("[data-note-form]", section),
+      name: $("[data-field-name]", section),
+      cause: $("[data-field-cause]", section),
+      details: $("[data-field-details]", section),
+      face: $("[data-field-face]", section),
+      submit: $("[data-inscribe]", section),
+      ceremony: $("[data-ceremony]", section),
+      ceremonyName: $("[data-ceremony-name]", section),
+      ringProg: $("[data-ring-prog]", section),
+      ringCount: $("[data-ring-count]", section),
+      status: $("[data-ceremony-status]", section),
+      list: $("[data-ledger-list]", section),
+      empty: $("[data-ledger-empty]", section),
+      foot: $("[data-ledger-foot]", section),
+      count: $("[data-ledger-count]", section),
+      clearBtn: $("[data-ledger-clear]", section),
+      confirm: $("[data-ledger-confirm]", section),
+      confirmYes: $("[data-confirm-yes]", section),
+      confirmNo: $("[data-confirm-no]", section),
+      live: $("[data-note-live]", section),
+    });
+
+    if (!els.form) return; // markup missing — bail quietly
+
+    // Prime the countdown ring geometry from its rendered radius.
+    const r = Number(els.ringProg.getAttribute("r")) || 52;
+    RING_CIRC = 2 * Math.PI * r;
+    els.ringProg.style.strokeDasharray = String(RING_CIRC);
+    els.ringProg.style.strokeDashoffset = "0";
+
+    // Validation triggers
+    els.name.addEventListener("input", refreshSubmit);
+    els.face.addEventListener("change", refreshSubmit);
+
+    // Submit the form -> run the ceremony
+    els.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      inscribe();
+    });
+
+    // Clear-the-note flow
+    els.clearBtn.addEventListener("click", () => showClearConfirm(true));
+    els.confirmYes.addEventListener("click", clearLedger);
+    els.confirmNo.addEventListener("click", () => showClearConfirm(false));
+    section.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && confirmingClear) showClearConfirm(false);
+    });
+
+    // Load + paint any persisted ledger
+    ledger = loadLedger();
+    renderAll();
+    refreshSubmit();
+
+    // Reveal now if the note is the active section on load…
+    if (DN.section === "note") reveal();
+    // …and whenever the router switches to it.
+    DN.onSection((id) => {
+      if (id === "note") reveal();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+  <script>
+// js/rules.js
+/* ============================================================
+   rules.js — THE RULES (section 03) behaviour
+   Death Note :: 死神の手帳
+
+   Intentionally tiny. The rules page is static; the only
+   behaviour is a staged, cinematic reveal the first time the
+   section becomes active:
+     - marks the section .is-js (enables the hidden pre-reveal
+       state defined in rules.css — so no-JS visitors just see
+       the content)
+     - assigns a staggered --d delay to each [data-reveal]
+     - toggles .is-revealed to play the entrance
+   Respects prefers-reduced-motion (no per-element delays).
+
+   Relies on the global `DN` from app.js. Adds no new globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const DN = window.DN;
+  if (!DN) return; // app.js must load first
+
+  const { $, $$, reducedMotion } = DN.util;
+
+  const raf = (fn) => window.requestAnimationFrame(fn);
+
+  /* Per-step stagger between revealed elements (ms). */
+  const STEP = 70;
+  /* Cap so a long list never feels sluggish at the tail. */
+  const MAX_DELAY = 900;
+
+  let section = null;
+  let revealed = false;
+
+  /* --------------------------------------------------------
+     Play the staged reveal exactly once.
+     -------------------------------------------------------- */
+  function reveal() {
+    if (revealed || !section) return;
+    revealed = true;
+
+    // Assign staggered entrance delays (skipped when motion is reduced;
+    // the reduced-motion CSS shows everything at once regardless).
+    if (!reducedMotion()) {
+      $$("[data-reveal]", section).forEach((el, i) => {
+        el.style.setProperty("--d", Math.min(i * STEP, MAX_DELAY) + "ms");
+      });
+    }
+
+    raf(() => section.classList.add("is-revealed"));
+  }
+
+  /* --------------------------------------------------------
+     Boot
+     -------------------------------------------------------- */
+  function init() {
+    section = $('[data-rules]');
+    if (!section) return; // markup missing — bail quietly
+
+    // Enable the hidden pre-reveal state now that JS is confirmed running.
+    section.classList.add("is-js");
+
+    // Reveal immediately if RULES is the active section on load…
+    if (DN.section === "rules") reveal();
+    // …otherwise on the first switch to it.
+    DN.onSection((id) => {
+      if (id === "rules") reveal();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+  <script>
+// js/cipher.js
+/* ============================================================
+   cipher.js — CIPHER (section 04) behaviour
+   Death Note :: 暗号 / 復号
+
+   A cryptographer's desk: a workbench of genuinely reversible
+   ciphers, themed on the series' hidden-message subplot.
+
+   Methods (all correct, round-trip verified):
+     - Caesar / ROT shift (N 0–25, ROT13 preset)
+     - Atbash (A↔Z mirror, self-inverse)
+     - Base64 (UTF-8 safe via TextEncoder/TextDecoder)
+     - Shinigami keyword substitution (Vigenère over A–Z)
+     - Hidden acrostic (every-Nth-letter reveal / hide)
+
+   - Live, debounced re-compute on input + param change
+   - Copy (clipboard + graceful fallback), Swap, sample preset
+   - Last method + params persisted to localStorage
+   - aria-live status, reduced-motion aware, XSS-safe
+     (all user text rendered via value/textContent — never innerHTML)
+
+   Relies on the global `DN` from app.js. Adds no new globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const DN = window.DN;
+  if (!DN) return; // app.js must load first
+
+  const { $, reducedMotion } = DN.util;
+
+  /* ========================================================
+     PURE CIPHER CORE
+     Every function is total (never throws for the alphabetic
+     ciphers), preserves case, and passes non-letters through
+     unchanged. Iterating with for…of keeps astral characters
+     (e.g. emoji) intact; their surrogate code units never fall
+     in the A–Z ranges, so they pass straight through.
+     ======================================================== */
+
+  /* Caesar: shift letters by `shift` (any integer, normalised). */
+  function caesar(text, shift) {
+    const s = (((shift % 26) + 26) % 26);
+    let out = "";
+    for (const ch of text) {
+      const c = ch.charCodeAt(0);
+      if (c >= 65 && c <= 90) {
+        out += String.fromCharCode(((c - 65 + s) % 26) + 65);
+      } else if (c >= 97 && c <= 122) {
+        out += String.fromCharCode(((c - 97 + s) % 26) + 97);
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  }
+
+  /* Atbash: A↔Z / a↔z mirror. Its own inverse. */
+  function atbash(text) {
+    let out = "";
+    for (const ch of text) {
+      const c = ch.charCodeAt(0);
+      if (c >= 65 && c <= 90) out += String.fromCharCode(90 - (c - 65));
+      else if (c >= 97 && c <= 122) out += String.fromCharCode(122 - (c - 97));
+      else out += ch;
+    }
+    return out;
+  }
+
+  /* Vigenère over A–Z, driven by a keyword. `decode` reverses it.
+     The key index advances only on letters, so non-letters pass
+     through identically in both directions (exact round-trip). */
+  function vigenere(text, keyword, decode) {
+    const key = String(keyword).toUpperCase().replace(/[^A-Z]/g, "");
+    if (!key) return text; // no usable key — nothing to do
+    let out = "";
+    let ki = 0;
+    for (const ch of text) {
+      const c = ch.charCodeAt(0);
+      let base = -1;
+      if (c >= 65 && c <= 90) base = 65;
+      else if (c >= 97 && c <= 122) base = 97;
+      if (base < 0) { out += ch; continue; }
+      const k = key.charCodeAt(ki % key.length) - 65;
+      const shift = decode ? -k : k;
+      out += String.fromCharCode((((c - base + shift) % 26) + 26) % 26 + base);
+      ki++;
+    }
+    return out;
+  }
+
+  /* Base64 — UTF-8 safe. btoa/atob only speak Latin-1, so we
+     round-trip through TextEncoder/TextDecoder to survive any
+     Unicode (Japanese, emoji, …). Both may throw on bad input;
+     callers wrap them and surface an error state. */
+  function utf8ToBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = "";
+    // Chunk to avoid call-stack limits on very large inputs.
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+    }
+    return btoa(bin);
+  }
+
+  function base64ToUtf8(b64) {
+    // Tolerate whitespace/newlines that commonly wrap base64 blobs.
+    const clean = String(b64).replace(/\s+/g, "");
+    const bin = atob(clean); // throws on invalid base64 alphabet/length
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    // fatal:true rejects malformed UTF-8 rather than emitting U+FFFD.
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  }
+
+  /* Hidden acrostic — a nod to the message spread across pages.
+     hide(secret, n): every Nth character carries a secret letter,
+     the rest are filler dots. reveal(cover, n): pull every Nth
+     character back out. reveal(hide(x, n), n) === x. */
+  const ACROSTIC_FILLER = "·";
+
+  function acrosticHide(secret, n) {
+    const step = Math.max(1, Math.floor(n) || 1);
+    let out = "";
+    for (const ch of secret) {
+      out += ACROSTIC_FILLER.repeat(step - 1) + ch;
+    }
+    return out;
+  }
+
+  function acrosticReveal(cover, n) {
+    const step = Math.max(1, Math.floor(n) || 1);
+    const chars = Array.from(cover);
+    let out = "";
+    for (let i = step - 1; i < chars.length; i += step) out += chars[i];
+    return out;
+  }
+
+  /* --------------------------------------------------------
+     Method registry. Each `run(text, params, decode)` returns
+     the transformed string OR throws with a human message
+     (only Base64 realistically throws).
+     -------------------------------------------------------- */
+  const METHODS = {
+    caesar: {
+      run(text, p, decode) {
+        return caesar(text, decode ? -p.shift : p.shift);
+      },
+    },
+    atbash: {
+      run(text) { return atbash(text); }, // symmetric — decode ignored
+    },
+    base64: {
+      run(text, p, decode) {
+        if (decode) {
+          try {
+            return base64ToUtf8(text);
+          } catch (err) {
+            const e = new Error("Not valid Base64 — check the input.");
+            e.isCipherError = true;
+            throw e;
+          }
+        }
+        return utf8ToBase64(text);
+      },
+    },
+    vigenere: {
+      run(text, p, decode) { return vigenere(text, p.keyword, decode); },
+    },
+    acrostic: {
+      run(text, p, decode) {
+        return decode ? acrosticReveal(text, p.n) : acrosticHide(text, p.n);
+      },
+    },
+  };
+
+  /* ========================================================
+     UI LAYER
+     ======================================================== */
+
+  const STORE_KEY = "dn.cipher.v1";
+  const SAMPLE = "L, do you know Shinigami love apples?";
+  const DEFAULTS = { method: "caesar", mode: "encode", shift: 3, keyword: "SHINIGAMI", n: 5 };
+
+  const els = {};
+  let params = Object.assign({}, DEFAULTS);
+  let mode = DEFAULTS.mode; // "encode" | "decode"
+  let method = DEFAULTS.method;
+  let debounceId = 0;
+
+  /* ---- persistence (params only; never the text) ---- */
+  function loadPrefs() {
+    let raw;
+    try { raw = window.localStorage.getItem(STORE_KEY); }
+    catch (err) { return; } // storage disabled
+    if (!raw) return;
+    try {
+      const d = JSON.parse(raw);
+      if (!d || typeof d !== "object") return;
+      if (METHODS[d.method]) method = d.method;
+      if (d.mode === "encode" || d.mode === "decode") mode = d.mode;
+      if (Number.isFinite(d.shift)) params.shift = clampInt(d.shift, 0, 25);
+      if (typeof d.keyword === "string" && d.keyword) params.keyword = d.keyword.slice(0, 40);
+      if (Number.isFinite(d.n)) params.n = clampInt(d.n, 1, 99);
+    } catch (err) {
+      /* corrupt JSON — fall back to defaults silently */
+    }
+  }
+
+  function savePrefs() {
+    const data = {
+      method,
+      mode,
+      shift: params.shift,
+      keyword: params.keyword,
+      n: params.n,
+    };
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+    catch (err) { /* storage unavailable — session still works */ }
+  }
+
+  function clampInt(v, min, max) {
+    v = Math.round(Number(v) || 0);
+    return Math.min(max, Math.max(min, v));
+  }
+
+  /* ---- aria-live status announcer ---- */
+  function announce(msg, kind) {
+    if (!els.status) return;
+    els.status.dataset.kind = kind || "info";
+    els.status.textContent = ""; // force re-announce of identical text
+    window.requestAnimationFrame(() => { els.status.textContent = msg; });
+  }
+
+  /* ---- reflect active method across tabs + control panels ---- */
+  function syncMethodUI() {
+    els.tabs.forEach((tab) => {
+      const active = tab.dataset.method === method;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+      tab.tabIndex = active ? 0 : -1;
+    });
+    // Toggle control groups for the active method.
+    els.controlGroups.forEach((g) => {
+      g.hidden = g.dataset.for !== method;
+    });
+    // Method blurb.
+    const meta = METHOD_META[method];
+    if (els.blurb) els.blurb.textContent = meta ? meta.blurb : "";
+  }
+
+  /* ---- reflect the encode/decode mode ---- */
+  function syncModeUI() {
+    els.encodeBtn.classList.toggle("is-active", mode === "encode");
+    els.encodeBtn.setAttribute("aria-pressed", mode === "encode" ? "true" : "false");
+    els.decodeBtn.classList.toggle("is-active", mode === "decode");
+    els.decodeBtn.setAttribute("aria-pressed", mode === "decode" ? "true" : "false");
+  }
+
+  /* ---- recompute the output from current input + params ---- */
+  function compute() {
+    const input = els.input.value;
+    updateCount(els.input, els.inCount);
+
+    if (input.length === 0) {
+      els.output.value = "";
+      updateCount(els.output, els.outCount);
+      setError(false);
+      announce("Awaiting input.", "info");
+      return;
+    }
+
+    const m = METHODS[method];
+    let result;
+    try {
+      result = m.run(input, params, mode === "decode");
+      setError(false);
+    } catch (err) {
+      // Only expected failure is invalid Base64 on decode.
+      els.output.value = "";
+      updateCount(els.output, els.outCount);
+      setError(true);
+      announce(err && err.message ? err.message : "Unable to process input.", "error");
+      return;
+    }
+
+    els.output.value = result; // value assignment — never innerHTML
+    updateCount(els.output, els.outCount);
+
+    const meta = METHOD_META[method];
+    announce(
+      (mode === "encode" ? "Encoded" : "Decoded") +
+      " with " + (meta ? meta.label : method) + ".",
+      "info"
+    );
+  }
+
+  function setError(on) {
+    els.output.classList.toggle("is-error", !!on);
+    if (els.outPanel) els.outPanel.classList.toggle("is-error", !!on);
+  }
+
+  function updateCount(field, node) {
+    if (!node) return;
+    // Count Unicode code points, not UTF-16 units.
+    const n = Array.from(field.value).length;
+    node.textContent = n + (n === 1 ? " char" : " chars");
+  }
+
+  /* Debounced recompute for high-frequency events (typing, slider). */
+  function scheduleCompute() {
+    window.clearTimeout(debounceId);
+    debounceId = window.setTimeout(compute, 120);
+  }
+
+  /* ---- actions ---- */
+  function setMode(next) {
+    mode = next;
+    syncModeUI();
+    savePrefs();
+    compute();
+  }
+
+  function setMethod(next) {
+    if (!METHODS[next]) return;
+    method = next;
+    syncMethodUI();
+    savePrefs();
+    compute();
+  }
+
+  function loadSample() {
+    els.input.value = SAMPLE;
+    els.input.focus();
+    compute();
+    announce("Sample line loaded.", "info");
+  }
+
+  function swap() {
+    const out = els.output.value;
+    if (!out) { announce("Nothing to swap.", "info"); return; }
+    els.input.value = out;
+    compute();
+    announce("Output moved to input.", "info");
+  }
+
+  function clearAll() {
+    els.input.value = "";
+    els.output.value = "";
+    updateCount(els.input, els.inCount);
+    updateCount(els.output, els.outCount);
+    setError(false);
+    els.input.focus();
+    announce("Cleared.", "info");
+  }
+
+  /* Copy with clipboard API + a legacy execCommand fallback. */
+  function copyOutput() {
+    const text = els.output.value;
+    if (!text) { announce("Nothing to copy.", "info"); return; }
+
+    const done = () => flashCopy();
+    const fail = () => announce("Copy failed — select the text manually.", "error");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, () => {
+        if (!legacyCopy(text)) fail(); else done();
+      });
+    } else {
+      if (legacyCopy(text)) done(); else fail();
+    }
+  }
+
+  function legacyCopy(text) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function flashCopy() {
+    announce("Copied to clipboard.", "info");
+    if (!els.copyBtn) return;
+    els.copyBtn.classList.add("is-copied");
+    const label = els.copyBtn.querySelector("[data-copy-label]");
+    if (label) label.textContent = "COPIED";
+    if (reducedMotion()) {
+      window.setTimeout(resetCopy, 1200);
+    } else {
+      window.setTimeout(resetCopy, 1400);
+    }
+  }
+
+  function resetCopy() {
+    if (!els.copyBtn) return;
+    els.copyBtn.classList.remove("is-copied");
+    const label = els.copyBtn.querySelector("[data-copy-label]");
+    if (label) label.textContent = "COPY";
+  }
+
+  /* ---- control wiring for method params ---- */
+  function bindControls() {
+    // Caesar: slider <-> number stay in sync; ROT13 preset.
+    if (els.shiftRange && els.shiftNum) {
+      const applyShift = (val) => {
+        params.shift = clampInt(val, 0, 25);
+        els.shiftRange.value = String(params.shift);
+        els.shiftNum.value = String(params.shift);
+        savePrefs();
+        scheduleCompute();
+      };
+      els.shiftRange.addEventListener("input", (e) => applyShift(e.target.value));
+      els.shiftNum.addEventListener("input", (e) => applyShift(e.target.value));
+      if (els.rot13Btn) {
+        els.rot13Btn.addEventListener("click", () => {
+          applyShift(13);
+          announce("Shift set to 13 (ROT13).", "info");
+        });
+      }
+    }
+
+    // Vigenère keyword.
+    if (els.keyword) {
+      els.keyword.addEventListener("input", (e) => {
+        params.keyword = e.target.value.slice(0, 40);
+        savePrefs();
+        scheduleCompute();
+      });
+    }
+
+    // Acrostic step N.
+    if (els.acrosticN) {
+      els.acrosticN.addEventListener("input", (e) => {
+        params.n = clampInt(e.target.value, 1, 99);
+        els.acrosticN.value = String(params.n);
+        savePrefs();
+        scheduleCompute();
+      });
+    }
+  }
+
+  /* ---- push persisted params into the control inputs ---- */
+  function primeControls() {
+    if (els.shiftRange) els.shiftRange.value = String(params.shift);
+    if (els.shiftNum) els.shiftNum.value = String(params.shift);
+    if (els.keyword) els.keyword.value = params.keyword;
+    if (els.acrosticN) els.acrosticN.value = String(params.n);
+  }
+
+  /* ---- keyboard support for the method tablist ---- */
+  function tablistKeydown(e) {
+    const idx = els.tabs.findIndex((t) => t.dataset.method === method);
+    if (idx < 0) return;
+    let next = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (idx + 1) % els.tabs.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (idx - 1 + els.tabs.length) % els.tabs.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = els.tabs.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    setMethod(els.tabs[next].dataset.method);
+    els.tabs[next].focus();
+  }
+
+  /* Method labels/blurbs live here so JS owns the copy shown in
+     status + the active-method description. */
+  const METHOD_META = {
+    caesar:   { label: "Caesar shift", blurb: "Rotate every letter forward by N places. ROT13 is its own inverse." },
+    atbash:   { label: "Atbash",       blurb: "Mirror the alphabet: A↔Z, B↔Y. Encoding and decoding are the same." },
+    base64:   { label: "Base64",       blurb: "Byte-for-byte encoding, UTF-8 safe — Japanese and emoji survive intact." },
+    vigenere: { label: "Shinigami key", blurb: "A keyword shifts each letter in turn — a polyalphabetic (Vigenère) cipher." },
+    acrostic: { label: "Hidden acrostic", blurb: "Hide a message as every Nth character — the trick spread across pages." },
+  };
+
+  /* --------------------------------------------------------
+     Staged reveal on first activation (mirrors note/intro)
+     -------------------------------------------------------- */
+  let revealed = false;
+  function reveal() {
+    if (revealed || !els.section) return;
+    revealed = true;
+    // The reveal state lives on the .dn-cipher element (see cipher.css:
+    // `.dn-cipher.is-revealed [data-reveal]`). In index.html that element is
+    // the inner div, not the <section> wrapper — so target it explicitly.
+    const target = els.section.querySelector(".dn-cipher") || els.section;
+    window.requestAnimationFrame(() => target.classList.add("is-revealed"));
+  }
+
+  /* --------------------------------------------------------
+     Boot
+     -------------------------------------------------------- */
+  function init() {
+    const section = $('[data-section="cipher"]');
+    if (!section) return;
+
+    Object.assign(els, {
+      section,
+      input: $("[data-cipher-input]", section),
+      output: $("[data-cipher-output]", section),
+      inCount: $("[data-cipher-incount]", section),
+      outCount: $("[data-cipher-outcount]", section),
+      outPanel: $("[data-cipher-outpanel]", section),
+      status: $("[data-cipher-status]", section),
+      blurb: $("[data-cipher-blurb]", section),
+      encodeBtn: $("[data-cipher-encode]", section),
+      decodeBtn: $("[data-cipher-decode]", section),
+      copyBtn: $("[data-cipher-copy]", section),
+      swapBtn: $("[data-cipher-swap]", section),
+      sampleBtn: $("[data-cipher-sample]", section),
+      clearBtn: $("[data-cipher-clear]", section),
+      shiftRange: $("[data-cipher-shift-range]", section),
+      shiftNum: $("[data-cipher-shift-num]", section),
+      rot13Btn: $("[data-cipher-rot13]", section),
+      keyword: $("[data-cipher-keyword]", section),
+      acrosticN: $("[data-cipher-n]", section),
+    });
+
+    if (!els.input || !els.output) return; // markup missing — bail quietly
+
+    els.tabs = Array.from(section.querySelectorAll("[data-method]"));
+    els.controlGroups = Array.from(section.querySelectorAll("[data-for]"));
+
+    // Restore persisted method + params, then paint the controls.
+    loadPrefs();
+    primeControls();
+
+    // Tabs
+    els.tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setMethod(tab.dataset.method));
+    });
+    const tablist = section.querySelector("[data-cipher-tablist]");
+    if (tablist) tablist.addEventListener("keydown", tablistKeydown);
+
+    // Mode buttons
+    els.encodeBtn.addEventListener("click", () => setMode("encode"));
+    els.decodeBtn.addEventListener("click", () => setMode("decode"));
+
+    // Utility actions
+    if (els.copyBtn) els.copyBtn.addEventListener("click", copyOutput);
+    if (els.swapBtn) els.swapBtn.addEventListener("click", swap);
+    if (els.sampleBtn) els.sampleBtn.addEventListener("click", loadSample);
+    if (els.clearBtn) els.clearBtn.addEventListener("click", clearAll);
+
+    // Live recompute while typing.
+    els.input.addEventListener("input", () => {
+      updateCount(els.input, els.inCount);
+      scheduleCompute();
+    });
+
+    bindControls();
+
+    // Initial paint.
+    syncMethodUI();
+    syncModeUI();
+    updateCount(els.input, els.inCount);
+    updateCount(els.output, els.outCount);
+    compute();
+
+    // Reveal now if cipher is the active section on load…
+    if (DN.section === "cipher") reveal();
+    // …and whenever the router switches to it.
+    DN.onSection((id) => { if (id === "cipher") reveal(); });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+  <script>
+// js/about.js
+/* ============================================================
+   about.js — ABOUT / 奥付 (section 05) behaviour
+   Death Note :: 死神の手帳
+
+   Intentionally tiny. The colophon is static; the only
+   behaviour is a staged, cinematic reveal the first time the
+   section becomes active:
+     - marks the section .is-js (enables the hidden pre-reveal
+       state defined in about.css — so no-JS visitors just see
+       the content)
+     - assigns a staggered --d delay to each [data-reveal]
+     - toggles .is-revealed to play the entrance
+   Respects prefers-reduced-motion (no per-element delays).
+
+   IMPORTANT: the reveal state lives on the .dn-about element
+   (about.css: `.dn-about.is-revealed [data-reveal]`), which is
+   the inner <div data-about> — NOT the <section> wrapper. We
+   query it directly so the classes land on the right element.
+
+   Relies on the global `DN` from app.js. Adds no new globals.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const DN = window.DN;
+  if (!DN) return; // app.js must load first
+
+  const { $, $$, reducedMotion } = DN.util;
+
+  const raf = (fn) => window.requestAnimationFrame(fn);
+
+  /* Per-step stagger between revealed elements (ms). */
+  const STEP = 80;
+  /* Cap so the tail never feels sluggish. */
+  const MAX_DELAY = 700;
+
+  let section = null;      // the .dn-about inner div (bears the reveal state)
+  let revealed = false;
+
+  /* --------------------------------------------------------
+     Play the staged reveal exactly once.
+     -------------------------------------------------------- */
+  function reveal() {
+    if (revealed || !section) return;
+    revealed = true;
+
+    // Assign staggered entrance delays (skipped when motion is reduced;
+    // the reduced-motion CSS shows everything at once regardless).
+    if (!reducedMotion()) {
+      $$("[data-reveal]", section).forEach((el, i) => {
+        el.style.setProperty("--d", Math.min(i * STEP, MAX_DELAY) + "ms");
+      });
+    }
+
+    raf(() => section.classList.add("is-revealed"));
+  }
+
+  /* --------------------------------------------------------
+     Boot
+     -------------------------------------------------------- */
+  function init() {
+    // [data-about] IS the .dn-about inner div — the element the CSS
+    // reveal selector expects the class on.
+    section = $("[data-about]");
+    if (!section) return; // markup missing — bail quietly
+
+    // Enable the hidden pre-reveal state now that JS is confirmed running.
+    section.classList.add("is-js");
+
+    // Reveal immediately if ABOUT is the active section on load…
+    if (DN.section === "about") reveal();
+    // …otherwise on the first switch to it.
+    DN.onSection((id) => {
+      if (id === "about") reveal();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+  </script>
+</body>
+</html>
