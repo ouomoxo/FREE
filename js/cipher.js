@@ -491,7 +491,11 @@
   function reveal() {
     if (revealed || !els.section) return;
     revealed = true;
-    window.requestAnimationFrame(() => els.section.classList.add("is-revealed"));
+    // The reveal state lives on the .dn-cipher element (see cipher.css:
+    // `.dn-cipher.is-revealed [data-reveal]`). In index.html that element is
+    // the inner div, not the <section> wrapper — so target it explicitly.
+    const target = els.section.querySelector(".dn-cipher") || els.section;
+    window.requestAnimationFrame(() => target.classList.add("is-revealed"));
   }
 
   /* --------------------------------------------------------

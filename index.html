@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/intro.css" />
   <link rel="stylesheet" href="css/note.css" />
+  <link rel="stylesheet" href="css/rules.css" />
+  <link rel="stylesheet" href="css/cipher.css" />
 
   <!-- Inline favicon (a crimson dot) so we make zero external requests -->
   <link rel="icon"
@@ -319,37 +321,318 @@
 
         <!-- ========== 03 · RULES (placeholder) ========== -->
         <section class="dn-section" data-section="rules" aria-label="Rules" aria-hidden="true">
-          <div class="dn-section__inner dn-placeholder">
-            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1" aria-hidden="true">
-              <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>
-            </svg>
-            <span class="dn-placeholder__index">03 · 規則</span>
-            <h2 class="dn-placeholder__title">The Rules</h2>
-            <p class="dn-placeholder__jp">使い方</p>
-            <p class="dn-placeholder__desc">
-              How to use it. The immutable laws that bind the notebook,
-              its owner, and the god of death who follows.
-            </p>
-            <span class="dn-placeholder__badge">Coming Soon</span>
+          <div class="dn-section__inner dn-rules" data-rules>
+
+            <!-- ===== Section header (consistent with other sections) ===== -->
+            <header class="dn-rules__head">
+              <p class="dn-rules__index" data-reveal>03 &middot; 規則</p>
+              <h2 class="dn-rules__title" data-reveal>How to Use It</h2>
+              <p class="dn-rules__jp dn-jp" data-reveal>使い方</p>
+              <p class="dn-rules__lead" data-reveal>
+                The laws printed on the first leaves of the notebook &mdash;
+                immutable, indifferent, and binding upon whoever should pick it up.
+              </p>
+            </header>
+
+            <!-- ===== The codex: rules printed on an aged page ===== -->
+            <div class="dn-codex" data-reveal>
+              <!-- Faux page header stamped along the top edge -->
+              <div class="dn-codex__head" aria-hidden="true">
+                <span class="dn-codex__stamp">
+                  <span class="dn-codex__stamp-en">DEATH&nbsp;NOTE</span>
+                  <span class="dn-codex__stamp-jp">使用規則</span>
+                </span>
+                <span class="dn-codex__meta">HOW&nbsp;TO&nbsp;USE &middot; XIV&nbsp;RULES</span>
+              </div>
+
+              <!-- Semantic ordered list — Roman numerals rendered via CSS counter.
+                   The first, most iconic rule is featured (full width + drop-cap). -->
+              <ol class="dn-rules__list" data-rules-list>
+
+                <li class="dn-rules__item dn-rules__item--featured" data-reveal>
+                  <p class="dn-rules__text">The human whose name is written in this
+                    note shall die.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">This note will not take effect unless the
+                    writer has the subject&rsquo;s face in their mind when writing the
+                    name. Those who merely share the same name are left unharmed.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">If the cause of death is written within
+                    <b>40 seconds</b> of writing the person&rsquo;s name, it will
+                    happen.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">If the cause of death is not specified, the
+                    person will simply die of a heart attack.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">After writing the cause of death, the
+                    details must be entered within the following <b>6 minutes and 40
+                    seconds</b>.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A death takes effect only within human
+                    possibility. Suicide is a valid cause &mdash; every human is thought
+                    to hold the capacity for it.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">Should a written death be impossible, or
+                    would it claim lives beyond the one intended, the subject dies of a
+                    heart attack instead.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">You cannot kill a human over <b>124 years</b>
+                    of age, nor one with fewer than <b>12 minutes</b> of life left to
+                    live.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A death once written cannot be undone.
+                    Crossing out a name or burning the page will not return the dead.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">The owner may trade <b>half of their
+                    remaining lifespan</b> for the eyes of a Shinigami &mdash; sight that
+                    reveals every human&rsquo;s name and lifespan above their head.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A Shinigami bound to a human may never tell
+                    that human the lifespan its eyes can see, whatever the reason.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">The owner recalls the deaths only while the
+                    note is theirs. Relinquish it, and every memory of the note is
+                    lost.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">A human who has used the note may go neither
+                    to Heaven nor to Hell. Beyond death waits only nothingness &mdash;
+                    <span class="dn-jp dn-accent">無</span>.</p>
+                </li>
+
+                <li class="dn-rules__item" data-reveal>
+                  <p class="dn-rules__text">Whoever ceases to own the note must write a
+                    name within <b>13 days</b>, or they will die.
+                    <span class="dn-rules__gloss">&mdash; a rule of dubious authorship,
+                    forged to shield the guilty.</span></p>
+                </li>
+
+              </ol>
+
+              <!-- Folded page corner (decorative) -->
+              <span class="dn-codex__corner" aria-hidden="true"></span>
+            </div>
+
+            <!-- ===== Footer: XIII seal + disclaimer ===== -->
+            <footer class="dn-rules__foot" data-reveal>
+              <span class="dn-rules__seal" aria-hidden="true">
+                <span class="dn-rules__seal-roman">XIII</span>
+                <span class="dn-rules__seal-num">13</span>
+              </span>
+              <p class="dn-rules__disclaimer">
+                These are the rules of a notebook that does not exist &mdash; drawn
+                faithfully from the fiction <i>Death&nbsp;Note</i>. No name written
+                here will ever come true.
+              </p>
+            </footer>
+
           </div>
         </section>
 
         <!-- ========== 04 · CIPHER (placeholder) ========== -->
         <section class="dn-section" data-section="cipher" aria-label="Cipher" aria-hidden="true">
-          <div class="dn-section__inner dn-placeholder">
-            <svg class="dn-placeholder__ornament" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1" aria-hidden="true">
-              <rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
-            </svg>
-            <span class="dn-placeholder__index">04 · 暗号</span>
-            <h2 class="dn-placeholder__title">Cipher</h2>
-            <p class="dn-placeholder__jp">暗号化</p>
-            <p class="dn-placeholder__desc">
-              Encode and decode hidden messages. A detective&rsquo;s tool,
-              or a criminal&rsquo;s — depending on whose hand holds it.
+          <div class="dn-section__inner dn-cipher">
+
+            <!-- Section header -->
+            <header class="dn-cipher__head" data-reveal style="--d:80ms">
+              <span class="dn-cipher__index">04 · 暗号</span>
+              <h2 class="dn-cipher__title">Cipher</h2>
+              <p class="dn-cipher__lead">
+                A message can be hidden in plain sight — spread across pages, mirrored,
+                shifted, keyed. Encode a line, or decode one left for you. Every method
+                here is exact and reversible.
+              </p>
+            </header>
+
+            <!-- The cryptographer's desk -->
+            <div class="dn-desk" data-reveal style="--d:220ms">
+
+              <!-- Method tablist -->
+              <div class="dn-methods" role="tablist" aria-label="Cipher method"
+                   data-cipher-tablist>
+                <button class="dn-method is-active" type="button" role="tab"
+                        data-method="caesar" aria-selected="true">
+                  <span class="dn-method__en">Caesar shift</span>
+                  <span class="dn-method__jp">シフト</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="atbash" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Atbash</span>
+                  <span class="dn-method__jp">反転</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="base64" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Base64</span>
+                  <span class="dn-method__jp">符号</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="vigenere" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Shinigami key</span>
+                  <span class="dn-method__jp">鍵</span>
+                </button>
+                <button class="dn-method" type="button" role="tab"
+                        data-method="acrostic" aria-selected="false" tabindex="-1">
+                  <span class="dn-method__en">Hidden acrostic</span>
+                  <span class="dn-method__jp">折句</span>
+                </button>
+              </div>
+
+              <!-- Blurb for the active method (populated by JS) -->
+              <p class="dn-cipher__blurb" data-cipher-blurb aria-live="off"></p>
+
+              <!-- Method-specific controls -->
+              <div class="dn-controls">
+                <!-- Caesar -->
+                <div class="dn-ctl" data-for="caesar">
+                  <label class="dn-ctl__label" for="dn-cipher-shift">Shift (N)</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-range" id="dn-cipher-shift" type="range"
+                           min="0" max="25" step="1" value="3"
+                           data-cipher-shift-range
+                           aria-label="Caesar shift amount" />
+                    <input class="dn-num" type="number" min="0" max="25" step="1"
+                           value="3" data-cipher-shift-num
+                           aria-label="Caesar shift amount (number)" />
+                    <button class="dn-chip" type="button" data-cipher-rot13>ROT13</button>
+                  </div>
+                </div>
+
+                <!-- Vigenère -->
+                <div class="dn-ctl" data-for="vigenere" hidden>
+                  <label class="dn-ctl__label" for="dn-cipher-keyword">Keyword</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-text" id="dn-cipher-keyword" type="text"
+                           value="SHINIGAMI" maxlength="40" autocomplete="off"
+                           spellcheck="false" placeholder="e.g. KIRA"
+                           data-cipher-keyword aria-label="Vigenere keyword" />
+                    <span class="dn-ctl__hint">A–Z only; other letters are ignored</span>
+                  </div>
+                </div>
+
+                <!-- Acrostic -->
+                <div class="dn-ctl" data-for="acrostic" hidden>
+                  <label class="dn-ctl__label" for="dn-cipher-n">Every Nth</label>
+                  <div class="dn-ctl__row">
+                    <input class="dn-num" id="dn-cipher-n" type="number"
+                           min="1" max="99" step="1" value="5"
+                           data-cipher-n aria-label="Reveal every Nth character" />
+                    <span class="dn-ctl__hint">
+                      Encode hides your text; Decode reveals every Nth character
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Atbash (no params) -->
+                <div class="dn-ctl" data-for="atbash" hidden>
+                  <span class="dn-ctl__label">No settings</span>
+                  <span class="dn-ctl__hint">Atbash is symmetric — encode equals decode.</span>
+                </div>
+
+                <!-- Base64 (no params) -->
+                <div class="dn-ctl" data-for="base64" hidden>
+                  <span class="dn-ctl__label">No settings</span>
+                  <span class="dn-ctl__hint">UTF-8 safe; invalid Base64 on decode is flagged.</span>
+                </div>
+              </div>
+
+              <!-- INPUT / OUTPUT wells -->
+              <div class="dn-wells">
+                <div class="dn-well dn-well--in">
+                  <div class="dn-well__head">
+                    <span class="dn-well__label">
+                      Input <span class="dn-well__jp">入力</span>
+                    </span>
+                    <span class="dn-well__count" data-cipher-incount aria-hidden="true">0 chars</span>
+                  </div>
+                  <label class="sr-only" for="dn-cipher-input">Cipher input text</label>
+                  <textarea class="dn-cipher__field" id="dn-cipher-input"
+                            data-cipher-input autocomplete="off" spellcheck="false"
+                            placeholder="Type or paste a message&hellip;"></textarea>
+                </div>
+
+                <div class="dn-well dn-well--out" data-cipher-outpanel>
+                  <div class="dn-well__head">
+                    <span class="dn-well__label">
+                      Output <span class="dn-well__jp">出力</span>
+                    </span>
+                    <span class="dn-well__count" data-cipher-outcount aria-hidden="true">0 chars</span>
+                  </div>
+                  <label class="sr-only" for="dn-cipher-output">Cipher output text (read only)</label>
+                  <textarea class="dn-cipher__field" id="dn-cipher-output"
+                            data-cipher-output readonly
+                            placeholder="The result appears here&hellip;"></textarea>
+                </div>
+              </div>
+
+              <!-- aria-live status: copied / decoded / errors -->
+              <p class="dn-cipher__status" data-cipher-status
+                 role="status" aria-live="polite" data-kind="info"></p>
+
+              <!-- Actions -->
+              <div class="dn-cipher__actions">
+                <div class="dn-cipher__modes" role="group" aria-label="Direction">
+                  <button class="dn-btn is-active" type="button"
+                          data-cipher-encode aria-pressed="true">
+                    暗号化 <span class="dn-btn__jp">/ ENCODE</span>
+                  </button>
+                  <button class="dn-btn" type="button"
+                          data-cipher-decode aria-pressed="false">
+                    復号 <span class="dn-btn__jp">/ DECODE</span>
+                  </button>
+                </div>
+
+                <span class="dn-cipher__spacer" aria-hidden="true"></span>
+
+                <button class="dn-util" type="button" data-cipher-sample>Sample</button>
+                <button class="dn-util" type="button" data-cipher-swap
+                        aria-label="Move output into input">
+                  <svg class="dn-util__ico" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <path d="M17 4l3 3-3 3M20 7H8M7 20l-3-3 3-3M4 17h12"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Swap
+                </button>
+                <button class="dn-util" type="button" data-cipher-copy>
+                  <svg class="dn-util__ico" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="1.5" />
+                    <path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <span data-copy-label>COPY</span>
+                </button>
+                <button class="dn-util" type="button" data-cipher-clear>Clear</button>
+              </div>
+
+            </div>
+
+            <p class="dn-cipher__foot">
+              All processing happens in your browser — nothing is sent anywhere.
             </p>
-            <span class="dn-placeholder__badge">Coming Soon</span>
           </div>
         </section>
 
@@ -379,5 +662,7 @@
   <script src="js/app.js" defer></script>
   <script src="js/intro.js" defer></script>
   <script src="js/note.js" defer></script>
+  <script src="js/rules.js" defer></script>
+  <script src="js/cipher.js" defer></script>
 </body>
 </html>
