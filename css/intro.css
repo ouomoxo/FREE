@@ -1,0 +1,188 @@
+/* ============================================================
+   intro.css — INTRO / CINEMATIC LANDING
+   Death Note :: 死神の手帳
+
+   The intro section fills the viewport with a centred, staged
+   reveal: kicker -> title -> subtitle -> tagline -> apple -> CTA.
+   Reveal is choreographed with staggered delays. Consumes tokens.
+   ============================================================ */
+
+.dn-intro {
+  /* Intro paints its own deeper void behind the ambient canvas glow */
+  background:
+      radial-gradient(80% 60% at 50% 30%,
+          rgba(179, 18, 27, 0.06), transparent 60%),
+      radial-gradient(120% 100% at 50% 120%,
+          rgba(0, 0, 0, 0.7), transparent 70%);
+}
+
+.dn-intro__stage {
+  min-height: calc(100vh - 2 * var(--space-8));
+  min-height: calc(100svh - 2 * var(--space-8));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-5);
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------
+   Staged reveal primitive
+   Each element carries .dn-reveal and a --d delay custom prop.
+   The section adds .is-revealed once the intro becomes active.
+   -------------------------------------------------------- */
+.dn-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(6px);
+  transition:
+      opacity var(--dur-cinema) var(--ease-emphasis),
+      transform var(--dur-cinema) var(--ease-emphasis),
+      filter var(--dur-cinema) var(--ease-emphasis);
+  transition-delay: var(--d, 0ms);
+}
+.dn-intro.is-revealed .dn-reveal {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* --------------------------------------------------------
+   Kicker
+   -------------------------------------------------------- */
+.dn-intro__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.dn-intro__kicker::before,
+.dn-intro__kicker::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--color-line-strong);
+}
+
+/* --------------------------------------------------------
+   Title — the loud gothic wordmark
+   -------------------------------------------------------- */
+.dn-intro__title {
+  font-family: var(--font-serif);
+  font-size: clamp(var(--text-4xl), 12vw, var(--text-5xl));
+  line-height: 0.94;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  margin: var(--space-2) 0;
+}
+.dn-intro__title .en {
+  display: block;
+  position: relative;
+}
+/* Blood underline stroke beneath the English title */
+.dn-intro__title .en::after {
+  content: "";
+  display: block;
+  width: 92px;
+  height: 2px;
+  margin: var(--space-4) auto 0;
+  background: linear-gradient(90deg,
+      transparent, var(--color-blood-bright), transparent);
+  box-shadow: var(--shadow-glow);
+}
+.dn-intro__title .jp {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: clamp(var(--text-lg), 5vw, var(--text-2xl));
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-blood-bright);
+  margin-top: var(--space-5);
+  text-shadow: 0 0 24px var(--color-blood-glow);
+}
+
+/* --------------------------------------------------------
+   Subtitle
+   -------------------------------------------------------- */
+.dn-intro__subtitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  font-style: italic;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------
+   Apple motif (inline SVG injected by intro.js)
+   -------------------------------------------------------- */
+.dn-intro__apple {
+  width: 76px;
+  height: 76px;
+  margin: var(--space-2) 0;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6));
+}
+.dn-intro__apple svg { width: 100%; height: 100%; }
+/* Gentle idle bob on the apple */
+@media (prefers-reduced-motion: no-preference) {
+  .dn-intro.is-revealed .dn-intro__apple {
+    animation: dn-apple-bob 6s var(--ease-in-out) infinite;
+  }
+}
+@keyframes dn-apple-bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-8px) rotate(1deg); }
+}
+
+/* --------------------------------------------------------
+   Tagline (JP + EN)
+   -------------------------------------------------------- */
+.dn-intro__tagline {
+  max-width: 44ch;
+  line-height: var(--leading-loose);
+}
+.dn-intro__tagline .jp {
+  display: block;
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text);
+}
+.dn-intro__tagline .en {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* --------------------------------------------------------
+   CTA
+   -------------------------------------------------------- */
+.dn-intro__cta {
+  margin-top: var(--space-4);
+}
+.dn-intro__cta .dn-btn { font-size: var(--text-sm); padding: var(--space-4) var(--space-7); }
+.dn-intro__cta-jp { color: rgba(255, 255, 255, 0.75); }
+
+/* Scroll / continue hint */
+.dn-intro__hint {
+  margin-top: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-ghost);
+}
+
+/* --------------------------------------------------------
+   Responsive tuning
+   -------------------------------------------------------- */
+@media (max-width: 480px) {
+  .dn-intro__stage { gap: var(--space-4); }
+  .dn-intro__apple { width: 60px; height: 60px; }
+}

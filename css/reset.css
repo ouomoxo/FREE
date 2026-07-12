@@ -1,0 +1,101 @@
+/* ============================================================
+   reset.css — minimal modern CSS reset
+   Death Note :: 死神の手帳
+   Keeps the cascade predictable so theme.css owns all styling.
+   ============================================================ */
+
+/* Box sizing everywhere, no surprise widths */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Strip default margins from the usual suspects */
+html,
+body,
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote,
+dl, dd, ul, ol,
+fieldset {
+  margin: 0;
+}
+
+/* Remove list styling when a list has a role (nav lists, etc.) */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* Core document defaults */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Media should never overflow its container */
+img,
+picture,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+svg {
+  height: auto;
+}
+
+/* Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Buttons: strip the chrome, we style from scratch */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Anchors inherit colour by default; theme decides accents */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Avoid text overflow on long words */
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Remove animations/transitions for users who ask for calm */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

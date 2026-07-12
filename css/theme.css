@@ -1,0 +1,312 @@
+/* ============================================================
+   theme.css — DESIGN SYSTEM / SINGLE SOURCE OF TRUTH
+   Death Note :: 死神の手帳
+
+   All colour, spacing, type, motion, elevation and z-index
+   tokens live here as CSS custom properties. Every other
+   stylesheet consumes these — never hard-code a value there.
+   ============================================================ */
+
+:root {
+  /* --------------------------------------------------------
+     COLOUR — near-black canvas, bone text, one crimson accent,
+     restrained gothic gold. Muted grays for secondary text.
+     -------------------------------------------------------- */
+
+  /* Backgrounds (darkest -> raised surfaces) */
+  --color-bg:            #08080a;   /* app void */
+  --color-bg-raised:     #0a0a0b;   /* panels / sidebar */
+  --color-bg-elevated:   #101013;   /* cards, hovered surfaces */
+  --color-bg-inset:      #050506;   /* wells, insets */
+
+  /* Text */
+  --color-text:          #e8e6e0;   /* bone / parchment — primary */
+  --color-text-muted:    #a09e98;   /* secondary */
+  --color-text-faint:    #6b6a66;   /* tertiary / captions */
+  --color-text-ghost:    #3a3a3d;   /* disabled / hairline labels */
+
+  /* Crimson accent — the single loud colour */
+  --color-blood:         #b3121b;   /* deep blood */
+  --color-blood-bright:  #d4232d;   /* bright crimson (hover/active) */
+  --color-blood-glow:    rgba(211, 35, 45, 0.45);
+  --color-blood-wash:    rgba(179, 18, 27, 0.10);
+
+  /* Gothic gold — sparing, ornamental */
+  --color-gold:          #b8963e;
+  --color-gold-dim:      #7d6733;
+
+  /* Lines & borders — fine hairlines */
+  --color-line:          rgba(232, 230, 224, 0.08);
+  --color-line-strong:   rgba(232, 230, 224, 0.16);
+  --color-line-blood:    rgba(179, 18, 27, 0.55);
+
+  /* Focus ring */
+  --color-focus:         #d4232d;
+
+  /* --------------------------------------------------------
+     TYPOGRAPHY — system stacks only, modular scale (~1.25)
+     -------------------------------------------------------- */
+  --font-serif:  Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+  --font-sans:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, "Hiragino Kaku Gothic ProN",
+                 "Yu Gothic", "Meiryo", sans-serif;
+  --font-mono:   ui-monospace, "SFMono-Regular", "Menlo", "Consolas",
+                 "Liberation Mono", monospace;
+
+  /* Modular type scale (base 16px, ratio ~1.25 major third) */
+  --text-2xs:  0.6875rem;   /* 11px — micro labels */
+  --text-xs:   0.78rem;     /* 12.5px */
+  --text-sm:   0.875rem;    /* 14px */
+  --text-base: 1rem;        /* 16px */
+  --text-md:   1.125rem;    /* 18px */
+  --text-lg:   1.375rem;    /* 22px */
+  --text-xl:   1.75rem;     /* 28px */
+  --text-2xl:  2.25rem;     /* 36px */
+  --text-3xl:  3rem;        /* 48px */
+  --text-4xl:  4rem;        /* 64px */
+  --text-5xl:  5.5rem;      /* 88px — hero */
+
+  /* Line heights */
+  --leading-tight:  1.1;
+  --leading-snug:   1.28;
+  --leading-normal: 1.5;
+  --leading-loose:  1.8;
+
+  /* Letter spacing (gothic display wants air) */
+  --tracking-tight:  -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.08em;
+  --tracking-wider:   0.18em;
+  --tracking-widest:  0.34em;
+
+  /* Weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold:   700;
+
+  /* --------------------------------------------------------
+     SPACING — 4px base scale
+     -------------------------------------------------------- */
+  --space-0:   0;
+  --space-1:   0.25rem;   /* 4  */
+  --space-2:   0.5rem;    /* 8  */
+  --space-3:   0.75rem;   /* 12 */
+  --space-4:   1rem;      /* 16 */
+  --space-5:   1.5rem;    /* 24 */
+  --space-6:   2rem;      /* 32 */
+  --space-7:   3rem;      /* 48 */
+  --space-8:   4rem;      /* 64 */
+  --space-9:   6rem;      /* 96 */
+  --space-10:  8rem;      /* 128 */
+
+  /* --------------------------------------------------------
+     RADII
+     -------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+  --radius-pill: 999px;
+
+  /* --------------------------------------------------------
+     ELEVATION / SHADOWS — deep, soft, occasional crimson glow
+     -------------------------------------------------------- */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg:   0 24px 60px rgba(0, 0, 0, 0.65);
+  --shadow-inset: inset 0 0 0 1px var(--color-line);
+  --shadow-glow: 0 0 24px var(--color-blood-glow);
+
+  /* Vignette used on the app frame */
+  --vignette: radial-gradient(
+      120% 120% at 50% 42%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.55) 100%);
+
+  /* --------------------------------------------------------
+     MOTION — cinematic easings & durations
+     -------------------------------------------------------- */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);    /* expo-out, silky */
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);   /* dramatic swell */
+  --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);   /* entrances */
+  --ease-linear:   linear;
+
+  --dur-fast:   160ms;
+  --dur-base:   280ms;
+  --dur-slow:   520ms;
+  --dur-slower: 900ms;
+  --dur-cinema: 1600ms;   /* intro reveals */
+
+  /* --------------------------------------------------------
+     Z-INDEX SCALE
+     -------------------------------------------------------- */
+  --z-base:      0;
+  --z-canvas:    1;    /* ambient background canvas */
+  --z-content:   10;
+  --z-vignette:  20;   /* frame overlay above content, below chrome */
+  --z-nav:       100;
+  --z-overlay:   1000;
+  --z-toast:     2000;
+
+  /* --------------------------------------------------------
+     LAYOUT METRICS
+     -------------------------------------------------------- */
+  --nav-width:      248px;   /* fixed sidebar width (desktop) */
+  --nav-bar-height: 60px;    /* top bar height (mobile) */
+  --content-max:    920px;   /* readable content column */
+}
+
+/* ============================================================
+   PAPER / GRAIN TEXTURE
+   Reusable inline-SVG fractal-noise as a data-URI. Applied as a
+   faint overlay to give surfaces a tactile parchment grain.
+   ============================================================ */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   BASE ELEMENT STYLING (consumes tokens)
+   ============================================================ */
+html {
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+/* Display headings default to the gothic serif */
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* --------------------------------------------------------
+   Utility text roles (shared across sections)
+   -------------------------------------------------------- */
+.dn-kicker {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.dn-jp {
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-wide);
+}
+
+.dn-accent { color: var(--color-blood-bright); }
+.dn-gold   { color: var(--color-gold); }
+.dn-muted  { color: var(--color-text-muted); }
+
+/* Hairline rule with a faint gradient falloff */
+.dn-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-line-strong) 20%,
+      var(--color-line-strong) 80%,
+      transparent);
+}
+
+/* --------------------------------------------------------
+   Shared button system
+   -------------------------------------------------------- */
+.dn-btn {
+  --_bg: transparent;
+  --_fg: var(--color-text);
+  --_border: var(--color-line-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--_fg);
+  background: var(--_bg);
+  border: 1px solid var(--_border);
+  border-radius: var(--radius-sm);
+  transition:
+      color var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+}
+
+.dn-btn:hover {
+  --_border: var(--color-line-blood);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+.dn-btn:active {
+  transform: translateY(1px);
+}
+
+.dn-btn--primary {
+  --_bg: var(--color-blood);
+  --_fg: #fff;
+  --_border: var(--color-blood);
+}
+
+.dn-btn--primary:hover {
+  --_bg: var(--color-blood-bright);
+  --_border: var(--color-blood-bright);
+}
+
+/* --------------------------------------------------------
+   Global focus-visible treatment (accessibility)
+   -------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+/* Only show the ring for keyboard users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-blood);
+  color: #fff;
+}
+
+/* Screen-reader-only helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Custom scrollbar (WebKit) tuned to the palette */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg-inset); }
+::-webkit-scrollbar-thumb {
+  background: #1a1a1e;
+  border: 2px solid var(--color-bg-inset);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-blood); }
