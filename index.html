@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Project Mayhem — a local-first liberation engine. Shed the things that own you. No accounts. No tracking. You own your data." />
+  <title>PROJECT MAYHEM // FREE</title>
+  <link rel="stylesheet" href="./css/mayhem.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0a'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='22' fill='%23c8ff00' text-anchor='middle'%3E%E2%98%A2%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#/today" aria-label="Project Mayhem home">
+      <span class="brand-mark" aria-hidden="true">☢</span>
+      <span class="brand-text">PROJECT&nbsp;MAYHEM</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#/today" data-route="today">TODAY</a>
+      <a href="#/assignments" data-route="assignments">ASSIGNMENTS</a>
+      <a href="#/ledger" data-route="ledger">LEDGER</a>
+      <a href="#/manifesto" data-route="manifesto">MANIFESTO</a>
+    </nav>
+    <div class="streak" title="Consecutive days awake">
+      <span class="flame" aria-hidden="true">▲</span>
+      <span class="streak-num" id="streakNum">0</span>
+    </div>
+  </header>
+
+  <main id="view" class="view" tabindex="-1" aria-live="polite">
+    <!-- rendered by app.js -->
+  </main>
+
+  <footer class="footer">
+    <span class="foot-left">YOU OWN THIS. NO ACCOUNTS. NO TRACKING. NO EXITS BUT THE ONE YOU CHOOSE.</span>
+    <span class="foot-right">
+      <button class="link-btn" id="footExport" type="button">EXPORT</button>
+      <span aria-hidden="true">·</span>
+      <button class="link-btn" id="footImport" type="button">IMPORT</button>
+      <span aria-hidden="true">·</span>
+      <button class="link-btn danger" id="footReset" type="button">SELF-DESTRUCT</button>
+    </span>
+  </footer>
+
+  <input type="file" id="importFile" accept="application/json,.json" hidden />
+
+  <!-- modal host -->
+  <div class="modal-host" id="modalHost" hidden></div>
+
+  <script type="module" src="./js/app.js"></script>
+  <noscript>
+    <p style="padding:24px;color:#ededed;background:#0a0a0a;">
+      Project Mayhem runs on your machine, in your browser, with JavaScript.
+      Turn it on. Freedom isn't passive.
+    </p>
+  </noscript>
+</body>
+</html>
