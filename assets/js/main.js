@@ -73,7 +73,7 @@
     dHz = $('dHz'), dPhase = $('dPhase'), dLand = $('dLand'), dDrift = $('dDrift'),
     dCells = $('dCells'), dRot = $('dRot'), footBin = $('footBin');
   var ticks = d.querySelectorAll('.rail__tick');
-  var lastIdx = -1, tock = 0;
+  var lastIdx = -1, tock = 0, wasEnd = false;
 
   // every frame of type breathes with its own movement
   var frames = [];
@@ -121,6 +121,9 @@
     }
 
     if (++tock % 3) return;
+
+    var atEnd = S.progress > 0.972;
+    if (atEnd !== wasEnd) { wasEnd = atEnd; d.body.classList.toggle('at-end', atEnd); }
 
     var i = S.active, sec = sections[i];
     if (i !== lastIdx) {

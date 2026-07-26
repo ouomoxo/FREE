@@ -30,7 +30,7 @@
   var S = (SY.s = {
     t: 0, dt: 0, frame: 0,
     w: 0, h: 0, dpr: 1,
-    scroll: 0, vh: 0, doc: 0, progress: 0,
+    scroll: 0, vh: 0, doc: 0, progress: 0, sv: 0, idle: 0,
     active: 0, activeP: 0,
     small: false,
     reduced: w.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -107,7 +107,7 @@
 
   /* ── pointer ──────────────────────────────────────────── */
   var P = S.pointer;
-  function move(x, y) { P.tx = x; P.ty = y; P.has = true; }
+  function move(x, y) { P.tx = x; P.ty = y; P.has = true; S.idle = 0; }
   d.addEventListener('mousemove', function (e) { move(e.clientX, e.clientY); }, { passive: true });
   d.addEventListener('touchmove', function (e) {
     if (e.touches[0]) move(e.touches[0].clientX, e.touches[0].clientY);
@@ -210,11 +210,21 @@
     last = now;
     S.dt = dt; S.t += S.reduced ? dt * 0.18 : dt; S.frame++;   // reduced motion: the piece breathes, slowly
 
+    var prev = S.scroll;
     S.scroll = w.pageYOffset || d.documentElement.scrollTop;
+    // the scroll wheel is an instrument: its speed swells the work
+    S.sv = U.lerp(S.sv, U.clamp((S.scroll - prev) / Math.max(dt, 0.001) / 60, -26, 26), 0.22);
     conduct();
 
-    // pointer easing
-    if (!P.has) { P.tx = S.w * 0.5; P.ty = S.h * 0.5; }
+    // pointer easing — and when no one is here, the piece performs for itself
+    S.idle += dt;
+    if (!P.has || S.idle > 4) {
+      var it = S.t * 0.11, amp = P.has ? U.clamp((S.idle - 4) / 3, 0, 1) : 1;
+      var gx = S.w * (0.5 + 0.31 * Math.sin(it) * Math.cos(it * 0.37));
+      var gy = S.h * (0.5 + 0.26 * Math.sin(it * 1.31 + 1.1));
+      P.tx = U.lerp(P.tx, gx, amp);
+      P.ty = U.lerp(P.ty, gy, amp);
+    }
     var px = P.x, py = P.y;
     P.x = U.lerp(P.x, P.tx, 1 - Math.pow(0.001, dt));
     P.y = U.lerp(P.y, P.ty, 1 - Math.pow(0.001, dt));

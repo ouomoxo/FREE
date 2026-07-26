@@ -17,14 +17,22 @@
   for (var bi = 0; bi < BANDS; bi++) bank.push([]);
   function band(a) { return bank[a < 0 ? 0 : a > 0.999 ? BANDS - 1 : (a * BANDS) | 0]; }
   function flush(c, tint) {
+    var smear = U.clamp(-S.sv * 0.9, -13, 13);   // dots stretch along the scroll
     for (var b = 0; b < BANDS; b++) {
       var arr = bank[b];
       if (!arr.length) continue;
       c.fillStyle = 'rgba(' + (tint || IVORY) + ',' + ((b + 0.5) / BANDS).toFixed(3) + ')';
       c.beginPath();
+      var sm = Math.abs(smear) > 1.2;
       for (var k = 0; k < arr.length; k += 3) {
         c.moveTo(arr[k] + arr[k + 2], arr[k + 1]);
         c.arc(arr[k], arr[k + 1], arr[k + 2], 0, 6.2832);
+        if (sm) {
+          c.moveTo(arr[k] + arr[k + 2] * 0.8, arr[k + 1] + smear);
+          c.arc(arr[k], arr[k + 1] + smear, arr[k + 2] * 0.8, 0, 6.2832);
+          c.moveTo(arr[k] + arr[k + 2] * 0.5, arr[k + 1] + smear * 0.55);
+          c.arc(arr[k], arr[k + 1] + smear * 0.55, arr[k + 2] * 0.5, 0, 6.2832);
+        }
       }
       c.fill();
       arr.length = 0;
@@ -222,7 +230,7 @@
     },
     draw: function (c, w0, h0, p, alpha, dt) {
       var Q = q(p), t = S.t, P = S.pointer, cy = h0 * 0.5;
-      var amp = Math.pow(Math.sin(Math.PI * U.clamp(Q, 0, 1)), 0.6) * 1.05 + 0.05;
+      var amp = (Math.pow(Math.sin(Math.PI * U.clamp(Q, 0, 1)), 0.6) * 1.05 + 0.05) * (1 + Math.abs(S.sv) * 0.055);
       var spread = U.lerp(h0 * 0.052, h0 * 0.008, Math.pow(U.clamp((Q - 0.55) / 0.45, 0, 1), 1.4));
       var step = w0 < 700 ? 8 : 5;
 
@@ -444,7 +452,7 @@
       if (t - this.noiseAt > 0.42) this.bake(w0, h0);
       c.drawImage(this.noise, 0, 0, w0, h0);
 
-      var A = t * 0.42 + Q * 2.6, B = t * 0.27 + Q * 1.1;
+      var A = t * 0.42 + Q * 2.6 + S.sv * 0.02, B = t * 0.27 + Q * 1.1 - S.sv * 0.012;
       var cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B);
       var R1 = 1, R2 = 2.1, K2 = 5.6;
       var grow = U.lerp(0.86, 1.42, U.smooth(U.clamp(Q * 1.25, 0, 1)));
@@ -524,7 +532,7 @@
       }
     },
     draw: function (c, w0, h0, p, alpha, dt) {
-      var Q = q(p), t = S.t, cx = w0 / 2, cy = h0 * 0.5, i, o;
+      var Q = q(p), t = S.t, cx = w0 / 2, cy = h0 * 0.72, i, o;
       var pull = U.smooth(U.clamp(Q / 0.62, 0, 1));
       c.globalCompositeOperation = 'lighter';
       for (i = 0; i < this.ps.length; i++) {
