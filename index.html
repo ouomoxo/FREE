@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>선율 · SEONYUL — 점과 선으로 짓는 하나의 세계</title>
-<meta name="description" content="점(點)과 선(線), 그리고 0과 1. 하나의 화면 위에 지어진 여섯 개의 악장. An interactive artwork built from dots, lines and binary.">
+<meta name="description" content="점(點)과 선(線), 그리고 0과 1. 하나의 화면 위에 지어진 일곱 개의 악장. An interactive artwork built from dots, lines and binary.">
 <meta name="theme-color" content="#000000">
 <meta property="og:title" content="선율 · SEONYUL">
-<meta property="og:description" content="점과 선으로 짓는 하나의 세계 — 여섯 개의 악장.">
+<meta property="og:description" content="점과 선으로 짓는 하나의 세계 — 일곱 개의 악장.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +50,7 @@
 </div>
 
 <div class="hud hud--bl">
-  <div class="hud__idx"><span id="mIdx">000</span><span class="dim"> / 005</span></div>
+  <div class="hud__idx"><span id="mIdx">000</span><span class="dim"> / 006</span></div>
   <div class="hud__name" id="mName">PRELUDE</div>
 </div>
 
@@ -68,6 +68,7 @@
   <a href="#s3" class="rail__tick" data-i="3"><span>003</span></a>
   <a href="#s4" class="rail__tick" data-i="4"><span>004</span></a>
   <a href="#s5" class="rail__tick" data-i="5"><span>005</span></a>
+  <a href="#s6" class="rail__tick" data-i="6"><span>006</span></a>
   <i class="rail__thumb" id="railThumb"></i>
 </nav>
 
@@ -81,7 +82,7 @@
         <div class="hero__meta reveal">
           <span><i>000</i></span><span><i>·</i></span><span><i>PRELUDE</i></span>
         </div>
-        <h1 class="hero__title">
+        <h1 class="hero__title hero__title--cut">
           <span class="reveal" style="--d:.05s"><i>선</i></span><span class="reveal" style="--d:.16s"><i>율</i></span>
         </h1>
         <div class="hero__latin reveal" style="--d:.34s"><span><i>S E O N Y U L</i></span></div>
@@ -90,13 +91,13 @@
           <span><i>A world built from dots and lines.</i></span>
         </p>
         <div class="hero__nums" aria-hidden="true">
-          <span>01001100</span><span>·</span><span>006</span><span>·</span><span>1 / ∞</span>
+          <span>01001100</span><span>·</span><span>007</span><span>·</span><span>1 / ∞</span>
         </div>
       </div>
       <div class="cue">
         <span class="cue__t">SCROLL</span>
         <span class="cue__l"><i></i></span>
-        <span class="cue__n">000 → 005</span>
+        <span class="cue__n">000 → 006</span>
       </div>
     </div>
   </section>
@@ -186,6 +187,7 @@
             <div><dt>DOTS</dt><dd id="dLand">0000</dd></div>
             <div><dt>GRID</dt><dd>150 × 066</dd></div>
             <div><dt>DRIFT</dt><dd id="dDrift">+000.0°</dd></div>
+            <div><dt>LENS</dt><dd id="dLens">000.0 px</dd></div>
           </dl>
         </div>
       </div>
@@ -223,11 +225,43 @@
     <div class="spacer"></div>
   </section>
 
-  <!-- 005 · 餘白 -->
-  <section class="sec sec--end" id="s5" data-scene="silence" data-name="SILENCE · 餘白" data-han="白">
+  <!-- 005 · 次元 -->
+  <section class="sec" id="s5" data-scene="dim" data-name="DIMENSION · 次元" data-han="次">
+    <div class="frame frame--split">
+      <div class="col col--l">
+        <div class="tag reveal"><span><i>005</i></span><span><i>次元</i></span></div>
+        <h2 class="h2 reveal" style="--d:.1s">
+          <span><i>우리는 4차원의</i></span>
+          <span><i>그림자만 본다.</i></span>
+        </h2>
+        <p class="p reveal" style="--d:.3s">
+          <span><i>여덟 개의 정육면체가 하나의 몸을 이룬다.</i></span>
+          <span><i>안이 밖이 되고 밖이 다시 안이 된다.</i></span>
+          <span><i>우리 눈에 닿는 것은 그 몸의 그림자뿐이다.</i></span>
+        </p>
+        <p class="p p--en reveal" style="--d:.4s">
+          <span><i>Eight cubes, one body. Inside turns out, out turns in —</i></span>
+          <span><i>what reaches us is only its shadow.</i></span>
+        </p>
+        <p class="hint reveal" style="--d:.5s"><span><i>커서가 네 번째 축을 돌린다 · YOUR CURSOR TURNS THE FOURTH AXIS</i></span></p>
+      </div>
+      <div class="col col--r">
+        <dl class="data">
+          <div><dt>VERTICES</dt><dd>16</dd></div>
+          <div><dt>EDGES</dt><dd>32</dd></div>
+          <div><dt>CELL</dt><dd id="dCell">1 / 8</dd></div>
+          <div><dt>W AXIS</dt><dd id="dW">+0.000</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 006 · 餘白 -->
+  <section class="sec sec--end" id="s6" data-scene="silence" data-name="SILENCE · 餘白" data-han="白">
     <div class="frame">
       <div class="end">
-        <div class="tag tag--c reveal"><span><i>005</i></span><span><i>餘白</i></span></div>
+        <div class="tag tag--c reveal"><span><i>006</i></span><span><i>餘白</i></span></div>
         <h2 class="h2 h2--c reveal" style="--d:.1s">
           <span><i>모든 선율은</i></span>
           <span><i>침묵으로 돌아간다.</i></span>
@@ -244,7 +278,7 @@
     <footer class="foot">
       <div class="foot__l">
         <div>선율 · SEONYUL</div>
-        <div class="dim">하나의 화면, 여섯 개의 악장 · SIX MOVEMENTS ON ONE SCREEN</div>
+        <div class="dim">하나의 화면, 일곱 개의 악장 · SEVEN MOVEMENTS ON ONE SCREEN</div>
       </div>
       <div class="foot__c dim" id="footBin">0101 0011 0059</div>
       <div class="foot__r">

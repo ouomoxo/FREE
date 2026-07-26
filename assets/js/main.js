@@ -71,7 +71,8 @@
   var mIdx = $('mIdx'), mName = $('mName'), mLat = $('mLat'), mLon = $('mLon'),
     mClock = $('mClock'), mFrame = $('mFrame'), dDots = $('dDots'), dState = $('dState'),
     dHz = $('dHz'), dPhase = $('dPhase'), dLand = $('dLand'), dDrift = $('dDrift'),
-    dCells = $('dCells'), dRot = $('dRot'), footBin = $('footBin');
+    dCells = $('dCells'), dRot = $('dRot'), dLens = $('dLens'),
+    dCell = $('dCell'), dW = $('dW'), footBin = $('footBin');
   var ticks = d.querySelectorAll('.rail__tick');
   var lastIdx = -1, tock = 0, wasEnd = false;
 
@@ -152,6 +153,9 @@
     if (I.drift != null) dDrift.textContent = '+' + fmt((I.drift * 2.4) % 360, 1) + '°';
     if (I.cells) dCells.textContent = U.pad(I.cells, 5);
     if (I.rot) dRot.textContent = I.rot;
+    if (I.lens != null) dLens.textContent = fmt(I.lens, 1) + ' px';
+    if (I.cell) dCell.textContent = I.cell;
+    if (I.w) dW.textContent = I.w;
 
     footBin.textContent =
       (S.frame % 2 ? '0101' : '0100') + ' ' +

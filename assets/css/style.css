@@ -156,6 +156,9 @@ body.at-end .hud--bl,body.at-end .hud--br,body.at-end .rail{opacity:0;pointer-ev
   font-family:var(--kr);font-weight:800;
   font-size:clamp(72px,17vw,240px);line-height:.94;letter-spacing:.02em;
 }
+/* the title stands inside the field, and cuts through it */
+.hero__title--cut{mix-blend-mode:difference;color:#fff}
+@supports not (mix-blend-mode:difference){.hero__title--cut{mix-blend-mode:normal;color:var(--ivory)}}
 .hero__latin{
   margin-top:clamp(16px,2.4vw,30px);
   font-family:var(--mono);font-weight:200;font-size:clamp(9px,1.05vw,13px);letter-spacing:.62em;

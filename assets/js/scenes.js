@@ -349,6 +349,8 @@
 
       var scan = (((t * 0.16) % 1.35) - 0.17) * rows;
       var base = cell * 0.32;
+      var LENS = 5200 * U.clamp(alpha * 1.4 - 0.4, 0, 1);
+      SY.info.lens = Math.sqrt(LENS);
 
       c.globalCompositeOperation = 'lighter';
       for (var i = 0; i < C.length; i += 2) {
@@ -357,6 +359,13 @@
         var side = xc < cols / 2 ? -1 : 1;
         var x = ox + xc * cell + cell / 2 + side * split;
         var y = oy + gy * cell + cell / 2;
+
+        // gravitational lens: the cursor is a mass, and the fabric obeys it
+        var lx = x - P.x, ly = y - P.y, l2 = lx * lx + ly * ly;
+        if (l2 < 250000 && l2 > 1) {
+          var ld = Math.sqrt(l2), bend = LENS / (ld + 26);
+          x += (lx / ld) * bend; y += (ly / ld) * bend;
+        }
 
         var wv = 0.5 + 0.5 * Math.sin(t * 1.15 - gx * 0.055 + gy * 0.09);
         var e = 0.22 + wv * 0.5;
@@ -456,7 +465,8 @@
       var cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B);
       var R1 = 1, R2 = 2.1, K2 = 5.6;
       var grow = U.lerp(0.86, 1.42, U.smooth(U.clamp(Q * 1.25, 0, 1)));
-      var K1 = rows * K2 * 2.35 / (8 * (R1 + R2)) * grow;
+      // fit to whichever axis is tighter, so narrow screens keep the whole body
+      var K1 = Math.min(rows * 2.35, cols * 1.7) * K2 / (8 * (R1 + R2)) * grow;
       var P = S.pointer;
       var tilt = (P.y / h0 - 0.5) * 0.5;
       var cT = Math.cos(tilt), sT = Math.sin(tilt);
@@ -519,7 +529,114 @@
     }
   };
 
-  /* ══ 005 · SILENCE ════════════════════════════════════════
+
+  /* ══ 005 · DIMENSION ══════════════════════════════════════
+     여덟 개의 정육면체가 한 몸을 이룬다. 안이 밖이 되고,
+     밖이 다시 안이 된다. 우리에게 닿는 것은 그림자뿐이다.      */
+  var dim = {
+    name: 'dim',
+    resize: function () {
+      var V = (this.V = []), i, a, b;
+      for (i = 0; i < 16; i++) V.push([i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
+      var E = (this.E = []);
+      for (a = 0; a < 16; a++) for (b = a + 1; b < 16; b++) {
+        var x = a ^ b;
+        if ((x & (x - 1)) === 0) E.push(a, b);        // one coordinate apart → an edge
+      }
+      this.P = [];
+      for (i = 0; i < 16; i++) this.P.push([0, 0, 0, 0]);
+    },
+    draw: function (c, w0, h0, p, alpha, dt) {
+      var Q = q(p), t = S.t, P = S.pointer, V = this.V, E = this.E, pr = this.P, i, self = this;
+      var cx = w0 * 0.5, cy = h0 * 0.5;
+      var base = Math.min(w0, h0) * 0.21 * U.lerp(0.8, 1.2, U.smooth(Q));
+
+      // three of the six planes of rotation — two of them leave our world
+      var axw = t * 0.27 + Q * 2.4 + (P.x / w0 - 0.5) * 2.6;
+      var ayz = t * 0.19 + (P.y / h0 - 0.5) * 1.9;
+      var axy = t * 0.085;
+
+      // one of the eight cells burns brighter, and hands the light to the next
+      var cell = Math.floor(t * 0.17) % 8;
+      var axis = cell >> 1, sign = (cell & 1) ? 1 : -1;
+      SY.info.cell = (cell + 1) + ' / 8';
+      SY.info.w = (Math.sin(axw) >= 0 ? '+' : '−') + Math.abs(Math.sin(axw)).toFixed(3);
+
+      function project(scale, sgn) {
+        var c1 = Math.cos(axw * sgn), s1 = Math.sin(axw * sgn);
+        var c2 = Math.cos(ayz * sgn), s2 = Math.sin(ayz * sgn);
+        var c3 = Math.cos(axy), s3 = Math.sin(axy);
+        for (var j = 0; j < 16; j++) {
+          var v = V[j], x = v[0], y = v[1], z = v[2], ww = v[3];
+          var nx = x * c1 - ww * s1; ww = x * s1 + ww * c1; x = nx;
+          var ny = y * c2 - z * s2; z = y * s2 + z * c2; y = ny;
+          var nx2 = x * c3 - y * s3; y = x * s3 + y * c3; x = nx2;
+          var f4 = 2.35 / (3.15 - ww);            // 4D → 3D
+          x *= f4; y *= f4; z *= f4;
+          var f3 = 3.1 / (4.1 - z);               // 3D → 2D
+          var o = pr[j];
+          o[0] = cx + x * f3 * scale;
+          o[1] = cy + y * f3 * scale;
+          o[2] = U.clamp((ww + 1.25) / 2.5, 0, 1);   // how far along the fourth axis
+        }
+      }
+
+      function render(mul, dots) {
+        for (var k = 0; k < E.length; k += 2) {
+          var A = pr[E[k]], B = pr[E[k + 1]];
+          var inCell = (V[E[k]][axis] === sign && V[E[k + 1]][axis] === sign);
+          var w4 = (A[2] + B[2]) * 0.5;
+          var lit = (inCell ? 1.55 : 1) * (0.22 + w4 * 0.9) * mul;
+          if (dots) {
+            var n = 26;
+            for (var u = 0; u <= n; u++) {
+              var f = u / n;
+              var dpt = A[2] + (B[2] - A[2]) * f;
+              var pulse = 0.72 + 0.28 * Math.sin(t * 2.1 - f * 5.2 + k);
+              band(Math.min(1, lit * (0.16 + dpt * 0.62) * pulse))
+                .push(A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f,
+                      (0.45 + dpt * 1.15) * (inCell ? 1.25 : 1));
+            }
+          }
+          c.strokeStyle = 'rgba(' + IVORY + ',' + (0.028 + w4 * 0.055 * (inCell ? 2.2 : 1)) * mul + ')';
+          c.lineWidth = 1;
+          c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke();
+        }
+        if (dots) flush(c);
+      }
+
+      c.globalCompositeOperation = 'lighter';
+
+      // the shadow of the shadow: the same body, turned the other way through w
+      project(base * 2.15, -1);
+      render(0.3, false);
+      for (i = 0; i < 16; i++) {
+        c.fillStyle = 'rgba(' + IVORY + ',' + (0.05 + pr[i][2] * 0.16).toFixed(3) + ')';
+        c.beginPath(); c.arc(pr[i][0], pr[i][1], 0.9 + pr[i][2] * 1.2, 0, 6.2832); c.fill();
+      }
+
+      // and the body itself
+      project(base, 1);
+      render(1, true);
+      for (i = 0; i < 16; i++) {
+        var o4 = pr[i];
+        c.fillStyle = 'rgba(255,255,255,' + (0.2 + o4[2] * 0.8).toFixed(3) + ')';
+        c.beginPath(); c.arc(o4[0], o4[1], 1.1 + o4[2] * 2.3, 0, 6.2832); c.fill();
+      }
+
+      // the horizon it does not belong to
+      var hy = cy + Math.min(w0, h0) * 0.4;
+      var g = c.createLinearGradient(cx - w0 * 0.42, 0, cx + w0 * 0.42, 0);
+      g.addColorStop(0, 'rgba(' + IVORY + ',0)');
+      g.addColorStop(0.5, 'rgba(' + IVORY + ',0.1)');
+      g.addColorStop(1, 'rgba(' + IVORY + ',0)');
+      c.fillStyle = g;
+      c.fillRect(cx - w0 * 0.42, hy, w0 * 0.84, 1);
+      c.globalCompositeOperation = 'source-over';
+    }
+  };
+
+  /* ══ 006 · SILENCE ════════════════════════════════════════
      모든 것이 하나의 점으로. 그리고 하나의 선으로.               */
   var silence = {
     name: 'silence',
@@ -572,6 +689,6 @@
     }
   };
 
-  SY.scenes = [field, dot, line, world, form, silence];
+  SY.scenes = [field, dot, line, world, form, dim, silence];
 
 })(window, document);
