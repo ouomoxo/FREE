@@ -12,6 +12,7 @@ import { store, actions } from './state.js';
 import { engine } from './audio/engine.js';
 import { transport } from './audio/transport.js';
 import { compose } from './audio/composer.js';
+import { orchestrate } from './audio/orchestra.js';
 import { prewarm } from './audio/instruments.js';
 import { getTrack, getAlbum, getArtist, albumTracks } from './data/catalog.js';
 import { bus, EVT } from './core/bus.js';
@@ -34,6 +35,9 @@ function scoreFor(track) {
       bpm: track.bpm,
       targetBars: track.targetBars,
     });
+    // The composer writes the music; the orchestrator decides who plays it,
+    // and how many of them are playing at any moment. See audio/orchestra.js.
+    score = orchestrate(score, track.seed);
     if (scoreCache.size > 24) {
       // Keep the cache bounded; re-composing is cheap and deterministic.
       const oldest = scoreCache.keys().next().value;

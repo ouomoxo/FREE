@@ -35,6 +35,7 @@ function suite(name) {
 const utils = await import('../js/core/utils.js');
 const theory = await import('../js/audio/theory.js');
 const composer = await import('../js/audio/composer.js');
+const orchestra = await import('../js/audio/orchestra.js');
 const catalog = await import('../js/data/catalog.js');
 const search = await import('../js/search.js');
 const { Store } = await import('../js/core/store.js');
@@ -514,6 +515,73 @@ test('every style has at least one movement', () => {
   for (const style of ALL_STYLES) {
     assert.ok(search.tracksByStyle(style).length > 0, `no movements for ${style}`);
   }
+});
+
+/* ========================================================================== */
+
+suite('audio/orchestra');
+
+test('tension is an arch that starts and ends low', () => {
+  const { tensionAt } = orchestra;
+  assert.ok(tensionAt(0) < 0.05, 'opens quietly');
+  assert.ok(tensionAt(0.68) > 0.9, 'summits about two thirds through');
+  assert.ok(tensionAt(0.68) > tensionAt(0.3), 'climbs to the summit');
+  assert.ok(tensionAt(0.9) < tensionAt(0.68), 'comes down after it');
+  for (let i = 0; i <= 100; i++) {
+    const v = tensionAt(i / 100);
+    assert.ok(v >= 0 && v <= 1, `tension stays in range at ${i / 100}`);
+  }
+});
+
+test('orchestration adds players without moving a note', () => {
+  const score = composer.compose({
+    seed: 'orchestra-test', style: 'romantic', key: 'D', mode: 'minor',
+    bpm: 84, targetBars: 48,
+  });
+  const full = orchestra.orchestrate(score, 'orchestra-test');
+
+  assert.ok(full.events.length > score.events.length, 'more is played');
+  assert.equal(full.duration, score.duration, 'the work is the same length');
+
+  // Every originally written note is still there, at its own time and pitch.
+  const wrote = new Set(score.events.map((e) => `${e.t.toFixed(4)}|${e.m}|${e.i}`));
+  for (const key of wrote) {
+    assert.ok(
+      full.events.some((e) => `${e.t.toFixed(4)}|${e.m}|${e.i}` === key),
+      'no written note was lost or moved',
+    );
+  }
+  for (const e of full.events) {
+    assert.ok(e.m >= 21 && e.m <= 108, 'every pitch is on a keyboard');
+    assert.ok(e.v > 0 && e.v <= 1, 'every velocity is playable');
+    assert.ok(e.d > 0, 'every note has a length');
+  }
+  assert.ok(
+    full.events.every((a, i) => i === 0 || full.events[i - 1].t <= a.t),
+    'the score is still in time order',
+  );
+});
+
+test('orchestration is deterministic and thickest at the summit', () => {
+  const spec = {
+    seed: 'tutti', style: 'romantic', key: 'C', mode: 'major',
+    bpm: 96, targetBars: 64,
+  };
+  const a = orchestra.orchestrate(composer.compose(spec), 'tutti');
+  const b = orchestra.orchestrate(composer.compose(spec), 'tutti');
+  assert.equal(a.events.length, b.events.length, 'same seed, same seating');
+
+  const density = (from, to) => a.events
+    .filter((e) => e.t >= a.duration * from && e.t < a.duration * to).length
+    / Math.max(1e-6, a.duration * (to - from));
+
+  assert.ok(density(0.6, 0.75) > density(0, 0.12) * 1.3, 'the summit is fuller than the opening');
+  assert.ok(density(0.6, 0.75) > density(0.94, 1), 'and fuller than the close');
+});
+
+test('a score too short for an arch is left alone', () => {
+  const tiny = { events: [{ t: 0, d: 1, m: 60, v: 0.5, i: 'flute' }], duration: 1 };
+  assert.equal(orchestra.orchestrate(tiny), tiny, 'returned untouched');
 });
 
 /* ========================================================================== */
