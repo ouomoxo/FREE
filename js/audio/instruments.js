@@ -572,13 +572,137 @@ export function cymbal(engine, n) {
 }
 
 /** @type {Record<string, Voice>} */
+
+/**
+ * Piano.
+ *
+ * The other voices here are instruments that happen to be synthesised. This one
+ * has to be a piano or the whole record is a demo, so it is built out of the
+ * four things that actually make a struck string sound like a struck string —
+ * and none of them is a filter preset.
+ *
+ * **Inharmonicity.** A piano string is stiff, so its partials are not integer
+ * multiples: the nth partial sits at n·f₀·√(1+Bn²). B is tiny in the treble and
+ * large in the bass, which is why a low piano note sounds *spread* and a
+ * synthesiser's sawtooth never does. This is the single thing most responsible
+ * for the difference between "piano" and "machine".
+ *
+ * **Partials that die at different rates.** The top of the spectrum goes first.
+ * A note is bright for a tenth of a second and dark for the rest of its life,
+ * so each partial gets its own decay, shorter the higher it is.
+ *
+ * **Two strings, slightly apart.** Every note above the bass has two or three
+ * strings tuned a hair from each other; the beating between them is the shimmer.
+ * Detune them by a couple of cents and a dead tone becomes a live one.
+ *
+ * **The hammer.** A short filtered noise burst at the attack — felt hitting
+ * wire, not a click. Brighter the harder the note is struck, which is also why
+ * a loud piano note is not merely a quiet one turned up.
+ *
+ * The damper is the note's end: a fast fade, not a release tail, unless the
+ * note is short enough that the string would still be ringing.
+ */
+export function piano(engine, n) {
+  const ctx = engine.ctx;
+  const t = n.time;
+  const vel = clamp(n.vel ?? 0.7, 0.02, 1);
+  const f0 = mtof(n.midi);
+
+  const chain = outputChain(engine, { pan: n.pan ?? 0, send: n.send ?? 0.42, gain: 1 });
+
+  // Stiffness: negligible at the top of the keyboard, unmistakable at the
+  // bottom. The curve is fitted to how real pianos are actually strung.
+  const B = 0.00008 * Math.pow(2, (60 - n.midi) / 12) + 0.00002;
+  // How long the note would ring if nobody lifted the key. Bass strings are
+  // long and heavy and ring for a very long time.
+  const ring = clamp(14 * Math.pow(2, (48 - n.midi) / 22), 0.9, 22);
+  // Struck harder is not just louder — it is brighter, and for longer.
+  const bright = 0.45 + vel * 0.55;
+
+  const PARTIALS = n.midi > 76 ? 5 : n.midi > 60 ? 7 : 9;
+  const detune = n.midi < 34 ? 0 : 2.2 + (72 - n.midi) * 0.035;
+  const strings = detune > 0 ? [-detune, detune] : [0];
+
+  /** @type {OscillatorNode[]} */
+  const oscs = [];
+  let last = t + 0.4;
+
+  for (let k = 1; k <= PARTIALS; k++) {
+    const f = f0 * k * Math.sqrt(1 + B * k * k);
+    if (f > 17000) break;
+    // Falling spectrum, tilted by how hard the key was struck.
+    const amp = (0.62 / Math.pow(k, 1.35)) * Math.pow(bright, k * 0.42) * vel;
+    if (amp < 0.0009) continue;
+    // The higher the partial, the sooner it is gone.
+    const decay = Math.max(0.16, ring / Math.pow(k, 0.78));
+    const end = t + Math.min(decay, ring);
+    if (end > last) last = end;
+
+    for (const cents of strings) {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, t);
+      if (cents) osc.detune.setValueAtTime(cents * (k * 0.5 + 0.5), t);
+      // A struck string's pitch falls a shade as the blow relaxes.
+      osc.frequency.exponentialRampToValueAtTime(f * 0.9985, t + 0.09);
+
+      const g = ctx.createGain();
+      const a = amp / strings.length;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(a, t + 0.004);
+      // Two stages: the quick loss of the initial energy, then the long tail.
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, a * 0.34), t + decay * 0.12);
+      g.gain.exponentialRampToValueAtTime(0.00008, end);
+
+      osc.connect(g);
+      g.connect(chain.input);
+      oscs.push(osc);
+    }
+  }
+
+  // Felt on wire.
+  const hammer = ctx.createBufferSource();
+  hammer.buffer = getNoise(ctx);
+  const hf = ctx.createBiquadFilter();
+  hf.type = 'bandpass';
+  hf.frequency.setValueAtTime(clamp(f0 * 5.5, 400, 5200), t);
+  hf.Q.value = 0.6;
+  const hg = ctx.createGain();
+  hg.gain.setValueAtTime(0, t);
+  hg.gain.linearRampToValueAtTime(vel * 0.06 * bright, t + 0.002);
+  hg.gain.exponentialRampToValueAtTime(0.00008, t + 0.06);
+  hammer.connect(hf); hf.connect(hg); hg.connect(chain.input);
+
+  // The damper.
+  //
+  // A key released stops the string; a key held lets it ring on. So a note
+  // shorter than its own ring is cut, and a note longer than it is simply
+  // allowed to die of its own accord — which is why a pedalled piano and a
+  // staccato one are different instruments.
+  const held = Math.max(0.08, n.dur ?? 0.5);
+  const off = t + held;
+  const stop = Math.min(off + 0.2, last + 0.1);
+  const cg = chain.input.gain;
+  cg.setValueAtTime(1, t);
+  if (off < last) {
+    cg.setValueAtTime(1, off);
+    cg.exponentialRampToValueAtTime(0.0004, off + 0.18);
+  }
+
+  for (const o of oscs) { o.start(t); o.stop(stop + 0.05); }
+  hammer.start(t); hammer.stop(t + 0.12);
+  if (oscs.length) oscs[0].onended = () => { chain.dispose(); hg.disconnect(); };
+  else { hammer.onended = () => { chain.dispose(); hg.disconnect(); }; }
+}
+
 export const VOICES = {
-  strings, harpsichord, harp, pizzicato, celeste, glockenspiel,
+  piano, strings, harpsichord, harp, pizzicato, celeste, glockenspiel,
   flute, choir, contrabass, timpani, cymbal,
 };
 
 /** Human-facing instrument labels for the UI. */
 export const INSTRUMENT_LABEL = Object.freeze({
+  piano: 'PIANO',
   strings: 'STRINGS',
   harpsichord: 'HARPSICHORD',
   harp: 'HARP',

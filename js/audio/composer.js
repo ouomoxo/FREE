@@ -105,8 +105,8 @@ export const STYLES = {
   notturno: {
     label: 'NOTTURNO',
     meter: [4, 4], bpmRange: [50, 60],
-    melody: 'strings', counter: 'harp', pad: 'harp',
-    bass: 'contrabass', accent: null,
+    melody: 'piano', counter: 'piano', pad: 'piano',
+    bass: 'piano', accent: null,
     melodyOctave: 5, padOctave: 4, bassOctave: 2,
     figuration: 'triplet', harmonicRhythm: 1, density: 0.34,
     swing: 0, reverb: 0.66, padLevel: 0.3,
@@ -123,8 +123,8 @@ export const STYLES = {
   still: {
     label: 'STILL',
     meter: [4, 4], bpmRange: [52, 64],
-    melody: 'celeste', counter: 'harp', pad: 'harp',
-    bass: 'contrabass', accent: null,
+    melody: 'piano', counter: 'piano', pad: 'piano',
+    bass: 'piano', accent: null,
     melodyOctave: 5, padOctave: 4, bassOctave: 2,
     figuration: 'suspended', harmonicRhythm: 1, density: 0.2,
     swing: 0, reverb: 0.74, padLevel: 0.26,

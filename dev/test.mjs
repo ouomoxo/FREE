@@ -594,7 +594,7 @@ test('a solo style is written for one player and left that way', () => {
       !score.instruments.includes('timpani') && !score.instruments.includes('cymbal'),
       `${style} has no percussion in it`,
     );
-    assert.ok(score.instruments.length <= 3, `${style} keeps to a few voices`);
+    assert.deepEqual(score.instruments, ['piano'], `${style} is played on a piano and nothing else`);
   }
 });
 
@@ -609,7 +609,7 @@ test('the held figure really is held, and the still one really is still', () => 
   let covered = 0;
   for (let b = 2; b < bars - 2; b++) {
     const from = b * barLen;
-    if (held.events.some((e) => e.i === 'harp' && e.t >= from && e.t < from + barLen)) covered++;
+    if (held.events.some((e) => e.i === 'piano' && e.t >= from && e.t < from + barLen)) covered++;
   }
   assert.ok(covered > (bars - 4) * 0.9, `figure present in ${covered}/${bars - 4} bars`);
 
