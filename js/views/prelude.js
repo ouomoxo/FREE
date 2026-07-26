@@ -1,17 +1,18 @@
 /**
  * MAESTRO — Prelude.
  *
- * The front of the house. Not a landing page for a product: a piece, in nine
+ * The front of the house. Not a landing page for a product: a piece, in thirteen
  * short movements, made of the two things the whole project is built from — a
  * point and a line.
  *
  * One population of a few thousand points carries the entire sequence. It
  * arrives as a conductor's hands, is drawn out into a harmonic curve, and then
- * becomes each of the plates in turn — two animals cheek to cheek, a held
- * look, a figure alone with a lamp, a face under water, a fish that is nothing
- * but a line, a flower that opens at night, and the hands again — the same
- * points travelling from one picture to the next without anything ever fading.
- * At the end it lets you in.
+ * becomes each of the plates in turn — a child answering himself in a mirror,
+ * two animals cheek to cheek, a held look, a figure alone with a lamp, a face
+ * under water, a fish that is nothing but a line, a flower that opens at
+ * night, three blooms in a fist, two people running through weather, and the
+ * hands again — the same points travelling from one picture to the next
+ * without anything ever fading. At the end it lets you in.
  *
  * The hall itself, with its catalogue and its transport, is behind the last
  * door. Nothing sounds here.
@@ -71,6 +72,20 @@ const MOVEMENTS = [
   },
   {
     numeral: 'III',
+    title: 'THE ANSWER',
+    line: 'A fugue begins alone. Then the same phrase returns, a fifth higher, '
+        + 'in another voice — not a reply but the subject looking back at '
+        + 'itself, and refusing to be one thing.',
+    src: plate('mirror.jpg'),
+    mode: 'shadow',
+    side: 'right',
+    fit: 0.8,
+    fitW: 0.4,
+    floor: 0.42,
+    curves: 0.18,
+  },
+  {
+    numeral: 'IV',
     title: 'THE DUET',
     line: 'Consonance is not sameness. Two voices hold their distance and agree '
         + 'anyway — which is the whole of counterpoint, and most of everything else.',
@@ -79,14 +94,14 @@ const MOVEMENTS = [
     // as a mass, the dark one as almost nothing — and a single gold eye. That
     // asymmetry is the movement, so nothing is done to even it out.
     mode: 'relief',
-    side: 'right',
+    side: 'left',
     fit: 0.7,
     fitW: 0.44,
     floor: 0.2,
     curves: 0.14,
   },
   {
-    numeral: 'IV',
+    numeral: 'V',
     title: 'THE GAZE',
     line: 'A held note and a held look are the same refusal: to move on, to '
         + 'resolve, to let the moment finish. Everything a piece means happens '
@@ -95,20 +110,20 @@ const MOVEMENTS = [
     // Brows, lashes, and one strand of hair fallen across the frame: the whole
     // picture is its dark marks, so those are what the points are given.
     mode: 'shadow',
-    side: 'left',
+    side: 'right',
     fit: 0.54,
     fitW: 0.46,
     floor: 0.42,
     curves: 0.1,
   },
   {
-    numeral: 'V',
+    numeral: 'VI',
     title: 'ALONE',
     line: 'Almost all of this music was written for one person in a dark room. '
         + 'A single lamp, a turned back, and something being listened to very '
         + 'closely.',
     src: plate('solitude.jpg'),
-    side: 'right',
+    side: 'left',
     fit: 0.72,
     fitW: 0.42,
     // Low enough to keep the drapes, so the lamp has a room to stand in and
@@ -118,39 +133,39 @@ const MOVEMENTS = [
     curves: 0.08,
   },
   {
-    numeral: 'VI',
+    numeral: 'VII',
     title: 'THE SURFACE',
     line: 'Sound reaches a submerged ear late, and with the top taken off it. '
         + 'Most listening is done from under something.',
     src: plate('surface.jpg'),
     mode: 'shadow',
-    side: 'left',
+    side: 'right',
     fit: 0.76,
     fitW: 0.4,
     floor: 0.4,
     curves: 0.1,
   },
   {
-    numeral: 'VII',
+    numeral: 'VIII',
     title: 'THE LINE',
     line: 'One voice, unaccompanied, moving through something that resists it '
         + 'exactly enough to make the movement visible. A melody is not a shape. '
         + 'It is a shape being drawn.',
     src: plate('line.jpg'),
     mode: 'shadow',
-    side: 'right',
+    side: 'left',
     fit: 0.82,
     fitW: 0.44,
     floor: 0.34,
     curves: 0.16,
   },
   {
-    numeral: 'VIII',
+    numeral: 'IX',
     title: 'THE BLOOM',
     line: 'A night-flowering cereus opens once, after dark, for a few hours. '
         + 'Nobody is required to be there. It opens anyway.',
     src: plate('bloom.jpg'),
-    side: 'left',
+    side: 'right',
     fit: 0.68,
     fitW: 0.42,
     floor: 0.2,
@@ -158,17 +173,70 @@ const MOVEMENTS = [
     curves: 0.12,
   },
   {
-    numeral: 'IX',
+    numeral: 'X',
+    title: 'THE OFFERING',
+    line: 'Three white flowers held against a black coat. The quietest movement '
+        + 'in any programme is the one where almost nothing is played, and '
+        + 'everyone leans in.',
+    src: plate('flowers.jpg'),
+    // Almost the whole frame is coat. What survives the floor is a hand and
+    // three blooms — a fraction of the points the other plates use, and the
+    // sparseness is the point.
+    side: 'left',
+    fit: 0.72,
+    fitW: 0.42,
+    floor: 0.3,
+    curves: 0.14,
+  },
+  {
+    numeral: 'XI',
+    title: 'THE RAIN',
+    line: 'Two people running through weather, holding on, going somewhere they '
+        + 'have not explained. Every piece of music is finally about this and '
+        + 'pretends to be about something else.',
+    src: plate('rain.jpg'),
+    // Cropped hard into the two of them. At full frame the trees win, and the
+    // trees are not what the movement is about.
+    mode: 'shadow',
+    side: 'right',
+    fit: 0.78,
+    fitW: 0.44,
+    zoom: 1.9,
+    offsetX: -0.1,
+    offsetY: -0.06,
+    floor: 0.56,
+    curves: 0.12,
+  },
+  {
+    numeral: 'XII',
+    title: 'THE HANDS',
+    line: 'Painted, not photographed: someone else looking at the same subject '
+        + 'and finding the same answer. Light on a hand, and everything around '
+        + 'it given away.',
+    src: plate('hands.jpg'),
+    side: 'left',
+    fit: 0.74,
+    fitW: 0.42,
+    floor: 0.22,
+    gamma: 0.9,
+    curves: 0.16,
+  },
+  {
+    numeral: 'XIII',
     title: 'THE HALL',
     line: 'Beyond this, a repertoire that does not exist: nine ensembles, twenty '
         + 'records, a hundred and five movements, every note composed and '
         + 'synthesised at the moment you ask for it.',
     src: reference('conductor-b.jpg'),
+    // Cropped in, so the hands fill the plate. At full frame most of the
+    // photograph is black and most of the field would have nothing to do.
     side: 'right',
-    fit: 0.84,
-    fitW: 0.42,
-    floor: 0.1,
-    gamma: 0.88,
+    fit: 0.86,
+    fitW: 0.44,
+    zoom: 1.32,
+    offsetY: -0.02,
+    floor: 0.08,
+    gamma: 0.86,
     curves: 0.2,
   },
 ];

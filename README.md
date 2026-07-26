@@ -19,13 +19,15 @@ open http://localhost:8000
 
 The site is in two parts, and the order matters.
 
-**`/` is the prelude** — a piece in nine short movements, made of the only two
-things this project is built from: a point and a line. One population of 5,200
-points carries the whole sequence. It arrives as a conductor's hands, is drawn
-out into a Lissajous figure of a perfect fifth, and then becomes each plate in
-turn — two animals cheek to cheek, a held look, a figure alone with a lamp, a
-face under water, a fish that is nothing but a line, a flower that opens at
-night — and finally the hands again, holding the door.
+**`/` is the prelude** — a piece in thirteen short movements, made of the only
+two things this project is built from: a point and a line. One population of
+5,200 points carries the whole sequence. It arrives as a conductor's hands, is
+drawn out into a Lissajous figure of a perfect fifth, and then becomes each
+plate in turn — a child answering himself in a mirror, two animals cheek to
+cheek, a held look, a figure alone with a lamp, a face under water, a fish that
+is nothing but a line, a flower that opens at night, three blooms held in a
+fist, two people running through weather — and finally the hands again, holding
+the door.
 
 Nothing sounds here and nothing is a control except the way in. The same points
 travel from one picture to the next; no image ever fades in or out.
@@ -157,6 +159,7 @@ js/
 dev/
   test.mjs            unit suite for every DOM-free layer
   shot.mjs            Playwright visual-QA harness
+  film.mjs            films the piece on a virtual clock, straight to H.264
   halftone-lab.html   dot pitch, screen angle, tonal response
   art-lab.html        the bitmap face and the generated sleeve motifs
 ```
@@ -275,9 +278,21 @@ node dev/shot.mjs /tmp/shots      # screenshots every route and breakpoint,
                                   # including scripted "while playing" states,
                                   # and reports any console error
 node dev/shot.mjs /tmp/shots --only=concert
+node dev/film.mjs /tmp/maestro.mp4 # films the whole piece — see below
 open dev/halftone-lab.html        # tune the screen against the photographs
 open dev/art-lab.html             # the bitmap face and the sleeve motifs
 ```
+
+`film.mjs` records one continuous take: the prelude from the first movement to
+the door, the way in, and the hall playing. The page runs on a **virtual
+clock** — `performance.now`, `Date.now`, `requestAnimationFrame` and the timer
+functions are all replaced before the application loads, and the harness
+advances them exactly one frame at a time. Nothing is dropped and nothing
+stutters: a screenshot that takes a tenth of a second to capture still
+represents one thirtieth of a second of the piece. Frames go straight into
+ffmpeg over a pipe as lossless PNG, because handing a field of single-pixel
+dots on near-black to a low-bitrate intermediate codec destroys exactly the
+thing worth filming. Point `FFMPEG_PATH` at an ffmpeg with libx264.
 
 The test suite covers the parts where a silent regression would be hardest to
 notice by eye — that the composer's estimated durations match its real ones,

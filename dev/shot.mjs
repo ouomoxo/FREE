@@ -106,7 +106,7 @@ const ACTIONS = {
     await page.click('.concert__top .btn');
     await page.waitForTimeout(2600);
   },
-  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map((i) => [`scrollTo${i}`, async (page) => {
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => [`scrollTo${i}`, async (page) => {
     await page.evaluate((n) => {
       const flow = document.querySelector('.prelude__flow');
       const target = document.querySelectorAll('.movement')[n];
@@ -148,7 +148,8 @@ const ACTIONS = {
 const SHOTS = [
   { name: 'lab',          path: '/dev/art-lab.html',  width: 1280, height: 1200, full: true },
   { name: 'halftone',     path: '/dev/halftone-lab.html', width: 1500, height: 1200, full: true, wait: 900 },
-  { name: 'prelude-1',    path: '/',                  width: 1600, height: 1000, wait: 2600 },
+  { name: 'prelude-open', path: '/',                  width: 1600, height: 1000, wait: 1100 },
+  { name: 'prelude-1',    path: '/',                  width: 1600, height: 1000, wait: 4600 },
   { name: 'prelude-2',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo1' },
   { name: 'prelude-3',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo2' },
   { name: 'prelude-4',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo3' },
@@ -157,6 +158,10 @@ const SHOTS = [
   { name: 'prelude-7',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo6' },
   { name: 'prelude-8',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo7' },
   { name: 'prelude-9',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo8' },
+  { name: 'prelude-10',   path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo9' },
+  { name: 'prelude-11',   path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo10' },
+  { name: 'prelude-12',   path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo11' },
+  { name: 'prelude-13',   path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo12' },
   { name: 'prelude-morph-a', path: '/',              width: 1600, height: 1000, wait: 0, action: 'morph420' },
   { name: 'prelude-morph-b', path: '/',              width: 1600, height: 1000, wait: 0, action: 'morph900' },
   { name: 'prelude-mobile', path: '/',                width: 390,  height: 844,  wait: 2400 },
