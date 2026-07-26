@@ -1,11 +1,17 @@
 /**
- * MAESTRO — Dot-matrix spectrum.
+ * MAESTRO — The sounding score, drawn.
  *
- * Reads the analyser node and renders it as a field of round dots: logarithmic
- * frequency columns, quantised into cells, with peak-hold markers that fall at
- * a fixed rate. Each cell holds one dot that never quite fills it, so the
- * display reads as points rather than as a curve — the same grammar as the
- * halftone artwork and the typeface.
+ * Five readings of the same music, all of them made of the same two marks the
+ * rest of the project is made of.
+ *
+ * `aria` is the one the concert hall opens on: every voice in the score drawn
+ * as one continuous hairline, level while a note is held and sweeping when it
+ * moves, scrolling under a fixed playhead. It is not a visualisation of the
+ * audio — the composer materialises the whole score before a note sounds, so
+ * this is the music itself, written out as a line while you listen to it.
+ *
+ * `matrix`, `score`, `wave` and `field` are the dot readings: logarithmic
+ * spectrum columns, a piano roll, the waveform, and a lattice.
  *
  * @module ui/visualizer
  */
@@ -15,7 +21,7 @@ import { transport } from '../audio/transport.js';
 import { findEventIndex } from '../audio/composer.js';
 import { clamp, damp, prefersReducedMotion } from '../core/utils.js';
 
-const MODES = ['matrix', 'score', 'wave', 'field'];
+const MODES = ['aria', 'matrix', 'score', 'wave', 'field'];
 
 /** Instrument -> tone, for the piano roll. Melody parts read brightest. */
 const PART_TONE = {
@@ -24,6 +30,44 @@ const PART_TONE = {
   strings: 'ink', pizzicato: 'bright',
   contrabass: 'dim', timpani: 'dim', cymbal: 'dim',
 };
+
+/** Instruments with no pitch, and so no place on a line of pitch. */
+const UNPITCHED = new Set(['timpani', 'cymbal']);
+
+/**
+ * Which part of a score is the tune.
+ *
+ * Not the highest — a string pad sits on top of everything and never moves,
+ * and a drawing that follows it is a straight line. The tune is the part that
+ * *travels*: the one whose consecutive notes are furthest apart, summed over
+ * the whole piece. That is very close to what a listener means by the melody,
+ * and it needs no table of instrument names to be right.
+ *
+ * Computed once and hung on the score, since a score never changes.
+ */
+function melodyPart(score) {
+  if (score.__melody) return score.__melody;
+  /** @type {Map<string, {last: number, travel: number, n: number}>} */
+  const parts = new Map();
+  for (const e of score.events) {
+    if (UNPITCHED.has(e.i)) continue;
+    const p = parts.get(e.i) ?? { last: e.m, travel: 0, n: 0 };
+    p.travel += Math.abs(e.m - p.last);
+    p.last = e.m;
+    p.n++;
+    parts.set(e.i, p);
+  }
+  let best = null;
+  let score_ = -1;
+  for (const [name, p] of parts) {
+    // Travel per note, weighted by how much of the piece the part is present
+    // for — so a busy flourish in one bar does not outrank the actual tune.
+    const v = (p.travel / Math.max(1, p.n)) * Math.sqrt(p.n);
+    if (v > score_) { score_ = v; best = name; }
+  }
+  score.__melody = best;
+  return best;
+}
 
 export class Visualizer {
   /** @type {HTMLCanvasElement|null} */ #canvas = null;
@@ -34,6 +78,11 @@ export class Visualizer {
 
   /** @type {Float32Array} */ #levels = new Float32Array(0);
   /** @type {Float32Array} */ #peaks = new Float32Array(0);
+  /** Chased, so the threads swell into loudness rather than snapping. */
+  #figureWeight = 0;
+  /** The register the drawing is currently opened out to. */
+  #gainLo = 0.35;
+  #gainHi = 0.65;
   /** @type {ResizeObserver|null} */ #observer = null;
   #resizeFrame = 0;
   #dpr = 1;
@@ -184,8 +233,208 @@ export class Visualizer {
       case 'wave': this.#drawWave(ctx, W, H); break;
       case 'field': this.#drawField(ctx, W, H); break;
       case 'score': this.#drawScore(ctx, W, H); break;
+      case 'aria': this.#drawAria(ctx, W, H); break;
       default: this.#drawMatrix(ctx, W, H);
     }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The aria: the score as lines.
+   * ------------------------------------------------------------------ */
+
+  /**
+   * The contour of the music, as a continuous function of time.
+   *
+   * Sampled coarsely across the window and then smoothed several times over,
+   * so what comes out is not a sequence of notes but the shape they make —
+   * a wave. Nothing here is quantised to anything.
+   *
+   * @returns {Float32Array} 0..1, low to high, one value per sample.
+   */
+  #ariaContour(score, t0, window, N) {
+    const events = score.events;
+    const melody = melodyPart(score);
+    const LO = 36;
+    const HI = 88;
+    const raw = new Float32Array(N).fill(-1);
+
+    // The tune where it is singing, and the top of the texture where it is
+    // not — because a window in which the melody happens to be resting is
+    // still a window with music in it.
+    const fallback = new Float32Array(N).fill(-1);
+    let i = findEventIndex(events, t0 - 16);
+    for (; i < events.length; i++) {
+      const e = events[i];
+      if (e.t > t0 + window) break;
+      if (e.t + e.d < t0) continue;
+      if (UNPITCHED.has(e.i)) continue;
+      const s0 = Math.max(0, Math.floor(((e.t - t0) / window) * N));
+      const s1 = Math.min(N - 1, Math.ceil(((e.t + e.d - t0) / window) * N));
+      const v = clamp((e.m - LO) / (HI - LO), 0, 1);
+      const into = e.i === melody ? raw : fallback;
+      for (let s = s0; s <= s1; s++) if (v > into[s]) into[s] = v;
+    }
+    for (let s = 0; s < N; s++) if (raw[s] < 0) raw[s] = fallback[s];
+
+    // Silence is not a hole in the line — the line keeps going where it was.
+    let last = 0.5;
+    for (let s = 0; s < N; s++) {
+      if (raw[s] < 0) raw[s] = last; else last = raw[s];
+    }
+    for (let s = N - 1; s >= 0; s--) {
+      if (raw[s] < 0) raw[s] = last; else last = raw[s];
+    }
+
+    // Three passes of a box, which is what turns a staircase into silk.
+    let src = raw;
+    let dst = new Float32Array(N);
+    const R = Math.max(2, Math.round(N * 0.012));
+    for (let pass = 0; pass < 3; pass++) {
+      let sum = 0;
+      for (let k = -R; k <= R; k++) sum += src[clamp(k, 0, N - 1)];
+      for (let s = 0; s < N; s++) {
+        dst[s] = sum / (R * 2 + 1);
+        sum += src[clamp(s + R + 1, 0, N - 1)] - src[clamp(s - R, 0, N - 1)];
+      }
+      const t = src; src = dst; dst = t;
+    }
+
+    // Then opened out to fill the frame.
+    //
+    // A tune that stays inside a fifth would otherwise be a flat line on a
+    // scale wide enough for a piccolo, which is the truth and is also nothing
+    // to look at. The window is read against its own range instead of against
+    // the piano — and the range is chased rather than set, so the drawing
+    // breathes open and closed as the music's tessitura moves instead of
+    // jumping whenever one high note enters or leaves.
+    let lo = 1;
+    let hi = 0;
+    for (let s = 0; s < N; s++) {
+      if (src[s] < lo) lo = src[s];
+      if (src[s] > hi) hi = src[s];
+    }
+    if (hi - lo < 0.06) { const c = (hi + lo) / 2; lo = c - 0.03; hi = c + 0.03; }
+    this.#gainLo = damp(this.#gainLo, lo, 0.7, 1 / 60);
+    this.#gainHi = damp(this.#gainHi, hi, 0.7, 1 / 60);
+    const span = Math.max(0.05, this.#gainHi - this.#gainLo);
+    for (let s = 0; s < N; s++) src[s] = clamp((src[s] - this.#gainLo) / span, -0.15, 1.15);
+
+    return src;
+  }
+
+  /** One thread, drawn through the contour with a curve and never a corner. */
+  #ariaThread(ctx, contour, W, H, o) {
+    const N = contour.length;
+    const mid = H * 0.5;
+    const reach = H * 0.31 * o.amp;
+    const lag = o.lag ?? 0;
+    const sway = o.sway ?? 0;
+
+    /** @type {number[]} */
+    const xs = [];
+    /** @type {number[]} */
+    const ys = [];
+    for (let s = 0; s < N; s++) {
+      const k = clamp(s - lag, 0, N - 1);
+      const u = s / (N - 1);
+      xs.push(u * W);
+      // A slow independent drift, so two threads carrying the same contour are
+      // never the same line twice.
+      ys.push(mid - (contour[k] - 0.5) * 2 * reach
+        + Math.sin(u * 4.3 + o.phase) * H * 0.012 * sway
+        + Math.sin(u * 9.1 - o.phase * 1.6) * H * 0.006 * sway);
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(xs[0], ys[0]);
+    // Midpoint quadratics: every joint is a tangent, so the thread has no
+    // corners anywhere along its length.
+    for (let s = 1; s < N - 1; s++) {
+      ctx.quadraticCurveTo(xs[s], ys[s], (xs[s] + xs[s + 1]) / 2, (ys[s] + ys[s + 1]) / 2);
+    }
+    ctx.lineTo(xs[N - 1], ys[N - 1]);
+    ctx.stroke();
+  }
+
+  #drawAria(ctx, W, H) {
+    const score = transport.score;
+    if (!score) { this.#drawAriaIdle(ctx, W, H); return; }
+
+    const dpr = this.#dpr;
+    const now = transport.position;
+    // Two bars, and never more than about eight seconds: a window long enough
+    // to hold a phrase and short enough that the phrase is still visible in it.
+    const window = clamp(score.secPerBeat * score.meter[0] * 2, 4.5, 8);
+    const t0 = now - window * 0.5;
+    const N = 240;
+    const contour = this.#ariaContour(score, t0, window, N);
+
+    // How loud it is, softly — the threads swell and are never still.
+    let level = 0;
+    for (let c = 0; c < this.#levels.length; c++) level += this.#levels[c];
+    level = clamp(level / Math.max(1, this.#levels.length) * 2.4, 0, 1);
+    this.#figureWeight = damp(this.#figureWeight, level, 0.22, 1 / 60);
+    const amp = 0.62 + this.#figureWeight * 0.5;
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Three threads of one music: the line, and two slower memories of it.
+    // Nothing else is drawn. There is no grid, no bar, no scale, no playhead —
+    // the emptiness around them is the greater part of the picture.
+    const THREADS = [
+      { lag: 0, amp: 1, sway: 0.35, width: 1.15, alpha: 0.8, ink: '236,231,220' },
+      { lag: N * 0.045, amp: 0.94, sway: 0.7, width: 0.85, alpha: 0.3, ink: '236,231,220' },
+      { lag: N * 0.1, amp: 0.87, sway: 1.1, width: 0.7, alpha: 0.15, ink: '217,185,120' },
+    ];
+
+    for (let k = THREADS.length - 1; k >= 0; k--) {
+      const th = THREADS[k];
+      ctx.lineWidth = th.width * dpr;
+      ctx.strokeStyle = `rgba(${th.ink},${th.alpha.toFixed(3)})`;
+      this.#ariaThread(ctx, contour, W, H, {
+        lag: th.lag,
+        amp: amp * th.amp,
+        sway: th.sway,
+        phase: now * 0.14 + k * 2.4,
+      });
+    }
+
+    // One warm point, riding the thread at the centre of the frame. It is the
+    // only thing on the screen that marks a moment, and it is four pixels wide.
+    const c = clamp(Math.round(N * 0.5), 0, N - 1);
+    const y = H * 0.5 - (contour[c] - 0.5) * 2 * (H * 0.31 * amp);
+    ctx.fillStyle = 'rgba(217,185,120,0.85)';
+    ctx.beginPath();
+    ctx.arc(W * 0.5, y, 2 * dpr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /**
+   * With nothing playing there is no score to draw, so the frame keeps one
+   * line — a slow, unresolving drift, waiting.
+   */
+  #drawAriaIdle(ctx, W, H) {
+    const dpr = this.#dpr;
+    const t = performance.now() / 1000;
+    ctx.strokeStyle = 'rgba(236,231,220,0.13)';
+    ctx.lineWidth = dpr;
+    ctx.lineJoin = 'round';
+    for (let line = 0; line < 3; line++) {
+      const ph = line * 2.1;
+      const amp = H * (0.055 - line * 0.012);
+      ctx.globalAlpha = 1 - line * 0.3;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 3) {
+        const u = x / W;
+        const y = H * 0.5
+          + Math.sin(u * 5.1 + t * 0.19 + ph) * amp
+          + Math.sin(u * 11.7 - t * 0.13 + ph * 1.7) * amp * 0.42;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 
   /**

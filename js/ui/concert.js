@@ -55,7 +55,9 @@ export function mountConcert(root) {
       const next = VISUALIZER_MODES[(i + 1) % VISUALIZER_MODES.length];
       actions.setVisualizer(next);
       concertVisualizer.setMode(next);
+      setAttr(root, 'data-viz', next);
       setText(modeBtn, next.toUpperCase());
+      concertVisualizer.resize();
       setAttr(root, 'data-viz', next);
     },
   }, store.state.visualizer.toUpperCase());

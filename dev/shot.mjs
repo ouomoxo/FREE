@@ -97,6 +97,13 @@ const ACTIONS = {
     await page.fill('.searchbox input', 'hands');
     await page.waitForTimeout(600);
   },
+  /** Play and sit in the concert hall long enough for the score to be drawn. */
+  async concertLong(page) {
+    await page.click('.track >> nth=0');
+    await page.waitForTimeout(1200);
+    await page.keyboard.press('f');
+    await page.waitForTimeout(26000);
+  },
   /** Play, open the concert hall, then switch to the score visualiser. */
   async playScore(page) {
     await page.click('.track >> nth=0');
@@ -185,6 +192,7 @@ const SHOTS = [
   { name: 'search-query', path: '/#/search',          width: 1600, height: 1000, wait: 1400, action: 'search' },
   { name: 'library-full', path: '/#/library',         width: 1600, height: 1000, wait: 1400, action: 'library' },
   { name: 'playing-mobile', path: '/#/album/op27',    width: 390,  height: 844,  wait: 1400, action: 'play' },
+  { name: 'concert-aria',  path: '/#/album/op27', width: 1600, height: 1000, wait: 0, action: 'concertLong' },
   { name: 'concert-score', path: '/#/album/toccatas', width: 1600, height: 1000, wait: 1400, action: 'playScore' },
   { name: 'help',         path: '/#/hall',            width: 1600, height: 1000, wait: 1400, action: 'help' },
   { name: 'queue',        path: '/#/queue',           width: 1600, height: 1000, wait: 1400 },

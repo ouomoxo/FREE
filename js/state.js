@@ -86,7 +86,7 @@ const initial = {
   helpOpen: false,
   queueOpen: false,
   density: read(K.DENSITY, 'comfortable'),
-  visualizer: read(K.VISUALIZER, 'matrix'),
+  visualizer: read(K.VISUALIZER, 'aria'),
   toast: null,
 };
 

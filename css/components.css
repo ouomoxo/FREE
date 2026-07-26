@@ -80,8 +80,11 @@
 .ibtn--lg { width: 40px; height: 40px; }
 .ibtn:disabled { opacity: 0.3; }
 
-/* The transport's play button — the only solid mass in the interface. */
+/* The transport's play button — the only solid mass in the interface, and the
+   only round thing in it. A square corner is a decision somebody made; a
+   circle is the shape a held note has. */
 .playbtn {
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -95,6 +98,11 @@
 .playbtn:hover { background: var(--c-bone-bright); transform: scale(1.06); }
 .playbtn:active { transform: scale(0.96); }
 .playbtn--lg { width: 52px; height: 52px; }
+
+/* Everything that sits beside it follows, so the transport reads as one row of
+   round marks rather than a toolbar. */
+.ibtn { border-radius: 50%; }
+.ibtn[aria-pressed="true"]::after, .ibtn.is-active::after { bottom: 2px; }
 
 /* --- Chips / pills -------------------------------------------------------- */
 

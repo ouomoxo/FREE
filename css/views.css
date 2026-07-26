@@ -295,6 +295,15 @@
 /* The piano roll earns more of the stage than a spectrum does. */
 .concert[data-viz="score"] .concert__spectrum { height: 52%; }
 
+/* The aria is not an accessory to the photograph — while it is on, the music
+   is the picture, and the photograph is the wall it is written on. */
+.concert[data-viz="aria"] .concert__spectrum { height: 100%; opacity: 1; }
+.concert[data-viz="aria"] .concert__hands {
+  opacity: 0.12;
+  max-width: min(56vw, 560px);
+  transition: opacity var(--m-slow) var(--ease-out);
+}
+
 .concert__bottom {
   display: flex;
   flex-direction: column;

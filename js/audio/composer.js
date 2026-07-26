@@ -415,6 +415,8 @@ export function compose(spec) {
     meter: [meterTop, meterBottom],
     secPerBeat, bars: totalBars,
     key: spec.key, mode, instruments, chords: chordMarks,
+    /** Pitch class of the tonic — the drawn score rules its staff on it. */
+    tonicClass: ((tonic % 12) + 12) % 12,
     reverb: style.reverb,
     styleLabel: style.label,
   };
