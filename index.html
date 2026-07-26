@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>선율 · SEONYUL — 점과 선으로 짓는 하나의 세계</title>
+<meta name="description" content="점(點)과 선(線), 그리고 0과 1. 하나의 화면 위에 지어진 여섯 개의 악장. An interactive artwork built from dots, lines and binary.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="선율 · SEONYUL">
+<meta property="og:description" content="점과 선으로 짓는 하나의 세계 — 여섯 개의 악장.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@200;300;400&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ░░ 00 · OVERTURE / LOADER ░░ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader__inner">
+    <div class="loader__bin" id="loaderBin">00000000</div>
+    <div class="loader__bar"><span id="loaderBar"></span></div>
+    <div class="loader__meta">
+      <span>선율 · SEONYUL</span>
+      <span id="loaderNum">000</span>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ CANVAS STAGE ░░ -->
+<div class="stage">
+  <canvas id="stage" aria-hidden="true"></canvas>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<!-- ░░ HUD ░░ -->
+<header class="hud hud--tl">
+  <div class="hud__mark">선율</div>
+  <div class="hud__sub">SEONYUL <span class="dim">/ 點線 ARCHIVE</span></div>
+</header>
+
+<div class="hud hud--tr">
+  <div class="hud__row"><span class="dim">LAT</span> <span id="mLat">37.5665</span></div>
+  <div class="hud__row"><span class="dim">LON</span> <span id="mLon">126.9780</span></div>
+  <div class="hud__row"><span class="dim">UTC</span> <span id="mClock">00:00:00</span></div>
+</div>
+
+<div class="hud hud--bl">
+  <div class="hud__idx"><span id="mIdx">000</span><span class="dim"> / 005</span></div>
+  <div class="hud__name" id="mName">PRELUDE</div>
+</div>
+
+<div class="hud hud--br">
+  <button class="snd" id="sndBtn" aria-pressed="false">
+    <span class="snd__dot"></span><span class="snd__label">SOUND <b id="sndState">OFF</b></span>
+  </button>
+  <div class="hud__row hud__fps"><span class="dim">FRAME</span> <span id="mFrame">000000</span></div>
+</div>
+
+<nav class="rail" aria-label="악장">
+  <a href="#s0" class="rail__tick" data-i="0"><span>000</span></a>
+  <a href="#s1" class="rail__tick" data-i="1"><span>001</span></a>
+  <a href="#s2" class="rail__tick" data-i="2"><span>002</span></a>
+  <a href="#s3" class="rail__tick" data-i="3"><span>003</span></a>
+  <a href="#s4" class="rail__tick" data-i="4"><span>004</span></a>
+  <a href="#s5" class="rail__tick" data-i="5"><span>005</span></a>
+  <i class="rail__thumb" id="railThumb"></i>
+</nav>
+
+<!-- ░░ CONTENT ░░ -->
+<main class="content">
+
+  <!-- 000 · PRELUDE -->
+  <section class="sec sec--hero" id="s0" data-scene="field" data-name="PRELUDE" data-han="序">
+    <div class="frame">
+      <div class="hero">
+        <div class="hero__meta reveal">
+          <span><i>000</i></span><span><i>·</i></span><span><i>PRELUDE</i></span>
+        </div>
+        <h1 class="hero__title">
+          <span class="reveal" style="--d:.05s"><i>선</i></span><span class="reveal" style="--d:.16s"><i>율</i></span>
+        </h1>
+        <div class="hero__latin reveal" style="--d:.34s"><span><i>S E O N Y U L</i></span></div>
+        <p class="hero__lead reveal" style="--d:.46s">
+          <span><i>점과 선으로 짓는 하나의 세계.</i></span>
+          <span><i>A world built from dots and lines.</i></span>
+        </p>
+        <div class="hero__nums" aria-hidden="true">
+          <span>01001100</span><span>·</span><span>006</span><span>·</span><span>1 / ∞</span>
+        </div>
+      </div>
+      <div class="cue">
+        <span class="cue__t">SCROLL</span>
+        <span class="cue__l"><i></i></span>
+        <span class="cue__n">000 → 005</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 001 · 點 -->
+  <section class="sec" id="s1" data-scene="dot" data-name="DOT · 點" data-han="點">
+    <div class="frame frame--split">
+      <div class="col col--l">
+        <div class="tag reveal"><span><i>001</i></span><span><i>點</i></span></div>
+        <h2 class="h2 reveal" style="--d:.1s">
+          <span><i>점 하나.</i></span>
+          <span><i>그것이 모든 것의</i></span>
+          <span><i>시작이다.</i></span>
+        </h2>
+        <p class="p reveal" style="--d:.3s">
+          <span><i>절제된 점은 침묵을 닮았다. 아무것도 말하지 않기에</i></span>
+          <span><i>모든 것을 말할 수 있다.</i></span>
+        </p>
+        <p class="p p--en reveal" style="--d:.4s">
+          <span><i>A single dot. The beginning of everything —</i></span>
+          <span><i>silent, and therefore able to say anything.</i></span>
+        </p>
+      </div>
+      <div class="col col--r">
+        <dl class="data">
+          <div><dt>POINTS</dt><dd id="dDots">1,600</dd></div>
+          <div><dt>ORDER</dt><dd>GRID → RING → φ</dd></div>
+          <div><dt>φ</dt><dd>1.6180339887</dd></div>
+          <div><dt>STATE</dt><dd id="dState">CONVERGING</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 002 · 線 -->
+  <section class="sec" id="s2" data-scene="line" data-name="LINE · 線" data-han="線">
+    <div class="frame frame--split">
+      <div class="col col--l">
+        <div class="tag reveal"><span><i>002</i></span><span><i>線</i></span></div>
+        <h2 class="h2 reveal" style="--d:.1s">
+          <span><i>점이 흐르면 선이 되고,</i></span>
+          <span><i>선이 떨리면</i></span>
+          <span><i>선율이 된다.</i></span>
+        </h2>
+        <p class="p reveal" style="--d:.3s">
+          <span><i>일곱 개의 선, 다섯 개의 음.</i></span>
+          <span><i>하나의 재생선이 왼쪽에서 오른쪽으로</i></span>
+          <span><i>화면을 연주한다.</i></span>
+        </p>
+        <p class="p p--en reveal" style="--d:.4s">
+          <span><i>Seven lines, five notes,</i></span>
+          <span><i>one playhead. The screen performs itself.</i></span>
+        </p>
+        <p class="hint reveal" style="--d:.5s"><span><i>커서를 움직여 선을 흔들어 보세요 · MOVE TO BEND</i></span></p>
+      </div>
+      <div class="col col--r">
+        <dl class="data">
+          <div><dt>VOICES</dt><dd>07</dd></div>
+          <div><dt>SCALE</dt><dd>PENTATONIC · C</dd></div>
+          <div><dt>Hz</dt><dd id="dHz">261.63</dd></div>
+          <div><dt>PHASE</dt><dd id="dPhase">0.000</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 003 · 世界 -->
+  <section class="sec" id="s3" data-scene="world" data-name="WORLD · 世界" data-han="世">
+    <div class="frame frame--bottom">
+      <div class="wide">
+        <div class="tag reveal"><span><i>003</i></span><span><i>世界</i></span></div>
+        <h2 class="h2 h2--wide reveal" style="--d:.1s">
+          <span><i>우리는 같은 점 위에 산다.</i></span>
+        </h2>
+        <div class="wide__row">
+          <p class="p reveal" style="--d:.3s">
+            <span><i>9,900개의 점이 대륙이 된다. 그 위에 80억 개의</i></span>
+            <span><i>더 작은 점이 각자의 선율을 그리며 산다.</i></span>
+          </p>
+          <p class="p p--en reveal" style="--d:.4s">
+            <span><i>9,900 dots become continents; eight billion</i></span>
+            <span><i>smaller ones draw their own melodies upon them.</i></span>
+          </p>
+          <dl class="data data--row">
+            <div><dt>DOTS</dt><dd id="dLand">0000</dd></div>
+            <div><dt>GRID</dt><dd>150 × 066</dd></div>
+            <div><dt>DRIFT</dt><dd id="dDrift">+000.0°</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 004 · 形 -->
+  <section class="sec" id="s4" data-scene="form" data-name="FORM · 形" data-han="形">
+    <div class="frame frame--split">
+      <div class="col col--l">
+        <div class="tag reveal"><span><i>004</i></span><span><i>形</i></span></div>
+        <h2 class="h2 reveal" style="--d:.1s">
+          <span><i>0과 1 사이에서</i></span>
+          <span><i>형태가 태어난다.</i></span>
+        </h2>
+        <p class="p reveal" style="--d:.3s">
+          <span><i>빛은 숫자로 번역된다. 밝을수록 촘촘하고,</i></span>
+          <span><i>어두울수록 성기게. 형태는 그 사이 어딘가에 있다.</i></span>
+        </p>
+        <p class="p p--en reveal" style="--d:.4s">
+          <span><i>Light translated into digits —</i></span>
+          <span><i>dense where it falls, sparse where it does not.</i></span>
+        </p>
+      </div>
+      <div class="col col--r">
+        <dl class="data">
+          <div><dt>CELLS</dt><dd id="dCells">00000</dd></div>
+          <div><dt>ALPHABET</dt><dd>0 · 1</dd></div>
+          <div><dt>ROT X/Z</dt><dd id="dRot">0.00 / 0.00</dd></div>
+          <div><dt>LUMA</dt><dd>0.00 → 1.00</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 005 · 餘白 -->
+  <section class="sec sec--end" id="s5" data-scene="silence" data-name="SILENCE · 餘白" data-han="白">
+    <div class="frame">
+      <div class="end">
+        <div class="tag tag--c reveal"><span><i>005</i></span><span><i>餘白</i></span></div>
+        <h2 class="h2 h2--c reveal" style="--d:.1s">
+          <span><i>모든 선율은</i></span>
+          <span><i>침묵으로 돌아간다.</i></span>
+        </h2>
+        <p class="p p--c p--en reveal" style="--d:.3s">
+          <span><i>Every melody returns to silence.</i></span>
+        </p>
+        <div class="end__num" aria-hidden="true">
+          <span>1</span><span class="dim">→</span><span>0</span>
+        </div>
+      </div>
+    </div>
+    <div class="spacer spacer--end"></div>
+    <footer class="foot">
+      <div class="foot__l">
+        <div>선율 · SEONYUL</div>
+        <div class="dim">하나의 화면, 여섯 개의 악장 · SIX MOVEMENTS ON ONE SCREEN</div>
+      </div>
+      <div class="foot__c dim" id="footBin">0101 0011 0059</div>
+      <div class="foot__r">
+        <a href="#s0" class="up">↑ 처음으로 · BACK TO 000</a>
+      </div>
+    </footer>
+  </section>
+
+</main>
+
+<div class="cursor" id="cur" aria-hidden="true"><i></i></div>
+<div class="cursor cursor--dot" id="curDot" aria-hidden="true"></div>
+
+<script src="assets/js/mapdata.js"></script>
+<script src="assets/js/engine.js"></script>
+<script src="assets/js/scenes.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
