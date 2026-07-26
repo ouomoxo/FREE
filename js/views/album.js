@@ -299,7 +299,7 @@ export function notFoundView(message) {
         title: 'NOT IN THE PROGRAMME',
         body: message ?? 'That page is not part of tonight’s performance.',
         icon: 'close',
-        action: h('a.btn', { href: '#/' }, 'BACK TO THE HALL'),
+        action: h('a.btn', { href: '#/hall' }, 'BACK TO THE HALL'),
       }),
     ),
   };

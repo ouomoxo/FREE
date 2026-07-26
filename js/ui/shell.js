@@ -28,7 +28,7 @@ function brandMark() {
    ========================================================================== */
 
 const NAV = [
-  { id: 'home', label: 'HALL', icon: 'home', href: '#/' },
+  { id: 'home', label: 'HALL', icon: 'home', href: '#/hall' },
   { id: 'search', label: 'SEARCH', icon: 'search', href: '#/search' },
   { id: 'library', label: 'LIBRARY', icon: 'library', href: '#/library' },
   { id: 'concert', label: 'CONCERT', icon: 'concert', href: '#/concert' },
@@ -64,7 +64,7 @@ export function mountSidebar(root) {
 
   render(root,
     h('div.sidebar__block.sidebar__block--nav', {},
-      h('a.brand', { href: '#/', 'aria-label': 'MAESTRO — home' },
+      h('a.brand', { href: '#/', 'aria-label': 'MAESTRO — back to the prelude', title: 'Back to the prelude' },
         brandMark(),
         h('span.brand__wordmark', {}, pxText('MAESTRO', { scale: 3.2, weight: 0.68 })),
       ),

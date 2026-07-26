@@ -1,0 +1,271 @@
+/* ============================================================================
+   MAESTRO — Prelude
+   The front of the house. A fixed stage of points and lines, with the
+   movements scrolling over it. Nothing here is a control except the way in.
+   ========================================================================== */
+
+.prelude {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-concert);
+  background: var(--c-void);
+  overflow: hidden;
+}
+.prelude[hidden] { display: none; }
+
+/* --- The stage ----------------------------------------------------------- */
+
+.prelude__stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* A breath of grain, so the black is a surface rather than an absence. */
+.prelude__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    radial-gradient(120% 90% at 50% 42%, transparent 34%, rgba(0, 0, 0, 0.55) 82%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+/* --- The movements ------------------------------------------------------- */
+
+.prelude__flow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+  scrollbar-width: none;
+}
+.prelude__flow::-webkit-scrollbar { width: 0; height: 0; }
+
+.movement {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-10) var(--s-7);
+  scroll-snap-align: start;
+}
+
+.movement__inner {
+  max-width: 62ch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-5);
+  text-align: center;
+}
+
+/* Where a picture stands in one half of the frame, the writing takes the other
+   — so the two are read one after the other rather than through each other. */
+.movement[data-align="left"],
+.movement[data-align="right"] {
+  padding-inline: clamp(var(--s-7), 6vw, 132px);
+}
+.movement[data-align="left"] { justify-items: start; }
+.movement[data-align="right"] { justify-items: end; }
+.movement[data-align="left"] .movement__inner,
+.movement[data-align="right"] .movement__inner {
+  align-items: flex-start;
+  text-align: left;
+  max-width: 40ch;
+}
+.movement[data-align="left"] .movement__title px-text,
+.movement[data-align="right"] .movement__title px-text { margin-inline: 0; }
+
+/* Everything in a panel is tied to how close it is to the centre of the
+   frame — it resolves as it arrives and recedes as it leaves. */
+.movement {
+  --near: 0;
+  --drift: 0px;
+}
+.movement .movement__inner {
+  opacity: calc(var(--near) * var(--near));
+  transform: translateY(var(--drift));
+}
+
+.movement__numeral {
+  font-size: var(--t-2xs);
+  letter-spacing: var(--ls-widest);
+  color: var(--c-gold-dim);
+}
+
+.movement__title { display: block; }
+.movement__title px-text { margin-inline: auto; }
+
+.movement__line {
+  font-size: var(--t-lg);
+  line-height: 1.85;
+  color: var(--c-text-mid);
+  max-width: 54ch;
+  text-wrap: balance;
+}
+
+/* --- The way in ---------------------------------------------------------- */
+
+.prelude__enter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-5);
+  padding: var(--s-4) var(--s-7);
+  border: 1px solid var(--a-gold-24);
+  color: var(--c-gold);
+  font-size: var(--t-xs);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+  transition: color var(--m-base) var(--ease-out),
+              border-color var(--m-base) var(--ease-out),
+              background var(--m-base) var(--ease-out),
+              gap var(--m-base) var(--ease-out);
+}
+.prelude__enter:hover {
+  color: var(--c-gold-bright);
+  border-color: var(--a-gold-40);
+  background: rgba(217, 185, 120, 0.05);
+  gap: var(--s-5);
+}
+
+/* --- Chrome: a mark, a way out, a rail of movements ---------------------- */
+
+.prelude__corner {
+  position: absolute;
+  top: var(--s-7); left: var(--s-8); right: var(--s-8);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.prelude__corner > * { pointer-events: auto; }
+.prelude__mark { color: var(--c-text-mid); }
+
+.prelude__skip {
+  font-size: var(--t-2xs);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+  transition: color var(--m-base) var(--ease-out);
+}
+.prelude__skip:hover { color: var(--c-bone); }
+
+/* The rail: one dot per movement, on a hairline. */
+.prelude__rail {
+  position: absolute;
+  right: var(--s-8);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  align-items: center;
+}
+.prelude__rail::before {
+  content: "";
+  position: absolute;
+  top: -8px; bottom: -8px; left: 50%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--c-line) 12%, var(--c-line) 88%, transparent);
+  transform: translateX(-50%);
+}
+.prelude__tick {
+  position: relative;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--c-line-strong);
+  transition: background var(--m-base) var(--ease-out),
+              transform var(--m-base) var(--ease-snap);
+  pointer-events: auto;
+}
+.prelude__tick[data-on="true"] {
+  background: var(--c-gold);
+  transform: scale(1.7);
+}
+
+/* The interval currently traced, named in the corner. */
+.prelude__interval {
+  position: absolute;
+  left: var(--s-8);
+  bottom: var(--s-8);
+  z-index: 3;
+  color: var(--c-text-faint);
+  letter-spacing: var(--ls-wider);
+  transition: opacity var(--m-slow) var(--ease-out);
+}
+
+/* Shown only on the first movement. */
+.prelude__hint {
+  position: absolute;
+  left: 50%;
+  bottom: var(--s-7);
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: var(--t-2xs);
+  letter-spacing: var(--ls-widest);
+  color: var(--c-text-faint);
+  opacity: 0;
+  transition: opacity var(--m-glacial) var(--ease-out);
+  pointer-events: none;
+}
+.prelude[data-first="true"] .prelude__hint { opacity: 1; }
+.prelude__hint i {
+  display: block;
+  width: 1px; height: 34px;
+  background: linear-gradient(to bottom, var(--c-line-strong), transparent);
+  animation: hint-fall 2600ms var(--ease-in-out) infinite;
+}
+@keyframes hint-fall {
+  0%   { transform: scaleY(0.2); transform-origin: top; opacity: 0; }
+  40%  { transform: scaleY(1);   transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(1);   transform-origin: bottom; opacity: 0; }
+}
+
+/* --- Narrow screens ------------------------------------------------------ */
+
+/* Narrow: there is no second column to give the picture, so it sinks to the
+   bottom of the frame and the writing rides above it. */
+@media (max-width: 900px) {
+  .movement {
+    align-items: start;
+    padding: 13svh var(--s-5) var(--s-9);
+  }
+  .movement[data-align="left"],
+  .movement[data-align="right"] {
+    justify-items: center;
+    padding-inline: var(--s-5);
+  }
+  .movement[data-align] .movement__inner {
+    align-items: center;
+    text-align: center;
+    max-width: 44ch;
+  }
+  .movement[data-align] .movement__title px-text { margin-inline: auto; }
+  .movement__line { font-size: var(--t-md); line-height: 1.75; }
+  .prelude__corner { top: var(--s-5); left: var(--s-5); right: var(--s-5); }
+  .prelude__rail { right: var(--s-4); gap: var(--s-3); }
+  .prelude__interval { left: var(--s-5); bottom: var(--s-5); font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prelude__flow { scroll-snap-type: none; }
+  .movement .movement__inner { opacity: 1; transform: none; }
+  .prelude__hint i { animation: none; }
+}
+
+/* While the prelude is on, the hall is not merely covered — it is taken down,
+   so none of its canvases are running behind it. */
+body[data-stage="prelude"] #app,
+body[data-stage="prelude"] .concert { display: none; }

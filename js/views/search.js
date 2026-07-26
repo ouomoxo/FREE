@@ -290,7 +290,7 @@ export function libraryView(tab = 'all') {
             body: 'The heart beside any movement files it here. Nothing is uploaded '
                 + 'anywhere — your shelf lives in this browser only.',
             icon: 'heart',
-            action: h('a.btn', { href: '#/' }, 'BROWSE THE HALL'),
+            action: h('a.btn', { href: '#/hall' }, 'BROWSE THE HALL'),
           }));
     }
 

@@ -106,6 +106,23 @@ const ACTIONS = {
     await page.click('.concert__top .btn');
     await page.waitForTimeout(2600);
   },
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map((i) => [`scrollTo${i}`, async (page) => {
+    await page.evaluate((n) => {
+      const flow = document.querySelector('.prelude__flow');
+      const target = document.querySelectorAll('.movement')[n];
+      if (flow && target) flow.scrollTop = target.offsetTop;
+    }, i);
+    await page.waitForTimeout(3400);
+  }])),
+  /** Catch the field mid-flight, while it is still drawing itself as lines. */
+  ...Object.fromEntries([420, 900].map((ms) => [`morph${ms}`, async (page) => {
+    await page.evaluate(() => {
+      const flow = document.querySelector('.prelude__flow');
+      const target = document.querySelectorAll('.movement')[6];
+      if (flow && target) flow.scrollTop = target.offsetTop;
+    });
+    await page.waitForTimeout(ms);
+  }])),
   /** Catch the opening sequence mid-flight. */
   async overture(page) {
     await page.waitForTimeout(220);
@@ -131,13 +148,26 @@ const ACTIONS = {
 const SHOTS = [
   { name: 'lab',          path: '/dev/art-lab.html',  width: 1280, height: 1200, full: true },
   { name: 'halftone',     path: '/dev/halftone-lab.html', width: 1500, height: 1200, full: true, wait: 900 },
-  { name: 'home-desktop', path: '/',                  width: 1600, height: 1000, wait: 3000 },
-  { name: 'overture-1',   path: '/',                  width: 1600, height: 1000, wait: 700,  action: 'overture' },
-  { name: 'overture-2',   path: '/',                  width: 1600, height: 1000, wait: 1250, action: 'overture' },
-  { name: 'home-wide',    path: '/',                  width: 1920, height: 1080, wait: 1400 },
-  { name: 'home-laptop',  path: '/',                  width: 1280, height: 800,  wait: 1400 },
-  { name: 'home-tablet',  path: '/',                  width: 900,  height: 1000, wait: 1400 },
-  { name: 'home-mobile',  path: '/',                  width: 390,  height: 844,  wait: 1400 },
+  { name: 'prelude-1',    path: '/',                  width: 1600, height: 1000, wait: 2600 },
+  { name: 'prelude-2',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo1' },
+  { name: 'prelude-3',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo2' },
+  { name: 'prelude-4',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo3' },
+  { name: 'prelude-5',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo4' },
+  { name: 'prelude-6',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo5' },
+  { name: 'prelude-7',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo6' },
+  { name: 'prelude-8',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo7' },
+  { name: 'prelude-9',    path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'scrollTo8' },
+  { name: 'prelude-morph-a', path: '/',              width: 1600, height: 1000, wait: 0, action: 'morph420' },
+  { name: 'prelude-morph-b', path: '/',              width: 1600, height: 1000, wait: 0, action: 'morph900' },
+  { name: 'prelude-mobile', path: '/',                width: 390,  height: 844,  wait: 2400 },
+  { name: 'prelude-mobile-3', path: '/',              width: 390,  height: 844,  wait: 1400, action: 'scrollTo2' },
+  { name: 'home-desktop', path: '/#/hall',            width: 1600, height: 1000, wait: 3000 },
+  { name: 'overture-1',   path: '/#/hall',            width: 1600, height: 1000, wait: 700,  action: 'overture' },
+  { name: 'overture-2',   path: '/#/hall',            width: 1600, height: 1000, wait: 1250, action: 'overture' },
+  { name: 'home-wide',    path: '/#/hall',            width: 1920, height: 1080, wait: 1400 },
+  { name: 'home-laptop',  path: '/#/hall',            width: 1280, height: 800,  wait: 1400 },
+  { name: 'home-tablet',  path: '/#/hall',            width: 900,  height: 1000, wait: 1400 },
+  { name: 'home-mobile',  path: '/#/hall',            width: 390,  height: 844,  wait: 1400 },
   { name: 'album',        path: '/#/album/op27',      width: 1600, height: 1000, wait: 1400 },
   { name: 'artist',       path: '/#/artist/vantor',   width: 1600, height: 1000, wait: 1400 },
   { name: 'search',       path: '/#/search',          width: 1600, height: 1000, wait: 1400 },
@@ -146,12 +176,12 @@ const SHOTS = [
   { name: 'playing',      path: '/#/album/op27',      width: 1600, height: 1000, wait: 1400, action: 'play' },
   { name: 'playing-wide', path: '/#/album/sinfonia',  width: 1920, height: 1080, wait: 1400, action: 'play' },
   { name: 'concert-live', path: '/#/album/dotmatrix', width: 1600, height: 1000, wait: 1400, action: 'playConcert' },
-  { name: 'palette',      path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'palette' },
+  { name: 'palette',      path: '/#/hall',            width: 1600, height: 1000, wait: 1400, action: 'palette' },
   { name: 'search-query', path: '/#/search',          width: 1600, height: 1000, wait: 1400, action: 'search' },
   { name: 'library-full', path: '/#/library',         width: 1600, height: 1000, wait: 1400, action: 'library' },
   { name: 'playing-mobile', path: '/#/album/op27',    width: 390,  height: 844,  wait: 1400, action: 'play' },
   { name: 'concert-score', path: '/#/album/toccatas', width: 1600, height: 1000, wait: 1400, action: 'playScore' },
-  { name: 'help',         path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'help' },
+  { name: 'help',         path: '/#/hall',            width: 1600, height: 1000, wait: 1400, action: 'help' },
   { name: 'queue',        path: '/#/queue',           width: 1600, height: 1000, wait: 1400 },
   { name: 'playlist',     path: '/#/playlist/tonight', width: 1600, height: 1000, wait: 1400 },
 ];

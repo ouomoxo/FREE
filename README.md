@@ -15,6 +15,30 @@ open http://localhost:8000
 
 ---
 
+## Two rooms
+
+The site is in two parts, and the order matters.
+
+**`/` is the prelude** — a piece in nine short movements, made of the only two
+things this project is built from: a point and a line. One population of 5,200
+points carries the whole sequence. It arrives as a conductor's hands, is drawn
+out into a Lissajous figure of a perfect fifth, and then becomes each plate in
+turn — two animals cheek to cheek, a held look, a figure alone with a lamp, a
+face under water, a fish that is nothing but a line, a flower that opens at
+night — and finally the hands again, holding the door.
+
+Nothing sounds here and nothing is a control except the way in. The same points
+travel from one picture to the next; no image ever fades in or out.
+
+**`/#/hall` is the application.** The catalogue, the transport, the concert
+view: everything that plays. It is reached through the last movement of the
+prelude, or by the *skip* link, and once you are inside the prelude is taken
+down completely — its canvas stops, and the hall's begin.
+
+The movement between the two rooms is not a page transition. It is the point of
+the piece: the streaming application is a *function*, and the prelude is what
+the function is for.
+
 ## The idea
 
 The project starts from two photographs of a conductor's hands: black frame,
@@ -103,17 +127,21 @@ page.
 ## Architecture
 
 ```
-index.html            shell markup: boot curtain, app grid, overlay hosts
-assets/reference/     the two source photographs
+index.html            shell markup: prelude host, boot curtain, app grid
+assets/reference/     the two conductor photographs
+assets/plates/        the plates the prelude's points become
 css/
   tokens.css          the entire design system as custom properties
   base.css            reset, typography primitives, utilities
   layout.css          app shell grid and its responsive collapse order
   components.css      buttons, cards, track table, sliders, empty states
   views.css           boot, transport, now-playing, concert hall, overlays
+  prelude.css         the front of the house: stage, movements, rail
   motion.css          entrances, the cue sheet, reduced-motion opt-outs
 js/
   core/               store, router, event bus, DOM layer, storage, utils
+  art/                points.js  — plate sampling and the point field
+                      curves.js  — Lissajous figures of musical intervals
   pixel/              halftone screen, photo sleeves, bitmap font,
                       dithering, PixelSurface, generated cover motifs
   audio/              engine, instruments, theory, composer, transport
@@ -121,16 +149,63 @@ js/
   ui/                 shell, transport bar, now-playing, concert, overlays,
                       conductor, visualiser, melody line, entrances, icons,
                       slider, a11y
-  views/              home, album/artist/playlist/queue, search/library
+  views/              prelude, home, album/artist/playlist/queue,
+                      search/library
   state.js            one store, one shape, all the actions
   player.js           queue, score cache, playhead broadcast, media session
-  app.js              bootstrap, routes, key map
+  app.js              bootstrap, routes, key map, prelude/hall staging
 dev/
   test.mjs            unit suite for every DOM-free layer
   shot.mjs            Playwright visual-QA harness
   halftone-lab.html   dot pitch, screen angle, tonal response
   art-lab.html        the bitmap face and the generated sleeve motifs
 ```
+
+### How a plate is made
+
+`art/points.js` turns a photograph into a *constellation*: a list of positions
+and weights the point field can be told to become.
+
+The plate is **placed** in the frame rather than stretched across it — it keeps
+the photograph's own proportions, takes a given fraction of the frame's height,
+and stands in one half of the screen while the writing takes the other. A wide
+monitor therefore crops nothing; it just leaves the plate standing in a larger
+darkness. The weight is feathered away at the border, so a plate dissolves
+instead of ending in a rectangle.
+
+Candidates are taken on the same rotated lattice as the halftone screen, but the
+lattice is anchored to the centre of the *frame*, never the plate, so successive
+movements land on one grid and the points slide between pictures rather than
+re-forming. Four readings decide what a cell is worth:
+
+| mode | weight is | for |
+| --- | --- | --- |
+| `tone` | brightness | a subject lit out of a black ground |
+| `shadow` | darkness | a dark subject on a pale one — a fish, a brow, hair |
+| `edge` | gradient magnitude | when only the contour survives |
+| `relief` | departure from the picture's commonest tone, normalised separately above and below it | a pale animal and a dark one on the same wall |
+
+Points the plate cannot use are not stacked on cells that are already lit. They
+are let go, and hang in the dark around the picture as dust.
+
+### Motion as material
+
+The prelude does not animate *between* states; the animation is the state.
+
+When a movement is called for, the whole field is first given a **tangential
+impulse** about the centre — every point leaves on a curve, the way a hand
+leaves a downbeat — and the direction alternates from movement to movement, so
+the piece beats one way and then the other.
+
+While the field is travelling the canvas is not wiped, only **washed**: each
+frame lays down a nearly-transparent black, so every point leaves the trace of
+its own path. For those two seconds the picture is made of lines. As it arrives
+the wash returns to opaque and the lines close up into points again. A held
+picture then keeps turning by a fraction of a degree and breathing by a fraction
+of a percent, on two periods that do not divide into one another.
+
+`prefers-reduced-motion` removes the impulse, the wash and the breath; the
+plates simply appear.
 
 ### Two kinds of artwork
 

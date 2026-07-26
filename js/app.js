@@ -23,6 +23,7 @@ import { reveal, revealChildren } from './ui/reveal.js';
 import { homeView } from './views/home.js';
 import { albumView, playlistView, artistView, queueView, notFoundView } from './views/album.js';
 import { searchView, libraryView } from './views/search.js';
+import { prelude } from './views/prelude.js';
 import { bootConductor } from './ui/conductor.js';
 import { REFERENCE } from './pixel/halftone.js';
 import { sleep, prefersReducedMotion } from './core/utils.js';
@@ -93,6 +94,9 @@ function mountView(factory, name, params = {}, title = '') {
   const view = $('#view');
   if (!host || !view) return;
 
+  // Any real view means we are inside the hall, not in front of it.
+  setPrelude(false);
+
   try { activeView?.onUnmount?.(); }
   catch (err) { console.error('[app] view unmount failed', err); }
 
@@ -128,9 +132,31 @@ function mountView(factory, name, params = {}, title = '') {
   bus.emit(EVT.ROUTE_RENDERED, { name, params });
 }
 
+/**
+ * The prelude is not a view inside the shell — it replaces it. Entering or
+ * leaving swaps which of the two is on screen.
+ * @param {boolean} on
+ */
+function setPrelude(on) {
+  const app = $('#app');
+  document.body.setAttribute('data-stage', on ? 'prelude' : 'hall');
+  if (on) {
+    prelude.mount($('#prelude'));
+    if (app) app.setAttribute('inert', '');
+  } else {
+    prelude.hide();
+    if (app) app.removeAttribute('inert');
+  }
+}
+
 function registerRoutes() {
   router
-    .route('home', '/', () => mountView(homeView, 'home'))
+    .route('prelude', '/', () => {
+      setPrelude(true);
+      store.set({ routeName: 'prelude' }, 'route:prelude');
+      document.title = 'MAESTRO';
+    })
+    .route('home', '/hall', () => mountView(homeView, 'home'))
     .route('search', '/search', () => mountView(searchView, 'search', {}, 'SEARCH'))
     .route('library', '/library', () => mountView(() => libraryView('all'), 'library', {}, 'LIBRARY'))
     .route('library', '/library/:tab', (m) =>
@@ -145,6 +171,7 @@ function registerRoutes() {
     .route('concert', '/concert', () => {
       // The concert hall is an overlay, not a page: show it over whatever is
       // behind, and send the route back so closing it lands somewhere real.
+      setPrelude(false);
       if (!activeView) mountView(homeView, 'home');
       store.set({ routeName: 'concert' }, 'route:concert');
       actions.setConcert(true);
@@ -181,7 +208,7 @@ function bindKeys(topbar) {
       if (store.state.commandOpen) { actions.setCommandOpen(false); return; }
       if (store.state.concert) {
         actions.setConcert(false);
-        if (store.state.routeName === 'concert') router.go('/');
+        if (store.state.routeName === 'concert') router.go('/hall');
         return;
       }
     }
@@ -192,7 +219,7 @@ function bindKeys(topbar) {
     // `g` prefix for "go to".
     if (pendingG) {
       pendingG = false;
-      const map = { h: '/', l: '/library', s: '/search', q: '/queue' };
+      const map = { h: '/hall', l: '/library', s: '/search', q: '/queue' };
       const target = map[e.key.toLowerCase()];
       if (target) { e.preventDefault(); router.go(target); return; }
     }
@@ -309,7 +336,7 @@ async function main() {
 
   // Keep the URL honest when the concert overlay closes.
   store.subscribe((s) => s.concert, (on) => {
-    if (!on && location.hash === '#/concert') router.go('/', { replace: true });
+    if (!on && location.hash === '#/concert') router.go('/hall', { replace: true });
   }, { immediate: false });
 }
 
