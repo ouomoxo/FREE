@@ -146,7 +146,12 @@
       var mv = U.clamp((stage - a0 - 0.16) / 0.62, 0, 1);
       var mix = mv * mv * mv * (mv * (mv * 6 - 15) + 10);
       var names = ['DISPERSED', 'GRID', 'RING', 'PHI', 'RELEASED'];
-      SY.info.state = names[U.clamp(Math.round(stage), 0, 4)];
+      var st = U.clamp(Math.round(stage), 0, 4);
+      SY.info.state = names[st];
+      if (st !== this.lastSt) {            // a formation locking in has a sound
+        if (this.lastSt !== undefined) SY.audio.pluck(0.34 + st * 0.12, 0.55);
+        this.lastSt = st;
+      }
 
       var rot = (Q - 0.5) * 0.9 + S.t * 0.045;
       var cr = Math.cos(rot), sr = Math.sin(rot);
@@ -283,9 +288,9 @@
         var hy = this.y(v, head, cy, spread, i, amp, t);
         var hy2 = this.y(v, head + 4, cy, spread, i, amp, t);
         var slope = hy2 - hy;
-        if (v.pslope < 0 && slope >= 0 && amp > 0.35) {   // trough → note
-          this.flash.push({ x: head, y: hy, t: 0 });
-          if (SY.audio.on) SY.audio.pluck(hy / h0, 0.5 + wgt * 0.5);
+        if (((v.pslope < 0 && slope >= 0) || (v.pslope > 0 && slope <= 0)) && amp > 0.22) {
+          this.flash.push({ x: head, y: hy, t: 0 });   // every turn of a line is a note
+          SY.audio.pluck(hy / h0, 0.45 + wgt * 0.5);
           SY.info.hz = (261.63 * Math.pow(2, (this.V - i) / 12)).toFixed(2);
         }
         v.pslope = slope;
@@ -378,7 +383,10 @@
         e += rip(x, y) * 2;
 
         var hs = U.hash(gx, gy);
-        if ((hs * 41.3 + t * 0.22) % 1 > 0.9965) e += 2.4;
+        if ((hs * 41.3 + t * 0.22) % 1 > 0.9965) {
+          e += 2.4;
+          if (t - (this.rang || 0) > 1.15) { this.rang = t; SY.audio.pluck(gy / rows, 0.3); }
+        }
 
         band(Math.min(1, e)).push(x, y, base * (0.55 + Math.min(e, 2.2) * 0.5));
       }
@@ -464,9 +472,9 @@
       var A = t * 0.42 + Q * 2.6 + S.sv * 0.02, B = t * 0.27 + Q * 1.1 - S.sv * 0.012;
       var cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B);
       var R1 = 1, R2 = 2.1, K2 = 5.6;
-      var grow = U.lerp(0.86, 1.42, U.smooth(U.clamp(Q * 1.25, 0, 1)));
+      var grow = U.lerp(0.84, 1.18, U.smooth(U.clamp(Q * 1.25, 0, 1)));
       // fit to whichever axis is tighter, so narrow screens keep the whole body
-      var K1 = Math.min(rows * 2.35, cols * 1.7) * K2 / (8 * (R1 + R2)) * grow;
+      var K1 = Math.min(rows * 2.2, cols * 1.6) * K2 / (8 * (R1 + R2)) * grow;
       var P = S.pointer;
       var tilt = (P.y / h0 - 0.5) * 0.5;
       var cT = Math.cos(tilt), sT = Math.sin(tilt);
@@ -560,6 +568,10 @@
       var cell = Math.floor(t * 0.17) % 8;
       var axis = cell >> 1, sign = (cell & 1) ? 1 : -1;
       SY.info.cell = (cell + 1) + ' / 8';
+      if (cell !== this.lastCell) {
+        if (this.lastCell !== undefined) SY.audio.pluck(0.26 + cell * 0.085, 0.6);
+        this.lastCell = cell;
+      }
       SY.info.w = (Math.sin(axw) >= 0 ? '+' : '−') + Math.abs(Math.sin(axw)).toFixed(3);
 
       function project(scale, sgn) {
@@ -651,6 +663,8 @@
     draw: function (c, w0, h0, p, alpha, dt) {
       var Q = q(p), t = S.t, cx = w0 / 2, cy = h0 * 0.72, i, o;
       var pull = U.smooth(U.clamp(Q / 0.62, 0, 1));
+      if (pull > 0.45 && !this.rang) { this.rang = 1; SY.audio.pluck(0.97, 0.9); }
+      if (pull < 0.15) this.rang = 0;
       c.globalCompositeOperation = 'lighter';
       for (i = 0; i < this.ps.length; i++) {
         o = this.ps[i];
