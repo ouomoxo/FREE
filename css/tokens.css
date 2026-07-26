@@ -1,0 +1,152 @@
+/* ============================================================================
+   MAESTRO — Design Tokens
+   The single source of truth for the visual system.
+   Aesthetic brief: a dark concert hall. One light source. Bone-white pixels
+   carved out of the void, one gold accent for the baton. Nothing is rounded —
+   every edge lands on the pixel grid.
+   ========================================================================== */
+
+:root {
+  /* --- Base surfaces: near-black, tinted very slightly cool ---------------- */
+  --c-void:        #050506;
+  --c-ink:         #08080a;
+  --c-surface:     #0d0d10;
+  --c-surface-2:   #131317;
+  --c-surface-3:   #1a1a20;
+  --c-elevated:    #202027;
+
+  /* --- Lines & separators -------------------------------------------------- */
+  --c-line:        #212128;
+  --c-line-soft:   #17171c;
+  --c-line-strong: #34343e;
+
+  /* --- Foreground: warm bone, as in the photographs ------------------------ */
+  --c-bone:        #ece7dc;
+  --c-bone-bright: #fbf8f1;
+  --c-text:        #d7d3ca;
+  --c-text-mid:    #8d8a84;
+  --c-text-dim:    #5e5c58;
+  --c-text-faint:  #3b3a38;
+
+  /* --- Accent: the baton. Warm gold, used sparingly ------------------------ */
+  --c-gold:        #d9b978;
+  --c-gold-bright: #f0d99f;
+  --c-gold-dim:    #8d7442;
+  --c-gold-deep:   #4a3c22;
+
+  /* --- Signal colours (used almost never, on purpose) ---------------------- */
+  --c-live:        #d4544a;
+  --c-ok:          #7fae7a;
+
+  /* --- Alpha ramps --------------------------------------------------------- */
+  --a-bone-04:     rgba(236, 231, 220, 0.04);
+  --a-bone-06:     rgba(236, 231, 220, 0.06);
+  --a-bone-10:     rgba(236, 231, 220, 0.10);
+  --a-bone-16:     rgba(236, 231, 220, 0.16);
+  --a-bone-28:     rgba(236, 231, 220, 0.28);
+  --a-gold-12:     rgba(217, 185, 120, 0.12);
+  --a-gold-24:     rgba(217, 185, 120, 0.24);
+  --a-gold-40:     rgba(217, 185, 120, 0.40);
+  --a-void-70:     rgba(5, 5, 6, 0.70);
+  --a-void-92:     rgba(5, 5, 6, 0.92);
+
+  /* --- Spacing: 4px pixel grid, no exceptions ------------------------------ */
+  --s-px:  1px;
+  --s-1:   4px;
+  --s-2:   8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-7:  32px;
+  --s-8:  40px;
+  --s-9:  48px;
+  --s-10: 64px;
+  --s-11: 80px;
+  --s-12: 112px;
+
+  /* --- Typography ---------------------------------------------------------- */
+  --f-sans: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont,
+            "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+            "Liberation Mono", monospace;
+
+  --t-2xs: 10px;
+  --t-xs:  11px;
+  --t-sm:  12px;
+  --t-md:  13px;
+  --t-lg:  15px;
+  --t-xl:  18px;
+  --t-2xl: 24px;
+  --t-3xl: 32px;
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.35;
+  --lh-body:  1.6;
+
+  --ls-wide:   0.08em;
+  --ls-wider:  0.16em;
+  --ls-widest: 0.24em;
+
+  /* --- Elevation: hard-edged, no blur halos. Pixels don't feather ---------- */
+  --e-1: 0 1px 0 0 var(--c-line);
+  --e-2: 0 2px 0 0 rgba(0, 0, 0, 0.6);
+  --e-3: 0 4px 0 0 rgba(0, 0, 0, 0.55), 0 0 0 1px var(--c-line);
+  --e-lift: 0 8px 0 -2px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--c-line-strong);
+  --e-glow-gold: 0 0 0 1px var(--a-gold-40), 0 0 24px -6px var(--a-gold-24);
+
+  /* --- Motion -------------------------------------------------------------- */
+  --m-instant: 80ms;
+  --m-fast:   140ms;
+  --m-base:   220ms;
+  --m-slow:   420ms;
+  --m-glacial: 900ms;
+
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-snap:  cubic-bezier(0.16, 1.24, 0.42, 1);
+  /* Stepped easing — motion that lands on the pixel grid */
+  --ease-pixel-6: steps(6, end);
+  --ease-pixel-4: steps(4, end);
+
+  /* --- Layout metrics ------------------------------------------------------ */
+  --w-rail:      64px;
+  --w-sidebar:   264px;
+  --w-aside:     320px;
+  --h-player:    88px;
+  --h-topbar:    56px;
+  --w-content-max: 1440px;
+
+  /* --- Z-index scale ------------------------------------------------------- */
+  --z-base:     0;
+  --z-sticky:   10;
+  --z-player:   40;
+  --z-overlay:  60;
+  --z-concert:  70;
+  --z-modal:    80;
+  --z-toast:    90;
+  --z-boot:    100;
+}
+
+/* Fine-grained pixel grid overlay texture, reused by several components. */
+:root {
+  --tex-scanline: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.014) 0px,
+    rgba(255, 255, 255, 0.014) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  --tex-grid: linear-gradient(to right, var(--a-bone-04) 1px, transparent 1px),
+              linear-gradient(to bottom, var(--a-bone-04) 1px, transparent 1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --m-instant: 0ms;
+    --m-fast: 0ms;
+    --m-base: 0ms;
+    --m-slow: 0ms;
+    --m-glacial: 0ms;
+  }
+}

@@ -1,0 +1,319 @@
+/* ============================================================================
+   MAESTRO — Application shell
+   A three-column grid over a fixed player bar. The columns collapse in a
+   defined order as the viewport narrows: aside first, then sidebar.
+   ========================================================================== */
+
+.app {
+  display: grid;
+  grid-template-columns: var(--w-sidebar) minmax(0, 1fr) var(--w-aside);
+  grid-template-rows: minmax(0, 1fr) var(--h-player);
+  grid-template-areas:
+    "sidebar main aside"
+    "player  player player";
+  height: 100dvh;
+  background: var(--c-void);
+  gap: var(--s-1);
+  padding: var(--s-1);
+  padding-bottom: 0;
+}
+
+.app[data-aside="closed"] {
+  grid-template-columns: var(--w-sidebar) minmax(0, 1fr) 0;
+}
+.app[data-sidebar="closed"] {
+  grid-template-columns: var(--w-rail) minmax(0, 1fr) var(--w-aside);
+}
+.app[data-sidebar="closed"][data-aside="closed"] {
+  grid-template-columns: var(--w-rail) minmax(0, 1fr) 0;
+}
+
+/* --- Regions ------------------------------------------------------------- */
+
+.sidebar {
+  grid-area: sidebar;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  overflow: hidden;
+}
+
+.main {
+  grid-area: main;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-ink);
+  border: 1px solid var(--c-line-soft);
+  overflow: hidden;
+}
+
+.aside {
+  grid-area: aside;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--c-ink);
+  border: 1px solid var(--c-line-soft);
+  display: flex;
+  flex-direction: column;
+  transition: opacity var(--m-base) var(--ease-out);
+}
+.app[data-aside="closed"] .aside {
+  opacity: 0;
+  pointer-events: none;
+  border-width: 0;
+}
+
+.playerbar {
+  grid-area: player;
+  min-width: 0;
+  z-index: var(--z-player);
+}
+
+/* --- Sidebar internals --------------------------------------------------- */
+
+.sidebar__block {
+  background: var(--c-ink);
+  border: 1px solid var(--c-line-soft);
+  min-height: 0;
+}
+.sidebar__block--nav { flex: 0 0 auto; padding: var(--s-3) var(--s-2) var(--s-2); }
+.sidebar__block--library { flex: 1 1 auto; display: flex; flex-direction: column; overflow: hidden; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3) var(--s-5);
+  position: relative;
+}
+.brand__mark {
+  width: 28px; height: 28px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+.brand__wordmark { display: block; }
+.app[data-sidebar="closed"] .brand__wordmark,
+.app[data-sidebar="closed"] .nav__label,
+.app[data-sidebar="closed"] .sidebar__block--library { display: none; }
+.app[data-sidebar="closed"] .brand { padding: var(--s-2) 0 var(--s-4); justify-content: center; }
+.app[data-sidebar="closed"] .sidebar__block--nav { padding: var(--s-3) var(--s-1); }
+.app[data-sidebar="closed"] .nav__item { justify-content: center; padding-inline: 0; }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+
+.nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  color: var(--c-text-mid);
+  position: relative;
+  transition: color var(--m-fast) var(--ease-out), background var(--m-fast);
+  border: 1px solid transparent;
+}
+.nav__item:hover { color: var(--c-bone); background: var(--a-bone-04); }
+.nav__item[aria-current="page"] {
+  color: var(--c-bone-bright);
+  background: var(--a-bone-06);
+  border-color: var(--c-line);
+}
+.nav__item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -1px; top: 50%;
+  width: 2px; height: 16px;
+  background: var(--c-gold);
+  transform: translateY(-50%);
+}
+.nav__icon { flex: 0 0 auto; width: 16px; height: 16px; }
+.nav__label { font-size: var(--t-sm); letter-spacing: var(--ls-wide); text-transform: uppercase; }
+.nav__badge {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: var(--t-2xs);
+  color: var(--c-text-dim);
+}
+
+.library {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.library__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+.library__filters {
+  display: flex;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-4);
+  flex-wrap: wrap;
+}
+.library__list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 var(--s-2) var(--s-4);
+}
+
+/* --- Main internals ------------------------------------------------------ */
+
+.topbar {
+  flex: 0 0 auto;
+  height: var(--h-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0 var(--s-4);
+  border-bottom: 1px solid transparent;
+  position: relative;
+  z-index: var(--z-sticky);
+  background: linear-gradient(to bottom, var(--c-ink) 40%, transparent);
+  transition: border-color var(--m-base), background var(--m-base);
+}
+.topbar[data-scrolled="true"] {
+  border-bottom-color: var(--c-line);
+  background: rgba(8, 8, 10, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 860px) {
+  .topbar { padding: 0 var(--s-3); gap: var(--s-2); }
+  .topbar__extras { display: none; }
+}
+
+.view {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) { .view { scroll-behavior: auto; } }
+
+.view__inner {
+  /* Full-bleed blocks (hero, marquee, artist header) cancel this padding with a
+     negative margin, so it lives in a variable that both sides read. */
+  --pad-x: var(--s-7);
+  max-width: var(--w-content-max);
+  margin: 0 auto;
+  padding: var(--s-4) var(--pad-x) var(--s-12);
+}
+
+/* --- Aside internals ----------------------------------------------------- */
+
+.aside__head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+.aside__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--s-4);
+}
+
+/* Bottom tab bar, mobile only. */
+.tabbar {
+  grid-area: tabbar;
+  display: none;
+  border-top: 1px solid var(--c-line);
+  background: var(--c-ink);
+}
+.tabbar__item {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--s-2) 0 calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
+  color: var(--c-text-dim);
+  font-size: var(--t-2xs);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.tabbar__item[aria-current="page"] { color: var(--c-gold); }
+
+/* ============================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+  :root { --w-aside: 280px; }
+}
+
+@media (max-width: 1120px) {
+  .app,
+  .app[data-sidebar="closed"],
+  .app[data-aside="closed"] {
+    grid-template-columns: var(--w-sidebar) minmax(0, 1fr);
+    grid-template-areas:
+      "sidebar main"
+      "player  player";
+  }
+  /* Taken out of flow entirely: left in the grid it would claim an implicit
+     column and squeeze the main column to nothing. */
+  .aside { display: none; }
+
+  /* On narrow screens the panel returns as an overlay sheet. */
+  .app[data-aside="open"] .aside {
+    display: flex;
+    position: fixed;
+    inset: var(--s-1) var(--s-1) calc(var(--h-player) + var(--s-1)) auto;
+    width: min(360px, 88vw);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: var(--z-overlay);
+    border: 1px solid var(--c-line);
+    box-shadow: -24px 0 48px -24px rgba(0, 0, 0, 0.9);
+  }
+}
+
+@media (max-width: 900px) {
+  .app,
+  .app[data-sidebar="closed"],
+  .app[data-aside="closed"] {
+    grid-template-columns: var(--w-rail) minmax(0, 1fr);
+  }
+  .brand__wordmark, .nav__label, .sidebar__block--library { display: none; }
+  .brand { padding: var(--s-2) 0 var(--s-4); justify-content: center; }
+  .sidebar__block--nav { padding: var(--s-3) var(--s-1); }
+  .nav__item { justify-content: center; padding-inline: 0; }
+  .view__inner { --pad-x: var(--s-4); }
+}
+
+@media (max-width: 720px) {
+  :root { --h-player: 76px; }
+  .app,
+  .app[data-sidebar="closed"],
+  .app[data-aside="closed"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto var(--h-player);
+    grid-template-areas:
+      "main"
+      "tabbar"
+      "player";
+    padding: 0;
+    gap: 0;
+  }
+  .sidebar { display: none; }
+  .app[data-aside="open"] .aside {
+    inset: var(--s-1) var(--s-1) calc(var(--h-player) + 56px) var(--s-1);
+    width: auto;
+  }
+  .main { border-width: 0; }
+  .view__inner { --pad-x: var(--s-3); padding-bottom: var(--s-10); }
+  .tabbar { display: flex; }
+}

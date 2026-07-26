@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MAESTRO — a pixel concert hall</title>
+<meta name="description" content="MAESTRO is a streaming hall for an invented repertoire: nine ensembles, twenty records, every note synthesised in your browser and conducted by a pair of pixel-art hands.">
+<meta name="theme-color" content="#050506">
+<meta name="color-scheme" content="dark">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="MAESTRO — a pixel concert hall">
+<meta property="og:description" content="An invented repertoire, synthesised live in the browser, conducted by a pair of pixel-art hands.">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect width='12' height='12' fill='%23050506'/><path d='M10 1h2v2h-2zM8 3h2v2H8zM6 5h2v2H6zM4 7h2v2H4zM1 9h3v2H1z' fill='%23d9b978'/></svg>">
+
+<link rel="preload" as="style" href="css/tokens.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/views.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">SKIP TO CONTENT</a>
+
+  <!-- Boot curtain: the house lights going down. -->
+  <div class="boot" id="boot" role="status" aria-live="polite">
+    <div class="boot__inner">
+      <canvas class="boot__hands" id="boot-hands" width="240" height="320" aria-hidden="true"></canvas>
+      <px-text class="boot__word" text="MAESTRO" scale="6" color="#ece7dc"></px-text>
+      <div class="boot__tagline t-eyebrow">A PIXEL CONCERT HALL</div>
+      <div class="boot__meter" aria-hidden="true"><span id="boot-fill"></span></div>
+      <div class="boot__status t-mono" id="boot-status">TUNING</div>
+    </div>
+  </div>
+
+  <div class="app" id="app" data-sidebar="open" data-aside="open" hidden>
+    <!-- Left rail -->
+    <aside class="sidebar" id="sidebar" aria-label="Primary"></aside>
+
+    <!-- Main column -->
+    <main class="main" id="main">
+      <header class="topbar" id="topbar"></header>
+      <div class="view scroll" id="view" tabindex="-1">
+        <div class="view__inner" id="main-content"></div>
+      </div>
+    </main>
+
+    <!-- Now playing -->
+    <aside class="aside" id="aside" aria-label="Now playing"></aside>
+
+    <!-- Mobile tabs -->
+    <nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+
+    <!-- Transport -->
+    <footer class="playerbar" id="playerbar" aria-label="Player"></footer>
+  </div>
+
+  <!-- Full-screen visualiser -->
+  <div class="concert" id="concert" hidden aria-hidden="true"></div>
+
+  <!-- Command palette, dialogs, toasts -->
+  <div id="overlays"></div>
+
+  <noscript>
+    <div style="padding:48px;max-width:60ch;margin:0 auto;color:#ece7dc;font:14px/1.6 system-ui">
+      <h1 style="letter-spacing:.2em;font-size:18px">MAESTRO</h1>
+      <p>This hall runs on JavaScript: every note you would hear is synthesised in the
+      browser at the moment you press play, and every image is drawn pixel by pixel on a
+      canvas. With scripting disabled there is, quite literally, nothing to show.</p>
+    </div>
+  </noscript>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
