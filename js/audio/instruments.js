@@ -610,17 +610,23 @@ export function piano(engine, n) {
 
   const chain = outputChain(engine, { pan: n.pan ?? 0, send: n.send ?? 0.42, gain: 1 });
 
-  // Stiffness: negligible at the top of the keyboard, unmistakable at the
-  // bottom. The curve is fitted to how real pianos are actually strung.
-  const B = 0.00008 * Math.pow(2, (60 - n.midi) / 12) + 0.00002;
-  // How long the note would ring if nobody lifted the key. Bass strings are
-  // long and heavy and ring for a very long time.
-  const ring = clamp(14 * Math.pow(2, (48 - n.midi) / 22), 0.9, 22);
-  // Struck harder is not just louder — it is brighter, and for longer.
-  const bright = 0.45 + vel * 0.55;
+  // Stiffness. B is *largest in the treble* — top strings are short and
+  // relatively thick, so their partials stretch hardest. Bass strings are
+  // wound precisely to keep B down. (Getting this backwards is what makes a
+  // synthesised piano sound like an organ in the bass and a bell on top.)
+  // This is also why piano tuning is stretched: the octaves are tuned wide to
+  // follow the partials rather than the fundamentals.
+  const B = clamp(0.00006 * Math.pow(2, (n.midi - 46) / 13), 0.00003, 0.012);
 
-  const PARTIALS = n.midi > 76 ? 5 : n.midi > 60 ? 7 : 9;
-  const detune = n.midi < 34 ? 0 : 2.2 + (72 - n.midi) * 0.035;
+  // How long the note would ring if nobody lifted the key.
+  const ring = clamp(15 * Math.pow(2, (48 - n.midi) / 20), 0.7, 26);
+  // Struck harder is not just louder — it is brighter, because the felt
+  // compresses, stiffens, and leaves the string sooner.
+  const bright = 0.4 + vel * 0.6;
+
+  // The bass needs a great many partials before it stops sounding like a sine.
+  const PARTIALS = Math.round(clamp(26 - (n.midi - 33) * 0.34, 5, 22));
+  const detune = n.midi < 34 ? 0 : 1.8 + (74 - n.midi) * 0.03;
   const strings = detune > 0 ? [-detune, detune] : [0];
 
   /** @type {OscillatorNode[]} */
@@ -629,33 +635,54 @@ export function piano(engine, n) {
 
   for (let k = 1; k <= PARTIALS; k++) {
     const f = f0 * k * Math.sqrt(1 + B * k * k);
-    if (f > 17000) break;
-    // Falling spectrum, tilted by how hard the key was struck.
-    const amp = (0.62 / Math.pow(k, 1.35)) * Math.pow(bright, k * 0.42) * vel;
-    if (amp < 0.0009) continue;
-    // The higher the partial, the sooner it is gone.
-    const decay = Math.max(0.16, ring / Math.pow(k, 0.78));
-    const end = t + Math.min(decay, ring);
+    if (f > 16500) break;
+
+    // The strike point. The hammer meets the string about an eighth of the way
+    // along, so any partial with a node there is barely excited — the 8th and
+    // its multiples are hollowed out. That notch is one of the most
+    // recognisable things about a piano and costs one line.
+    const strike = Math.abs(Math.sin(k * Math.PI * 0.125));
+    const shape = 0.08 + 0.92 * strike;
+
+    const amp = (0.7 / Math.pow(k, 1.28)) * Math.pow(bright, k * 0.38) * shape * vel;
+    if (amp < 0.0006) continue;
+
+    // Double decay — the single most important thing in the whole voice.
+    //
+    // A string vibrates in two planes. The vertical one drives the bridge hard
+    // and dies fast; the horizontal one is barely coupled and rings on for a
+    // very long time. What you hear is the *sum* of two exponentials, not one:
+    // a quick fall to about a third, then a long tail. One exponential, however
+    // carefully tuned, is always a synthesiser.
+    const fast = Math.max(0.09, (ring * 0.1) / Math.pow(k, 0.85));
+    const slow = Math.max(0.3, ring / Math.pow(k, 0.55));
+    const end = t + slow;
     if (end > last) last = end;
 
     for (const cents of strings) {
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(f, t);
-      if (cents) osc.detune.setValueAtTime(cents * (k * 0.5 + 0.5), t);
-      // A struck string's pitch falls a shade as the blow relaxes.
-      osc.frequency.exponentialRampToValueAtTime(f * 0.9985, t + 0.09);
+      // Each string of a unison is tuned a hair off its neighbour, and the
+      // offset grows with the partial — which is where the shimmer comes from.
+      if (cents) osc.detune.setValueAtTime(cents * (0.6 + k * 0.45), t);
+      // A struck string's pitch falls slightly as the blow relaxes.
+      osc.frequency.exponentialRampToValueAtTime(f * 0.9988, t + 0.1);
 
-      const g = ctx.createGain();
       const a = amp / strings.length;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(a, t + 0.004);
-      // Two stages: the quick loss of the initial energy, then the long tail.
-      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, a * 0.34), t + decay * 0.12);
-      g.gain.exponentialRampToValueAtTime(0.00008, end);
 
-      osc.connect(g);
-      g.connect(chain.input);
+      const gFast = ctx.createGain();
+      gFast.gain.setValueAtTime(0, t);
+      gFast.gain.linearRampToValueAtTime(a * 0.68, t + 0.003);
+      gFast.gain.exponentialRampToValueAtTime(0.00006, t + fast);
+
+      const gSlow = ctx.createGain();
+      gSlow.gain.setValueAtTime(0, t);
+      gSlow.gain.linearRampToValueAtTime(a * 0.32, t + 0.006);
+      gSlow.gain.exponentialRampToValueAtTime(0.00006, end);
+
+      osc.connect(gFast); gFast.connect(chain.input);
+      osc.connect(gSlow); gSlow.connect(chain.input);
       oscs.push(osc);
     }
   }

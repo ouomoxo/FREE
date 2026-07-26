@@ -189,7 +189,14 @@ async function main() {
       '-c:a', 'libmp3lame', '-b:a', '256k',
       '-metadata', `title=${out.title}`, '-metadata', 'artist=MAESTRO',
       '-metadata', 'album=Synthesised at the moment you ask for it', mp3]);
-    console.log(`— ${out.title} · ${out.duration.toFixed(0)}s · ${out.parts} parts · ${out.notes} notes`);
+    // A take that came out silent is a failed take, not a quiet one. Nothing
+    // leaves here without having made a sound.
+    const dbfs = 20 * Math.log10(Math.max(1e-9, out.peak));
+    if (dbfs < -50) {
+      throw new Error(`${id} rendered silent (peak ${dbfs.toFixed(1)} dBFS) — refusing to ship it`);
+    }
+    console.log(`— ${out.title} · ${out.duration.toFixed(0)}s · ${out.parts} parts · `
+      + `${out.notes} notes · peak ${dbfs.toFixed(1)} dBFS`);
   }
 
   await browser.close();

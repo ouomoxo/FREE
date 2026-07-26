@@ -107,7 +107,9 @@ export const STYLES = {
     meter: [4, 4], bpmRange: [50, 60],
     melody: 'piano', counter: 'piano', pad: 'piano',
     bass: 'piano', accent: null,
-    melodyOctave: 5, padOctave: 4, bassOctave: 2,
+    // Where the hands actually are. The right hand's figure sits around
+    // middle C, the tune just above it, the left hand two octaves below.
+    melodyOctave: 5, padOctave: 3, bassOctave: 2,
     figuration: 'triplet', harmonicRhythm: 1, density: 0.34,
     swing: 0, reverb: 0.66, padLevel: 0.3,
     solo: true,
@@ -125,9 +127,9 @@ export const STYLES = {
     meter: [4, 4], bpmRange: [52, 64],
     melody: 'piano', counter: 'piano', pad: 'piano',
     bass: 'piano', accent: null,
-    melodyOctave: 5, padOctave: 4, bassOctave: 2,
+    melodyOctave: 5, padOctave: 3, bassOctave: 2,
     figuration: 'suspended', harmonicRhythm: 1, density: 0.2,
-    swing: 0, reverb: 0.74, padLevel: 0.26,
+    swing: 0, reverb: 0.74, padLevel: 0.44,
     solo: true,
   },
   nocturne: {
@@ -550,7 +552,7 @@ function writePad(push, o) {
         const idx = order[k];
         const m = voicing[idx % voicing.length] + (idx >= voicing.length ? 12 : 0);
         push(barBeat + k * step, step * 1.7, m,
-          level * (k === 0 ? 0.75 : 0.5), style.pad, ((k % 2) - 0.5) * 0.34);
+          level * (k === 0 ? 1.5 : 1.15), style.pad, ((k % 2) - 0.5) * 0.34);
       }
       break;
     }
