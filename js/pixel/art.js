@@ -1,6 +1,10 @@
 /**
  * MAESTRO — Procedural cover artwork.
  *
+ * Sleeves for the abstract records. Anything whose subject is the conductor
+ * himself uses the reference photograph instead, screened into dots by
+ * {@link module:pixel/photo} — these motifs are for everything else.
+ *
  * Every record, programme and ensemble in the catalogue gets a unique sleeve,
  * generated from its seed at a 64x64 backing resolution and quantised to a
  * five-tone palette. No image assets ship with the app.
@@ -13,7 +17,6 @@
 
 import { PixelSurface } from './surface.js';
 import { PALETTES } from './dither.js';
-import { drawHand, batonHand, shapingHand } from './hand.js';
 import { Random, TAU, clamp } from '../core/utils.js';
 
 const SIZE = 64;
@@ -34,50 +37,6 @@ const g = (v) => {
 
 /** @type {Record<string, Motif>} */
 export const MOTIFS = {
-  /** The conductor's hands — the image the whole project is built on. */
-  hands(ctx, w, h, rnd) {
-    backdrop(ctx, w, h, 0.06);
-    drawHand(ctx, shapingHand({
-      x: w * 0.3, y: h * 0.34, scale: w * 0.115,
-      forearmAngle: 3.05, palmAngle: 0.42, exposure: 0.82,
-    }));
-    drawHand(ctx, batonHand({
-      x: w * 0.52, y: h * 0.7, scale: w * 0.132,
-      forearmAngle: 2.5, palmAngle: -0.34, baton: -0.72, batonLength: 4.6,
-    }));
-    vignette(ctx, w, h, 0.62);
-  },
-
-  /** A single baton, held out of frame. */
-  baton(ctx, w, h, rnd) {
-    backdrop(ctx, w, h, 0.05);
-    const a = -0.7;
-    const grad = ctx.createLinearGradient(w * 0.18, h * 0.86, w * 0.94, h * 0.12);
-    grad.addColorStop(0, g(0.28));
-    grad.addColorStop(0.3, g(1));
-    grad.addColorStop(1, g(0.55));
-    ctx.strokeStyle = grad;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.2, h * 0.84);
-    ctx.lineTo(w * 0.92, h * 0.14);
-    ctx.stroke();
-    // Cork grip.
-    ctx.strokeStyle = g(0.44);
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.18, h * 0.87);
-    ctx.lineTo(w * 0.3, h * 0.75);
-    ctx.stroke();
-    ctx.globalAlpha = 0.5;
-    drawHand(ctx, batonHand({
-      x: w * 0.16, y: h * 0.94, scale: w * 0.1, exposure: 0.5, baton: undefined,
-    }));
-    ctx.globalAlpha = 1;
-    vignette(ctx, w, h, 0.7);
-  },
-
   /** The auditorium, seen from the podium. */
   hall(ctx, w, h, rnd) {
     backdrop(ctx, w, h, 0.04);

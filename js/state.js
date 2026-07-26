@@ -44,6 +44,7 @@ import { clamp } from './core/utils.js';
  * @property {boolean} sidebarOpen
  * @property {boolean} concert
  * @property {boolean} commandOpen
+ * @property {boolean} helpOpen
  * @property {boolean} queueOpen
  * @property {'comfortable'|'compact'} density
  * @property {string} visualizer
@@ -82,6 +83,7 @@ const initial = {
   sidebarOpen: read(K.SIDEBAR_OPEN, true),
   concert: false,
   commandOpen: false,
+  helpOpen: false,
   queueOpen: false,
   density: read(K.DENSITY, 'comfortable'),
   visualizer: read(K.VISUALIZER, 'matrix'),
@@ -211,6 +213,11 @@ export const actions = {
   /** @param {boolean} [on] */
   setCommandOpen(on) {
     store.set({ commandOpen: on ?? !store.state.commandOpen }, 'ui:command');
+  },
+
+  /** @param {boolean} [on] */
+  setHelpOpen(on) {
+    store.set({ helpOpen: on ?? !store.state.helpOpen, commandOpen: false }, 'ui:help');
   },
 
   /** @param {string} visualizer */

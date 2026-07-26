@@ -11,9 +11,19 @@
  */
 
 import { engine } from '../audio/engine.js';
+import { transport } from '../audio/transport.js';
+import { findEventIndex } from '../audio/composer.js';
 import { clamp, damp, prefersReducedMotion } from '../core/utils.js';
 
-const MODES = ['matrix', 'wave', 'field'];
+const MODES = ['matrix', 'score', 'wave', 'field'];
+
+/** Instrument -> tone, for the piano roll. Melody parts read brightest. */
+const PART_TONE = {
+  harpsichord: 'accent', flute: 'accent', celeste: 'accent',
+  glockenspiel: 'accent', choir: 'bright', harp: 'bright',
+  strings: 'ink', pizzicato: 'bright',
+  contrabass: 'dim', timpani: 'dim', cymbal: 'dim',
+};
 
 export class Visualizer {
   /** @type {HTMLCanvasElement|null} */ #canvas = null;
@@ -104,6 +114,12 @@ export class Visualizer {
     if (!this.#running) return;
     const dt = Math.min(0.05, (now - this.#last) / 1000);
     this.#last = now;
+    // Nothing to draw when the surface is off-screen (a collapsed panel, a
+    // hidden overlay). rAF keeps firing; the work does not need to.
+    if (this.#canvas && this.#canvas.offsetParent === null && this.#canvas.style.position !== 'fixed') {
+      this.#raf = requestAnimationFrame(this.#frame);
+      return;
+    }
     try { this.#sample(dt); this.#draw(); }
     catch (err) { console.error('[visualizer] frame failed', err); this.stop(); }
     this.#raf = requestAnimationFrame(this.#frame);
@@ -168,8 +184,88 @@ export class Visualizer {
     switch (this.#opts.mode) {
       case 'wave': this.#drawWave(ctx, W, H); break;
       case 'field': this.#drawField(ctx, W, H); break;
+      case 'score': this.#drawScore(ctx, W, H); break;
       default: this.#drawMatrix(ctx, W, H);
     }
+  }
+
+  /**
+   * Piano roll of the score that is actually sounding.
+   *
+   * Because the composer materialises every note up front, this is not a
+   * visualisation *of* the audio — it is the score itself, scrolling past a
+   * fixed playhead, quantised onto the same dot lattice as everything else.
+   */
+  #drawScore(ctx, W, H) {
+    const score = transport.score;
+    if (!score) { this.#drawMatrix(ctx, W, H); return; }
+
+    const { ink, inkBright, accent } = this.#opts;
+    const window = Math.max(4, score.secPerBeat * score.meter[0] * 3);  // three bars
+    const playhead = 0.28;
+    const now = transport.position;
+    const t0 = now - window * playhead;
+    const t1 = t0 + window;
+
+    // A finer vertical grid than the spectrum uses: at 22 rows a whole triad
+    // collapses into one band. One row per two semitones keeps chords legible.
+    const LO = 33;
+    const HI = 93;
+    const rows = clamp(Math.floor(H / (5 * this.#dpr)), 18, (HI - LO) / 2);
+    const cellH = H / rows;
+    const cellW = Math.max(2, Math.round(W / 150));
+
+    // Faint lattice, so the empty register still reads as a grid.
+    ctx.fillStyle = 'rgba(236,231,220,0.035)';
+    for (let r = 0; r < rows; r++) {
+      const y = Math.round(H - (r + 1) * cellH);
+      for (let x = 0; x < W; x += cellW * 3) ctx.fillRect(x, y, 1, 1);
+    }
+
+    // Bar lines.
+    const barLen = score.secPerBeat * score.meter[0];
+    ctx.fillStyle = 'rgba(236,231,220,0.10)';
+    for (let bar = Math.floor(t0 / barLen); bar <= Math.ceil(t1 / barLen); bar++) {
+      const x = Math.round(((bar * barLen - t0) / window) * W);
+      if (x >= 0 && x < W) ctx.fillRect(x, 0, 1, H);
+    }
+
+    const events = score.events;
+    let i = findEventIndex(events, t0 - 8);
+    for (; i < events.length; i++) {
+      const e = events[i];
+      if (e.t > t1) break;
+      if (e.t + e.d < t0) continue;
+
+      const row = Math.round(((e.m - LO) / (HI - LO)) * (rows - 1));
+      if (row < 0 || row >= rows) continue;
+
+      const x = Math.round(((e.t - t0) / window) * W);
+      const w = Math.max(cellW, Math.round((e.d / window) * W));
+      const y = Math.round(H - (row + 1) * cellH);
+      const sounding = now >= e.t && now <= e.t + e.d;
+
+      const tone = PART_TONE[e.i] ?? 'ink';
+      ctx.fillStyle = sounding
+        ? accent
+        : tone === 'accent' ? 'rgba(217,185,120,0.55)'
+        : tone === 'bright' ? inkBright
+        : tone === 'dim' ? 'rgba(141,138,132,0.5)'
+        : ink;
+      ctx.globalAlpha = sounding ? 1 : clamp(0.32 + e.v * 0.68, 0.2, 1);
+
+      // Notes are drawn as runs of discrete cells, never a smooth bar.
+      for (let cx = x; cx < x + w; cx += cellW) {
+        if (cx + cellW < 0 || cx > W) continue;
+        ctx.fillRect(cx, y, cellW - 1, Math.max(1, Math.floor(cellH) - 1));
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // The playhead.
+    ctx.fillStyle = accent;
+    const px = Math.round(playhead * W);
+    for (let y = 0; y < H; y += 4) ctx.fillRect(px, y, 1, 2);
   }
 
   #drawMatrix(ctx, W, H) {

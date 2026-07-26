@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MAESTRO · halftone lab</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/base.css">
+<style>
+  body { overflow: auto; padding: 28px; }
+  h2 { font-size: 11px; letter-spacing: .22em; color: var(--c-text-dim); margin: 28px 0 10px; text-transform: uppercase; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .cell { border: 1px solid var(--c-line); background: var(--c-void); padding: 6px; }
+  .cell canvas { display: block; }
+  .cap { font-size: 10px; letter-spacing: .1em; color: var(--c-text-dim); margin-top: 6px; text-transform: uppercase; font-family: var(--f-mono); }
+  .src img { width: 170px; border: 1px solid var(--c-line); }
+</style>
+</head>
+<body class="scroll">
+  <h2>Source photographs</h2>
+  <div class="row src">
+    <img src="../assets/reference/conductor-a.jpg" alt="">
+    <img src="../assets/reference/conductor-b.jpg" alt="">
+  </div>
+
+  <h2>Tonal response · photo A, cell 7</h2>
+  <div class="row" id="tone"></div>
+
+  <h2>Cell size · photo A (framed)</h2>
+  <div class="row" id="sweepA"></div>
+
+  <h2>Cell size · photo B (framed)</h2>
+  <div class="row" id="sweepB"></div>
+
+  <h2>Screen angle and dot shape</h2>
+  <div class="row" id="angles"></div>
+
+  <h2>At size</h2>
+  <div class="row" id="big"></div>
+
+<script type="module">
+  import { createHalftone, REFERENCE } from '../js/pixel/halftone.js';
+
+  const mk = async (host, src, opts, w, h, label, frame = {}) => {
+    const canvas = document.createElement('canvas');
+    const box = document.createElement('div');
+    box.className = 'cell';
+    box.appendChild(canvas);
+    const cap = document.createElement('div');
+    cap.className = 'cap';
+    cap.textContent = label;
+    box.appendChild(cap);
+    host.appendChild(box);
+    const ht = await createHalftone(canvas, src, opts);
+    ht.measure(w, h, frame);
+    ht.render(frame.render ?? {});
+    canvas.style.width = (w / 2) + 'px';
+    canvas.style.height = (h / 2) + 'px';
+  };
+
+  const A = REFERENCE.a;
+  const B = REFERENCE.b;
+
+  /* Framing: photo A sits small in a lot of black, so it is zoomed in. */
+  const FRAME_A = { cover: true, zoom: 1.55, offsetX: -0.06, offsetY: -0.10 };
+  const FRAME_B = { cover: true, zoom: 1.18, offsetY: -0.02 };
+
+  for (const [label, opts] of [
+    ['default', {}],
+    ['contrast 1.3', { contrast: 1.3 }],
+    ['gamma 0.8', { gamma: 0.8 }],
+    ['gamma 1.3', { gamma: 1.3 }],
+    ['maxDot .42', { maxDot: 0.42 }],
+    ['maxDot .62', { maxDot: 0.62 }],
+    ['floor .12', { floor: 0.12 }],
+    ['no autoLevels', { autoLevels: false }],
+  ]) {
+    await mk(tone, A, { cell: 7, ...opts }, 440, 440, label, FRAME_A);
+  }
+
+  for (const cell of [4, 5, 6, 8, 10, 13]) {
+    await mk(sweepA, A, { cell }, 460, 460, `cell ${cell}`, FRAME_A);
+  }
+  for (const cell of [4, 5, 6, 8, 10, 13]) {
+    await mk(sweepB, B, { cell }, 380, 520, `cell ${cell}`, FRAME_B);
+  }
+
+  for (const [label, opts, extra] of [
+    ['0°', { cell: 6, angle: 0 }],
+    ['15°', { cell: 6, angle: 0.262 }],
+    ['22.5°', { cell: 6, angle: 0.3927 }],
+    ['45°', { cell: 6, angle: 0.785 }],
+    ['square', { cell: 6, shape: 'square' }],
+    ['diamond', { cell: 6, shape: 'diamond' }],
+    ['jitter .35', { cell: 6 }, { jitter: 0.35 }],
+    ['gain 1.35', { cell: 6 }, { gain: 1.35 }],
+    ['gain 0.6', { cell: 6 }, { gain: 0.6 }],
+    ['wave', { cell: 6 }, { wave: 0.35, phase: 1.2 }],
+  ]) {
+    await mk(angles, A, opts, 420, 420, label, { ...FRAME_A, render: extra });
+  }
+
+  await mk(big, B, { cell: 7 }, 700, 980, 'photo B · cell 7', FRAME_B);
+  await mk(big, A, { cell: 7 }, 980, 980, 'photo A · cell 7', FRAME_A);
+</script>
+</body>
+</html>

@@ -20,6 +20,8 @@ import { INSTRUMENT_LABEL } from '../audio/instruments.js';
 import { MODE_LABEL } from '../audio/theory.js';
 import { formatTime } from '../core/utils.js';
 import { asideConductor } from './conductor.js';
+import { REFERENCE } from '../pixel/halftone.js';
+import { barVisualizer } from './visualizer.js';
 import { trackCover, likeButton } from './components.js';
 import { Slider } from './slider.js';
 
@@ -32,6 +34,9 @@ export function mountAside(root) {
     beatDots,
     stageCanvas,
   );
+
+  const meterCanvas = h('canvas', { 'aria-hidden': 'true' });
+  const meter = h('div.np__meter', {}, meterCanvas);
 
   const titleEl = h('div', { style: 'font-size:var(--t-lg);color:var(--c-bone-bright);line-height:1.25' }, '—');
   const subEl = h('div.t-dim', { style: 'font-size:var(--t-sm)' }, 'Nothing playing');
@@ -79,6 +84,7 @@ export function mountAside(root) {
     h('div.aside__body.scroll', {},
       h('div.np', {},
         stage,
+        meter,
         h('div.np__title', {}, titleEl, subEl, factsEl),
         structure,
         mixerBlock,
@@ -89,8 +95,10 @@ export function mountAside(root) {
 
   /* --- Conductor -------------------------------------------------------- */
   asideConductor.mount(stageCanvas, {
-    width: 104, height: 132, scale: 0, trail: true, fitTo: stage,
+    src: REFERENCE.b, cell: 5, fitTo: stage,
+    framing: { zoom: 1.02, offsetY: 0 },
   });
+  barVisualizer.mount(meterCanvas, { columns: 34, rows: 7, gap: 2, mode: 'matrix' });
 
   /* --- Beat dots -------------------------------------------------------- */
   let meterTop = 4;

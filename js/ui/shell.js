@@ -11,28 +11,16 @@ import { router } from '../router-instance.js';
 import { PLAYLISTS, ALBUM_LIST, getTrack, getAlbum, CATALOG_STATS } from '../data/catalog.js';
 import { playlistCover, albumCover, cover } from './components.js';
 import { formatCount, debounce } from '../core/utils.js';
-import { renderPixelCanvas } from '../pixel/surface.js';
-import { drawHand, batonHand } from '../pixel/hand.js';
 
 /* ============================================================================
    Brand mark
    ========================================================================== */
 
-/** A tiny baton-in-hand mark, drawn once. */
+/** The wordmark's baton, on the same 12x12 lattice as every other icon. */
 function brandMark() {
-  const canvas = renderPixelCanvas({
-    width: 14, height: 14, scale: 2,
-    draw: (ctx) => {
-      ctx.clearRect(0, 0, 14, 14);
-      drawHand(ctx, batonHand({
-        x: 3, y: 11, scale: 2.6, baton: -0.72, batonLength: 5.2, cuff: 0.7,
-      }));
-    },
-    present: { palette: 'gold', strength: 0.6, gamma: 1.1 },
-  });
-  canvas.className = 'brand__mark';
-  canvas.setAttribute('aria-hidden', 'true');
-  return canvas;
+  const mark = icon('baton', { size: 22, class: 'brand__mark' });
+  mark.style.color = 'var(--c-gold)';
+  return mark;
 }
 
 /* ============================================================================

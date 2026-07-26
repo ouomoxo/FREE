@@ -38,6 +38,11 @@ export const ARTISTS = [
     id: 'vantor',
     name: 'ELIAS VANTOR',
     role: 'CONDUCTOR',
+    /** This ensemble's artwork is the reference photograph itself, screened. */
+    photo: 'a',
+    photoCell: 5,
+    photoZoom: 1.7,
+    photoOffsetY: -0.06,
     tagline: 'The gesture before the sound',
     city: 'VIENNA',
     palette: 'bone',
@@ -176,7 +181,7 @@ export const ARTISTS = [
 export const ALBUMS = [
   {
     id: 'op27', artist: 'vantor', title: "THE CONDUCTOR'S HANDS", year: 2024, kind: 'ALBUM',
-    palette: 'bone', motif: 'hands', style: 'adagio', key: 'D', mode: 'minor',
+    palette: 'bone', motif: 'hands', photo: 'b', photoCell: 4, photoZoom: 1.45, photoOffsetY: -0.04, style: 'adagio', key: 'D', mode: 'minor',
     blurb: 'Six movements written to be conducted in darkness. The parts are identical; only the gesture changes.',
     tracks: [
       ['I. PREPARATION', { style: 'adagio', minutes: 3.4 }],
@@ -189,7 +194,7 @@ export const ALBUMS = [
   },
   {
     id: 'silent-baton', artist: 'vantor', title: 'SILENT BATON', year: 2022, kind: 'ALBUM',
-    palette: 'gold', motif: 'baton', style: 'chorale', key: 'A', mode: 'minor',
+    palette: 'gold', motif: 'baton', photo: 'a', photoCell: 6, photoZoom: 2.6, photoOffsetY: -0.2, style: 'chorale', key: 'A', mode: 'minor',
     blurb: 'Studies in what an orchestra does in the half-second before it plays.',
     tracks: [
       ['ANTICIPATION', { style: 'chorale', minutes: 3.1 }],
@@ -201,7 +206,7 @@ export const ALBUMS = [
   },
   {
     id: 'downbeat-live', artist: 'vantor', title: 'DOWNBEAT — LIVE AT THE VOID', year: 2025, kind: 'LIVE',
-    palette: 'velvet', motif: 'hall', style: 'march', key: 'C', mode: 'minor',
+    palette: 'velvet', motif: 'hall', photo: 'b', photoCell: 8, photoZoom: 1.9, photoOffsetY: -0.16, style: 'march', key: 'C', mode: 'minor',
     blurb: 'Recorded across three nights in a hall with the house lights broken. Nobody asked for them to be fixed.',
     tracks: [
       ['OVERTURE (LIVE)', { style: 'march', minutes: 4.4 }],

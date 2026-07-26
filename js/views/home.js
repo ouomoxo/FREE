@@ -16,6 +16,7 @@ import {
 import { store } from '../state.js';
 import { player } from '../player.js';
 import { marqueeConductor } from '../ui/conductor.js';
+import { REFERENCE } from '../pixel/halftone.js';
 import { formatDuration, formatCount } from '../core/utils.js';
 
 /**
@@ -44,8 +45,8 @@ export function homeView() {
         'Nine ensembles. Twenty records. ',
         h('b', {}, `${CATALOG_STATS.tracks} movements`),
         ', none of which exist as a file: every note is composed and synthesised '
-        + 'the moment you press play, and conducted — in time, in the correct metre — '
-        + 'by a pair of hands drawn one pixel at a time.',
+        + 'the moment you press play. Beside it, a photograph of a conductor\u2019s hands, '
+        + 'screened into dots that swell on every beat of the bar.',
       ),
       h('div.marquee__actions', {},
         h('div', {}, contextPlayButton(featuredContext, { large: true })),
@@ -150,8 +151,8 @@ export function homeView() {
     el,
     onMount() {
       marqueeConductor.mount(stageCanvas, {
-        width: 120, height: 150, scale: 0, trail: true, palette: 'bone',
-        maxWidth: 380, maxHeight: 400,
+        src: REFERENCE.a, cell: 6, maxWidth: 460, maxHeight: 340,
+        framing: { zoom: 1.2, offsetX: -0.03, offsetY: -0.05 },
       });
     },
     onUnmount() {

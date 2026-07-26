@@ -17,6 +17,7 @@ import { bus, EVT } from '../core/bus.js';
 import { getTrack, getAlbum, getArtist } from '../data/catalog.js';
 import { formatTime } from '../core/utils.js';
 import { concertConductor } from './conductor.js';
+import { REFERENCE } from '../pixel/halftone.js';
 import { concertVisualizer, VISUALIZER_MODES } from './visualizer.js';
 import { Slider } from './slider.js';
 import { STYLES } from '../audio/composer.js';
@@ -55,6 +56,7 @@ export function mountConcert(root) {
       actions.setVisualizer(next);
       concertVisualizer.setMode(next);
       setText(modeBtn, next.toUpperCase());
+      setAttr(root, 'data-viz', next);
     },
   }, store.state.visualizer.toUpperCase());
 
@@ -99,13 +101,18 @@ export function mountConcert(root) {
     root.hidden = false;
     setAttr(root, 'aria-hidden', 'false');
     concertConductor.mount(handsCanvas, {
-      width: 116, height: 132, scale: 0, trail: true, handScale: 0.118,
+      src: REFERENCE.b,
+      cell: 7,
       fitTo: root.querySelector('.concert__stage'),
-      fitW: 0.9, fitH: 0.96, maxWidth: 900,
+      fitW: 0.92, fitH: 0.96, maxWidth: 900,
+      // The stage is far wider than the photograph, so this one is contained
+      // rather than cropped: losing the baton to a crop would lose the subject.
+      framing: { cover: false, zoom: 1.0, offsetY: 0 },
     });
     concertVisualizer.mount(spectrumCanvas, {
       columns: 72, rows: 22, gap: 2, mode: store.state.visualizer,
     });
+    setAttr(root, 'data-viz', store.state.visualizer);
     window.addEventListener('resize', onResize);
     requestAnimationFrame(layout);
     releaseFocus = trapFocus(root);

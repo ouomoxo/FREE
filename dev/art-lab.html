@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>MAESTRO · art lab</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../css/tokens.css">
 <link rel="stylesheet" href="../css/base.css">
 <style>
@@ -30,17 +31,14 @@
   <h2>Motifs · bone</h2>
   <div class="grid" id="motifs"></div>
 
-  <h2>Palettes · motif "hands"</h2>
+  <h2>Palettes · motif "lattice"</h2>
   <div class="grid" id="palettes"></div>
 
-  <h2>Hand rig</h2>
-  <div class="strip" id="hands"></div>
 
   <script type="module">
     import { MOTIFS, renderCover } from '../js/pixel/art.js';
     import { PALETTES } from '../js/pixel/dither.js';
     import { PixelSurface } from '../js/pixel/surface.js';
-    import { drawHand, batonHand, shapingHand } from '../js/pixel/hand.js';
     import '../js/pixel/font.js';
 
     const mk = (canvas, label) => {
@@ -61,29 +59,9 @@
 
     const pal = document.getElementById('palettes');
     for (const name of Object.keys(PALETTES)) {
-      pal.appendChild(mk(renderCover({ seed: 'pal', motif: 'hands', palette: name, scale: 4 }), name));
+      pal.appendChild(mk(renderCover({ seed: 'pal', motif: 'lattice', palette: name, scale: 4 }), name));
     }
 
-    const hands = document.getElementById('hands');
-    const poses = [
-      ['baton', batonHand({ x: 46, y: 92, scale: 13 })],
-      ['shaping', shapingHand({ x: 46, y: 60, scale: 13 })],
-      ['fist', batonHand({ x: 46, y: 92, scale: 13, curl: [0.95, 1, 1, 1], thumbCurl: 0.9 })],
-      ['open', shapingHand({ x: 46, y: 60, scale: 13, curl: [0.02, 0, 0.02, 0.06], spread: [-0.34, -0.1, 0.16, 0.42] })],
-      ['upbeat', batonHand({ x: 46, y: 100, scale: 13, baton: -1.35, palmAngle: -0.8, forearmAngle: 2.2 })],
-      ['downbeat', batonHand({ x: 46, y: 70, scale: 13, baton: 0.35, palmAngle: 0.1, forearmAngle: 2.7 })],
-    ];
-    for (const [label, pose] of poses) {
-      const c = document.createElement('canvas');
-      const s = new PixelSurface(c, { width: 92, height: 128, scale: 3 });
-      s.ctx.clearRect(0, 0, 92, 128);
-      drawHand(s.ctx, pose);
-      s.present({ palette: 'bone', strength: 0.85, gamma: 0.95 });
-      c.style.width = (92 * 3) + 'px';
-      const cell = mk(c, label);
-      cell.style.width = 'auto';
-      hands.appendChild(cell);
-    }
   </script>
 </body>
 </html>

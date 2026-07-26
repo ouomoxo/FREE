@@ -12,6 +12,7 @@
 import { h, pxText, setAttr, on } from '../core/dom.js';
 import { icon } from './icons.js';
 import { coverDataURL } from '../pixel/art.js';
+import { photoImage, REFERENCE } from '../pixel/photo.js';
 import { formatTime, formatCount } from '../core/utils.js';
 import { store, actions } from '../state.js';
 import { player } from '../player.js';
@@ -70,13 +71,39 @@ export function cover(o) {
   });
 }
 
+/**
+ * Some entities' artwork is a reference photograph screened into dots rather
+ * than a generated motif. `screened` renders that, at a dot pitch scaled to the
+ * size actually being displayed.
+ *
+ * @param {{photo:string, photoCell?:number, photoZoom?:number, photoOffsetY?:number}} entity
+ * @param {{scale?:number, class?:string, alt?:string}} o
+ */
+function screened(entity, o) {
+  const size = (o.scale ?? 4) * 64;
+  return photoImage({
+    src: REFERENCE[entity.photo] ?? REFERENCE.b,
+    size,
+    // Keep the dot pitch proportional so a thumbnail is not a solid blob and a
+    // full-size sleeve is not a fine grey mist.
+    cell: Math.max(2, Math.round((entity.photoCell ?? 5) * (size / 256))),
+    zoom: entity.photoZoom,
+    offsetX: entity.photoOffsetX,
+    offsetY: entity.photoOffsetY,
+    alt: o.alt ?? '',
+    class: o.class,
+  });
+}
+
 /** @param {import('../data/catalog.js').Album} album */
-export const albumCover = (album, o = {}) =>
-  cover({ seed: `album:${album.id}`, motif: album.motif, palette: album.palette, alt: `${album.title} — sleeve`, ...o });
+export const albumCover = (album, o = {}) => (album.photo
+  ? screened(album, { ...o, alt: `${album.title} — sleeve` })
+  : cover({ seed: `album:${album.id}`, motif: album.motif, palette: album.palette, alt: `${album.title} — sleeve`, ...o }));
 
 /** @param {import('../data/catalog.js').Artist} artist */
-export const artistCover = (artist, o = {}) =>
-  cover({ seed: `artist:${artist.id}`, motif: artist.motif, palette: artist.palette, alt: `${artist.name} — portrait`, ...o });
+export const artistCover = (artist, o = {}) => (artist.photo
+  ? screened(artist, { ...o, alt: `${artist.name} — portrait` })
+  : cover({ seed: `artist:${artist.id}`, motif: artist.motif, palette: artist.palette, alt: `${artist.name} — portrait`, ...o }));
 
 /** @param {import('../data/catalog.js').Playlist} pl */
 export const playlistCover = (pl, o = {}) =>
@@ -85,7 +112,7 @@ export const playlistCover = (pl, o = {}) =>
 /** @param {import('../data/catalog.js').Track} track */
 export function trackCover(track, o = {}) {
   const album = getAlbum(track.albumId);
-  return cover({ seed: `album:${album.id}`, motif: album.motif, palette: album.palette, alt: '', ...o });
+  return albumCover(album, { alt: '', ...o });
 }
 
 /* ============================================================================

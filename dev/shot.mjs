@@ -18,7 +18,19 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+
+/** Resolve Playwright from the project, then from a global install. */
+function loadPlaywright() {
+  for (const id of ['playwright', '/opt/node22/lib/node_modules/playwright']) {
+    try { return require(id); } catch { /* try the next */ }
+  }
+  console.error('Playwright not found. Install it, or run `node dev/test.mjs` for the unit suite.');
+  process.exit(2);
+}
+const { chromium } = loadPlaywright();
+
+/** Chromium binary: whatever Playwright is configured to use, else the pre-installed one. */
+const CHROME = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : '/tmp/shots';
@@ -31,6 +43,8 @@ const MIME = {
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.webmanifest': 'application/manifest+json',
 };
@@ -83,6 +97,20 @@ const ACTIONS = {
     await page.fill('.searchbox input', 'hands');
     await page.waitForTimeout(600);
   },
+  /** Play, open the concert hall, then switch to the score visualiser. */
+  async playScore(page) {
+    await page.click('.track >> nth=0');
+    await page.waitForTimeout(1200);
+    await page.keyboard.press('f');
+    await page.waitForTimeout(600);
+    await page.click('.concert__top .btn');
+    await page.waitForTimeout(2600);
+  },
+  /** Open the keyboard shortcuts sheet. */
+  async help(page) {
+    await page.keyboard.press('?');
+    await page.waitForTimeout(400);
+  },
   /** Save a few things so the library has content. */
   async library(page) {
     await page.evaluate(() => {
@@ -98,6 +126,7 @@ const ACTIONS = {
 /** @type {Array<{name:string, path:string, width:number, height:number, wait?:number, full?:boolean, action?:string}>} */
 const SHOTS = [
   { name: 'lab',          path: '/dev/art-lab.html',  width: 1280, height: 1200, full: true },
+  { name: 'halftone',     path: '/dev/halftone-lab.html', width: 1500, height: 1200, full: true, wait: 900 },
   { name: 'home-desktop', path: '/',                  width: 1600, height: 1000, wait: 1400 },
   { name: 'home-wide',    path: '/',                  width: 1920, height: 1080, wait: 1400 },
   { name: 'home-laptop',  path: '/',                  width: 1280, height: 800,  wait: 1400 },
@@ -115,13 +144,15 @@ const SHOTS = [
   { name: 'search-query', path: '/#/search',          width: 1600, height: 1000, wait: 1400, action: 'search' },
   { name: 'library-full', path: '/#/library',         width: 1600, height: 1000, wait: 1400, action: 'library' },
   { name: 'playing-mobile', path: '/#/album/op27',    width: 390,  height: 844,  wait: 1400, action: 'play' },
+  { name: 'concert-score', path: '/#/album/toccatas', width: 1600, height: 1000, wait: 1400, action: 'playScore' },
+  { name: 'help',         path: '/',                  width: 1600, height: 1000, wait: 1400, action: 'help' },
   { name: 'queue',        path: '/#/queue',           width: 1600, height: 1000, wait: 1400 },
   { name: 'playlist',     path: '/#/playlist/tonight', width: 1600, height: 1000, wait: 1400 },
 ];
 
 await mkdir(OUT, { recursive: true });
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME,
   // Let the AudioContext start without a gesture so scripted scenarios can
   // capture the app while it is actually sounding.
   args: ['--autoplay-policy=no-user-gesture-required'],

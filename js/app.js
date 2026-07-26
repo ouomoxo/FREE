@@ -18,11 +18,12 @@ import { mountPlayerBar } from './ui/playerbar.js';
 import { mountAside } from './ui/aside.js';
 import { mountConcert } from './ui/concert.js';
 import { mountPalette, mountToast } from './ui/overlays.js';
+import { mountLiveRegion, mountShortcuts, bindRouteFocus } from './ui/a11y.js';
 import { homeView } from './views/home.js';
 import { albumView, playlistView, artistView, queueView, notFoundView } from './views/album.js';
 import { searchView, libraryView } from './views/search.js';
-import { PixelSurface } from './pixel/surface.js';
-import { drawHand, batonHand, shapingHand } from './pixel/hand.js';
+import { bootConductor } from './ui/conductor.js';
+import { REFERENCE } from './pixel/halftone.js';
 import { sleep, prefersReducedMotion } from './core/utils.js';
 import { read, STORAGE_KEYS } from './core/storage.js';
 import './pixel/font.js';
@@ -45,29 +46,18 @@ async function runBootSequence() {
   const status = $('#boot-status');
   const canvas = /** @type {HTMLCanvasElement} */ ($('#boot-hands'));
 
-  // A still of the two hands, drawn at the boot resolution.
+  // The reference photograph, screened into dots, breathing while the hall
+  // is prepared.
   if (canvas) {
-    const surf = new PixelSurface(canvas, { width: 120, height: 160, scale: 2 });
-    const draw = (t) => {
-      surf.clear();
-      drawHand(surf.ctx, shapingHand({
-        x: 40, y: 58 + Math.sin(t * 0.9) * 3, scale: 13,
-        forearmAngle: 3.0, palmAngle: 0.24, exposure: 0.8,
-      }));
-      drawHand(surf.ctx, batonHand({
-        x: 62, y: 108 + Math.sin(t * 0.9 + 1) * 4, scale: 15,
-        baton: -0.72 + Math.sin(t * 0.9) * 0.08, batonLength: 5.4,
-      }));
-      surf.present({ palette: 'bone', strength: 0.8, gamma: 1.1 });
-    };
-    let raf = 0;
-    const start = performance.now();
-    const loop = () => {
-      draw((performance.now() - start) / 1000);
-      raf = requestAnimationFrame(loop);
-    };
-    if (prefersReducedMotion()) draw(0); else loop();
-    bootEl?.addEventListener('transitionend', () => cancelAnimationFrame(raf), { once: true });
+    bootConductor.mount(canvas, {
+      src: REFERENCE.b, cell: 5, width: 0, height: 0,
+      fitTo: canvas.parentElement, maxWidth: 260, maxHeight: 340, idleGain: 0.8,
+    });
+    bootEl?.addEventListener(
+      'transitionend',
+      () => bootConductor.unmount(),
+      { once: true },
+    );
   }
 
   const fast = prefersReducedMotion();
@@ -175,6 +165,7 @@ function bindKeys(topbar) {
     }
 
     if (e.key === 'Escape') {
+      if (store.state.helpOpen) { actions.setHelpOpen(false); return; }
       if (store.state.commandOpen) { actions.setCommandOpen(false); return; }
       if (store.state.concert) {
         actions.setConcert(false);
@@ -183,7 +174,7 @@ function bindKeys(topbar) {
       }
     }
 
-    if (typing || store.state.commandOpen) return;
+    if (typing || store.state.commandOpen || store.state.helpOpen) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
 
     // `g` prefix for "go to".
@@ -228,7 +219,7 @@ function bindKeys(topbar) {
       case 'm': case 'M': actions.toggleMute(); break;
       case 'f': case 'F': actions.setConcert(!store.state.concert); break;
       case 'q': case 'Q': actions.setQueueOpen(true); if (!store.state.asideOpen) actions.toggleAside(); break;
-      case '?': actions.setCommandOpen(true); break;
+      case '?': e.preventDefault(); actions.setHelpOpen(true); break;
       default: break;
     }
   });
@@ -290,6 +281,9 @@ async function main() {
   mountConcert($('#concert'));
   mountPalette($('#overlays'));
   mountToast($('#overlays'));
+  mountShortcuts($('#overlays'));
+  mountLiveRegion($('#overlays'));
+  bindRouteFocus();
 
   bindScrollState($('#view'), $('#topbar'));
   bindKeys(topbar);
