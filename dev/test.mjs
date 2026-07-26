@@ -579,6 +579,52 @@ test('orchestration is deterministic and thickest at the summit', () => {
   assert.ok(density(0.6, 0.75) > density(0.94, 1), 'and fuller than the close');
 });
 
+test('a solo style is written for one player and left that way', () => {
+  for (const style of ['notturno', 'still']) {
+    const score = composer.compose({
+      seed: `solo-${style}`, style, key: 'C#', mode: 'minor',
+      bpm: 54, targetBars: 40,
+    });
+    assert.equal(score.solo, true, `${style} declares itself solo`);
+    assert.ok(score.events.length > 60, `${style} actually writes something`);
+
+    const seated = orchestra.orchestrate(score, 'x');
+    assert.equal(seated, score, `${style} is returned untouched`);
+    assert.ok(
+      !score.instruments.includes('timpani') && !score.instruments.includes('cymbal'),
+      `${style} has no percussion in it`,
+    );
+    assert.ok(score.instruments.length <= 3, `${style} keeps to a few voices`);
+  }
+});
+
+test('the held figure really is held, and the still one really is still', () => {
+  const held = composer.compose({
+    seed: 'held', style: 'notturno', key: 'C#', mode: 'minor', bpm: 54, targetBars: 40,
+  });
+  const barLen = held.secPerBeat * held.meter[0];
+  // The figure has to be present in nearly every bar of the piece, or it is
+  // an effect rather than the subject.
+  const bars = Math.floor(held.duration / barLen);
+  let covered = 0;
+  for (let b = 2; b < bars - 2; b++) {
+    const from = b * barLen;
+    if (held.events.some((e) => e.i === 'harp' && e.t >= from && e.t < from + barLen)) covered++;
+  }
+  assert.ok(covered > (bars - 4) * 0.9, `figure present in ${covered}/${bars - 4} bars`);
+
+  const still = composer.compose({
+    seed: 'quiet', style: 'still', key: 'E', mode: 'minor', bpm: 58, targetBars: 40,
+  });
+  const perSecond = still.events.length / still.duration;
+  assert.ok(perSecond < 3.2, `sparse: ${perSecond.toFixed(2)} notes a second`);
+  assert.ok(perSecond > 0.5, 'but not empty');
+  assert.ok(
+    held.events.length / held.duration > perSecond,
+    'the figure piece is busier than the still one',
+  );
+});
+
 test('a score too short for an arch is left alone', () => {
   const tiny = { events: [{ t: 0, d: 1, m: 60, v: 0.5, i: 'flute' }], duration: 1 };
   assert.equal(orchestra.orchestrate(tiny), tiny, 'returned untouched');

@@ -94,6 +94,42 @@ export const STYLES = {
     figuration: 'oompah', harmonicRhythm: 1, density: 0.7,
     swing: 0, reverb: 0.44, padLevel: 0.3,
   },
+  /**
+   * The one figure, held.
+   *
+   * A slow triplet broken chord that begins in the first bar and is still
+   * going in the last, a melody in long values floating over it, and an octave
+   * in the bass struck once and left to ring. Nothing about the figure
+   * develops. Its refusal to develop is the piece.
+   */
+  notturno: {
+    label: 'NOTTURNO',
+    meter: [4, 4], bpmRange: [50, 60],
+    melody: 'strings', counter: 'harp', pad: 'harp',
+    bass: 'contrabass', accent: null,
+    melodyOctave: 5, padOctave: 4, bassOctave: 2,
+    figuration: 'triplet', harmonicRhythm: 1, density: 0.34,
+    swing: 0, reverb: 0.66, padLevel: 0.3,
+    solo: true,
+  },
+  /**
+   * Fewer notes than rests.
+   *
+   * Four tones, spaced wide, laid down about one to the bar and left to
+   * overlap; a melody that enters rarely and does not resolve when it does; a
+   * single low note under all of it. What is heard between them is the room,
+   * and the room is most of the music.
+   */
+  still: {
+    label: 'STILL',
+    meter: [4, 4], bpmRange: [52, 64],
+    melody: 'celeste', counter: 'harp', pad: 'harp',
+    bass: 'contrabass', accent: null,
+    melodyOctave: 5, padOctave: 4, bassOctave: 2,
+    figuration: 'suspended', harmonicRhythm: 1, density: 0.2,
+    swing: 0, reverb: 0.74, padLevel: 0.26,
+    solo: true,
+  },
   nocturne: {
     label: 'NOCTURNE',
     meter: [4, 4], bpmRange: [58, 72],
@@ -419,6 +455,8 @@ export function compose(spec) {
     tonicClass: ((tonic % 12) + 12) % 12,
     reverb: style.reverb,
     styleLabel: style.label,
+    /** A solo piece is not an orchestra, and must not be seated as one. */
+    solo: !!style.solo,
   };
 }
 
@@ -491,6 +529,31 @@ function writePad(push, o) {
       }
       break;
     }
+    case 'triplet': {
+      // Three to the beat, rising through the chord, from the first bar to the
+      // last. The figure is the movement; it is never varied and never rests.
+      for (let b = 0; b < meterTop; b++) {
+        for (let k = 0; k < 3; k++) {
+          const m = voicing[k % voicing.length] + (k >= voicing.length ? 12 : 0);
+          push(barBeat + b + k / 3, (1 / 3) * 0.98, m,
+            level * (k === 0 ? 0.72 : 0.52), style.pad, (k - 1) * 0.12);
+        }
+      }
+      break;
+    }
+    case 'suspended': {
+      // Four tones to the bar, out of order so the shape never closes, each
+      // held long enough to still be sounding when the next arrives.
+      const order = [0, 2, 1, 3];
+      const step = meterTop / order.length;
+      for (let k = 0; k < order.length; k++) {
+        const idx = order[k];
+        const m = voicing[idx % voicing.length] + (idx >= voicing.length ? 12 : 0);
+        push(barBeat + k * step, step * 1.7, m,
+          level * (k === 0 ? 0.75 : 0.5), style.pad, ((k % 2) - 0.5) * 0.34);
+      }
+      break;
+    }
     case 'arpeggio': {
       const pattern = [0, 1, 2, 1, 2, 3, 2, 1];
       const step = meterTop / 4;
@@ -548,6 +611,15 @@ function writeBass(push, o) {
   switch (style.figuration) {
     case 'oompah':
       push(barBeat, 0.9, root, level, style.bass, -0.1);
+      break;
+    case 'triplet':
+      // One octave, struck on the downbeat and left to ring under everything.
+      push(barBeat, meterTop * 0.98, root, level, style.bass, -0.1);
+      push(barBeat, meterTop * 0.98, root + 12, level * 0.5, style.bass, -0.06);
+      break;
+    case 'suspended':
+      // One note a bar, and it outlasts the bar.
+      push(barBeat, meterTop * 1.4, root, level * 0.85, style.bass, -0.08);
       break;
     case 'running':
     case 'perpetual': {

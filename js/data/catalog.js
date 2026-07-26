@@ -193,6 +193,19 @@ export const ALBUMS = [
     ],
   },
   {
+    id: 'moonlight', artist: 'vantor', title: 'ONE FIGURE, HELD', year: 2025, kind: 'ALBUM',
+    palette: 'marble', motif: 'hands', photo: 'b', photoCell: 5, photoZoom: 1.9, photoOffsetY: -0.06,
+    style: 'notturno', key: 'C#', mode: 'minor',
+    blurb: 'Written for one player and one figure. The right hand begins a broken chord in the '
+      + 'first bar and has not put it down by the last; everything that happens, happens over it.',
+    tracks: [
+      ['I. ADAGIO SOSTENUTO', { style: 'notturno', key: 'C#', mode: 'minor', minutes: 5.4 }],
+      ['II. THE SAME ROOM, LATER', { style: 'still', key: 'F#', mode: 'minor', minutes: 4.6 }],
+      ['III. WITHOUT RESOLVING', { style: 'still', key: 'B', mode: 'minor', minutes: 5.8 }],
+      ['IV. AND STILL HELD', { style: 'notturno', key: 'G#', mode: 'minor', minutes: 6.2 }],
+    ],
+  },
+  {
     id: 'silent-baton', artist: 'vantor', title: 'SILENT BATON', year: 2022, kind: 'ALBUM',
     palette: 'gold', motif: 'baton', photo: 'a', photoCell: 6, photoZoom: 2.6, photoOffsetY: -0.2, style: 'chorale', key: 'A', mode: 'minor',
     blurb: 'Studies in what an orchestra does in the half-second before it plays.',

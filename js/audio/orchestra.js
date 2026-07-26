@@ -118,6 +118,9 @@ export function readParts(events) {
 export function orchestrate(score, seed = 'orchestra') {
   const events = score.events;
   if (!Array.isArray(events) || events.length < MIN_EVENTS) return score;
+  // Some music is for one player. Putting a timpani under a nocturne does not
+  // make it bigger; it makes it a different and worse piece.
+  if (score.solo) return score;
 
   const rnd = Random(`${seed}:orchestra`);
   const { melody, bass } = readParts(events);
