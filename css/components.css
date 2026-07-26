@@ -1,6 +1,6 @@
 /* ============================================================================
    MAESTRO — Components
-   Square corners throughout. Shadows are hard offsets, never blurred halos.
+   Square corners and hairline rules. The only round things are the dots.
    ========================================================================== */
 
 /* --- Buttons -------------------------------------------------------------- */
@@ -71,6 +71,7 @@
   position: absolute;
   bottom: 3px; left: 50%;
   width: 3px; height: 3px;
+  border-radius: 50%;
   background: var(--c-gold);
   transform: translateX(-50%);
 }
@@ -79,7 +80,7 @@
 .ibtn--lg { width: 40px; height: 40px; }
 .ibtn:disabled { opacity: 0.3; }
 
-/* The transport's play button — the one round-ish thing, and it isn't round. */
+/* The transport's play button — the only solid mass in the interface. */
 .playbtn {
   display: inline-flex;
   align-items: center;
@@ -107,17 +108,16 @@
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--c-text-mid);
-  background: var(--c-surface-2);
-  border: 1px solid transparent;
+  background: transparent;
+  border: 1px solid var(--c-line);
   transition: color var(--m-fast), background var(--m-fast), border-color var(--m-fast);
   white-space: nowrap;
 }
-.chip:hover { color: var(--c-bone); background: var(--c-surface-3); }
+.chip:hover { color: var(--c-bone); border-color: var(--c-line-strong); }
 .chip[aria-pressed="true"] {
-  color: var(--c-void);
-  background: var(--c-bone);
-  border-color: var(--c-bone);
-  font-weight: 600;
+  color: var(--c-bone-bright);
+  border-color: var(--a-bone-28);
+  background: var(--a-bone-04);
 }
 
 .tag {
@@ -171,7 +171,7 @@
   flex-direction: column;
   gap: var(--s-3);
   padding: var(--s-3);
-  background: var(--c-surface);
+  background: transparent;
   border: 1px solid var(--c-line-soft);
   text-align: left;
   transition: background var(--m-base) var(--ease-out),
@@ -180,7 +180,7 @@
   isolation: isolate;
 }
 .card:hover {
-  background: var(--c-surface-2);
+  background: var(--a-bone-04);
   border-color: var(--c-line-strong);
   transform: translateY(-2px);
 }
@@ -196,7 +196,6 @@
 .card__art img, .card__art canvas {
   width: 100%; height: 100%;
   object-fit: cover;
-  image-rendering: pixelated;
 }
 .card__play {
   position: absolute;
@@ -280,7 +279,6 @@
   width: 36px; height: 36px;
   flex: 0 0 auto;
   border: 1px solid var(--c-line-soft);
-  image-rendering: pixelated;
 }
 .track__text { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
 .track__title { font-size: var(--t-md); color: var(--c-text); }
@@ -293,21 +291,22 @@
 .track .ibtn[aria-pressed="true"] { opacity: 1; }
 @media (pointer: coarse) { .track__actions .ibtn { opacity: 1; } }
 
-/* Playing indicator: three dancing bars, on the pixel grid. */
-.eq { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+/* Playing indicator: three dots rising and falling. */
+.eq { display: flex; align-items: center; gap: 3px; height: 12px; }
 .eq span {
-  width: 2px;
+  width: 3px; height: 3px;
+  border-radius: 50%;
   background: var(--c-gold);
-  animation: eq-bounce 900ms steps(4, end) infinite;
+  animation: eq-bounce 900ms var(--ease-in-out) infinite;
 }
-.eq span:nth-child(1) { height: 40%; animation-delay: 0ms; }
-.eq span:nth-child(2) { height: 90%; animation-delay: 180ms; }
-.eq span:nth-child(3) { height: 60%; animation-delay: 360ms; }
+.eq span:nth-child(1) { animation-delay: 0ms; }
+.eq span:nth-child(2) { animation-delay: 150ms; }
+.eq span:nth-child(3) { animation-delay: 300ms; }
 .eq[data-paused="true"] span { animation-play-state: paused; opacity: 0.5; }
 
 @keyframes eq-bounce {
-  0%, 100% { height: 25%; }
-  50% { height: 100%; }
+  0%, 100% { transform: translateY(2.5px) scale(0.8); opacity: 0.55; }
+  50%      { transform: translateY(-2.5px) scale(1); opacity: 1; }
 }
 
 /* --- Sliders (seek + volume) --------------------------------------------- */
@@ -340,7 +339,8 @@
   position: absolute;
   top: 50%;
   left: calc(var(--value, 0) * 100%);
-  width: 8px; height: 8px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
   background: var(--c-bone-bright);
   transform: translate(-50%, -50%) scale(0);
   transition: transform var(--m-fast) var(--ease-snap);
@@ -353,9 +353,10 @@
 .slider__mark {
   position: absolute;
   top: 50%;
-  width: 1px; height: 8px;
-  background: var(--a-bone-16);
-  transform: translateY(-50%);
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--a-bone-28);
+  transform: translate(-50%, -50%);
 }
 
 /* --- Toast ---------------------------------------------------------------- */
@@ -398,7 +399,7 @@
   text-align: center;
   color: var(--c-text-dim);
 }
-.empty canvas { image-rendering: pixelated; opacity: 0.7; }
+.empty canvas { opacity: 0.7; }
 .empty__title { color: var(--c-text-mid); }
 .empty__body { max-width: 42ch; font-size: var(--t-sm); line-height: var(--lh-body); }
 
@@ -437,9 +438,7 @@
 .hero__art {
   width: 192px; height: 192px;
   flex: 0 0 auto;
-  border: 1px solid var(--c-line);
-  box-shadow: var(--e-lift);
-  image-rendering: pixelated;
+  border: 1px solid var(--c-line-soft);
 }
 .hero__text { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; padding-bottom: var(--s-2); }
 .hero__kind { display: flex; align-items: center; gap: var(--s-2); }

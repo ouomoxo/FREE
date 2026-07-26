@@ -16,7 +16,7 @@ import { formatCount, debounce } from '../core/utils.js';
    Brand mark
    ========================================================================== */
 
-/** The wordmark's baton, on the same 12x12 lattice as every other icon. */
+/** The wordmark's baton, drawn with the same hairline as every other icon. */
 function brandMark() {
   const mark = icon('baton', { size: 22, class: 'brand__mark' });
   mark.style.color = 'var(--c-gold)';
@@ -66,7 +66,7 @@ export function mountSidebar(root) {
     h('div.sidebar__block.sidebar__block--nav', {},
       h('a.brand', { href: '#/', 'aria-label': 'MAESTRO — home' },
         brandMark(),
-        h('span.brand__wordmark', {}, pxText('MAESTRO', { scale: 3 })),
+        h('span.brand__wordmark', {}, pxText('MAESTRO', { scale: 3.2, weight: 0.68 })),
       ),
       h('nav.nav', { 'aria-label': 'Primary' }, ...navItems),
     ),

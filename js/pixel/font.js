@@ -12,6 +12,8 @@
  * @module pixel/font
  */
 
+import { clamp } from '../core/utils.js';
+
 const G = (...rows) => rows;
 
 /**
@@ -147,19 +149,31 @@ export function measure(text, opts = {}) {
  * @param {number} [o.gap=0]      Shrinks each dot to expose the lattice.
  * @param {'left'|'center'|'right'} [o.align='left']
  * @param {{color:string,dx:number,dy:number}} [o.shadow]
+ * @param {number} [o.reveal=1] 0..1. Dots grow in from the left, one column at
+ *                              a time, so a heading is *set* rather than shown.
  * @returns {{width:number,height:number}} Rendered size in device px.
  */
 export function drawText(ctx, text, o) {
-  const scale = Math.max(1, Math.round(o.scale ?? 1));
+  const scale = Math.max(1, o.scale ?? 1);
   const tracking = o.tracking ?? 1;
   const leading = o.leading ?? 2;
-  const gap = o.gap ?? 0;
-  const dot = Math.max(1, scale - gap);
+  const square = o.square === true;
+  // Each lit cell is a round dot sitting in the middle of its cell, at 62% of
+  // the pitch. The gap is what makes the face read as a screen of points rather
+  // than a block of pixels.
+  const radius = (scale * (o.weight ?? 0.62)) / 2;
   const m = measure(text, { tracking, leading });
   const lines = String(text).split('\n');
+  const reveal = o.reveal ?? 1;
+  const revealing = reveal < 1;
+  // A wide band means several columns are always mid-flight; the eye reads it
+  // as a fade travelling across the word, not as a wipe.
+  const BAND = 0.55;
+  const totalCols = Math.max(1, m.width);
 
   const paint = (color, offX, offY) => {
     ctx.fillStyle = color;
+    ctx.beginPath();
     lines.forEach((line, li) => {
       const lw = line.length === 0 ? 0 : line.length * (GLYPH_W + tracking) - tracking;
       let originX = o.x + offX;
@@ -174,11 +188,28 @@ export function drawText(ctx, text, o) {
           const row = rows[r];
           for (let c = 0; c < GLYPH_W; c++) {
             if (row[c] !== '#') continue;
-            ctx.fillRect(gx + c * scale, originY + r * scale, dot, dot);
+            const cx = gx + (c + 0.5) * scale;
+            const cy = originY + (r + 0.5) * scale;
+            let rr = radius;
+            if (revealing) {
+              const col = ci * (GLYPH_W + tracking) + c;
+              const along = col / totalCols;
+              const local = clamp((reveal * (1 + BAND) - along) / BAND, 0, 1);
+              rr = radius * (1 - Math.pow(1 - local, 3));
+              if (rr < 0.12) continue;
+            }
+            const radiusNow = rr;
+            if (square) {
+              ctx.rect(cx - radiusNow, cy - radiusNow, radiusNow * 2, radiusNow * 2);
+            } else {
+              ctx.moveTo(cx + radiusNow, cy);
+              ctx.arc(cx, cy, radiusNow, 0, Math.PI * 2);
+            }
           }
         }
       }
     });
+    ctx.fill();
   };
 
   if (o.shadow) paint(o.shadow.color, o.shadow.dx, o.shadow.dy);
@@ -196,14 +227,14 @@ export function drawText(ctx, text, o) {
  *
  * Attributes:
  *   text      — the string (uppercased by the face)
- *   scale     — integer pixel size (default 2)
+ *   scale     — dot pitch in CSS pixels (default 3)
  *   color     — CSS colour (default currentColor resolved at paint time)
- *   tracking  — glyph gap in pixel units (default 1)
- *   gap       — dot inset, for a dot-matrix look (default 0)
- *   as        — semantic role hint: h1|h2|h3|div (default div)
+ *   tracking  — glyph gap in pitch units (default 1)
+ *   weight    — dot diameter as a fraction of the pitch (default 0.62)
+ *   square    — set to draw square dots instead of round ones
  */
 export class PixelTextElement extends HTMLElement {
-  static observedAttributes = ['text', 'scale', 'color', 'tracking', 'gap', 'leading'];
+  static observedAttributes = ['text', 'scale', 'color', 'tracking', 'weight', 'leading', 'square', 'reveal'];
 
   #canvas = document.createElement('canvas');
   #label = document.createElement('span');
@@ -229,10 +260,12 @@ export class PixelTextElement extends HTMLElement {
 
   render() {
     const text = (this.getAttribute('text') ?? this.textContent ?? '').toUpperCase();
-    const scale = parseInt(this.getAttribute('scale') ?? '2', 10);
-    const tracking = parseInt(this.getAttribute('tracking') ?? '1', 10);
-    const leading = parseInt(this.getAttribute('leading') ?? '2', 10);
-    const gap = parseInt(this.getAttribute('gap') ?? '0', 10);
+    const scale = parseFloat(this.getAttribute('scale') ?? '3');
+    const tracking = parseFloat(this.getAttribute('tracking') ?? '1');
+    const leading = parseFloat(this.getAttribute('leading') ?? '2');
+    const weight = parseFloat(this.getAttribute('weight') ?? '0.62');
+    const square = this.hasAttribute('square');
+    const reveal = this.hasAttribute('reveal') ? parseFloat(this.getAttribute('reveal')) : 1;
     const color =
       this.getAttribute('color') || getComputedStyle(this).color || '#ece7dc';
 
@@ -249,8 +282,7 @@ export class PixelTextElement extends HTMLElement {
     const ctx = this.#canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.imageSmoothingEnabled = false;
-    drawText(ctx, text, { x: 0, y: 0, scale, color, tracking, leading, gap });
+    drawText(ctx, text, { x: 0, y: 0, scale, color, tracking, leading, weight, square, reveal });
 
     this.#label.textContent = text;
   }
@@ -258,4 +290,33 @@ export class PixelTextElement extends HTMLElement {
 
 if (!customElements.get('px-text')) {
   customElements.define('px-text', PixelTextElement);
+}
+
+/**
+ * Set a heading, dot column by dot column.
+ *
+ * @param {Element} el       A `<px-text>` element.
+ * @param {{duration?: number, delay?: number}} [o]
+ * @returns {() => void} cancel
+ */
+export function revealText(el, o = {}) {
+  const duration = o.duration ?? 900;
+  const delay = o.delay ?? 0;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.removeAttribute('reveal');
+    return () => {};
+  }
+  el.setAttribute('reveal', '0');
+  let raf = 0;
+  let start = 0;
+  const step = (now) => {
+    if (!start) start = now;
+    const t = (now - start - delay) / duration;
+    if (t < 0) { raf = requestAnimationFrame(step); return; }
+    if (t >= 1) { el.removeAttribute('reveal'); return; }
+    el.setAttribute('reveal', t.toFixed(3));
+    raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+  return () => { cancelAnimationFrame(raf); el.removeAttribute('reveal'); };
 }

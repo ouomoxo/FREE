@@ -49,6 +49,7 @@ export class Conductor {
   #gain = 0.72;
   #pulse = 0;
   #phase = 0;
+  #reveal = 0;
 
   #opts = {
     /** Which reference photograph. */
@@ -64,6 +65,8 @@ export class Conductor {
     beat: 0.26,
     /** Amplitude of the travelling ripple. */
     wave: 0.1,
+    /** Seconds for the image to assemble on mount. 0 shows it immediately. */
+    revealSeconds: 1.6,
     /** Fractions of the host box to occupy when auto-fitting. */
     fitW: 1,
     fitH: 1,
@@ -92,6 +95,7 @@ export class Conductor {
     this.#ready = false;
     this.#gain = this.#opts.idleGain;
     this.#fitBox = { w: 0, h: 0 };
+    this.#reveal = prefersReducedMotion() || !this.#opts.revealSeconds ? 1 : 0;
 
     createHalftone(canvas, this.#opts.src, {
       cell: this.#opts.cell,
@@ -227,6 +231,10 @@ export class Conductor {
     const target = rest + (reduced ? 0 : this.#pulse * this.#opts.beat);
     this.#gain = damp(this.#gain, target, 0.035, dt);
 
+    if (this.#reveal < 1) {
+      this.#reveal = Math.min(1, this.#reveal + dt / this.#opts.revealSeconds);
+    }
+
     // The ripple advances one full cycle per bar.
     if (score && playing && !reduced) {
       this.#phase = (transport.position / (score.secPerBeat * score.meter[0])) * TAU;
@@ -243,6 +251,7 @@ export class Conductor {
       gain: this.#gain,
       wave: reduced ? 0 : this.#opts.wave * (0.4 + this.#level),
       phase: this.#phase,
+      reveal: this.#reveal,
     });
   }
 }

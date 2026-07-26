@@ -17,6 +17,9 @@ import { store } from '../state.js';
 import { player } from '../player.js';
 import { marqueeConductor } from '../ui/conductor.js';
 import { REFERENCE } from '../pixel/halftone.js';
+import { marqueeLine } from '../ui/melodyline.js';
+import { revealText } from '../pixel/font.js';
+import { reveal, revealChildren, sequence } from '../ui/reveal.js';
 import { formatDuration, formatCount } from '../core/utils.js';
 
 /**
@@ -36,34 +39,42 @@ export function homeView() {
     : hour < 18 ? 'GOOD AFTERNOON'
     : 'GOOD EVENING';
 
-  /* --- Marquee ---------------------------------------------------------- */
-  const marquee = h('div.marquee', {},
-    h('div.marquee__copy', {},
-      h('div.t-eyebrow', {}, greeting),
-      pxText('THE HALL IS DARK', { scale: 5 }),
-      h('p.marquee__lede', {},
-        'Nine ensembles. Twenty records. ',
-        h('b', {}, `${CATALOG_STATS.tracks} movements`),
-        ', none of which exist as a file: every note is composed and synthesised '
-        + 'the moment you press play. Beside it, a photograph of a conductor\u2019s hands, '
-        + 'screened into dots that swell on every beat of the bar.',
-      ),
-      h('div.marquee__actions', {},
-        h('div', {}, contextPlayButton(featuredContext, { large: true })),
-        h('a.btn.btn--lg', { href: `#/album/${featured.id}` }, 'OPEN THE RECORD'),
-        h('button.btn.btn--lg.btn--ghost', {
-          type: 'button',
-          onClick: () => { window.location.hash = '#/concert'; },
-        }, icon('expand', { size: 12 }), 'CONCERT HALL'),
-      ),
-      h('div.marquee__stats', {},
-        h('div', {}, h('b', {}, String(CATALOG_STATS.tracks)), 'MOVEMENTS'),
-        h('div', {}, h('b', {}, String(CATALOG_STATS.albums)), 'RECORDS'),
-        h('div', {}, h('b', {}, String(CATALOG_STATS.artists)), 'ENSEMBLES'),
-        h('div', {}, h('b', {}, formatDuration(CATALOG_STATS.totalDuration).replace(' MIN', 'M')), 'RUNTIME'),
-      ),
-    ),
-    h('div.marquee__stage', {}, stageCanvas),
+  /* --- Marquee ----------------------------------------------------------
+     Composed as an overture: nothing is present at first, and the elements
+     are released one at a time by the cue sheet in `onMount`. */
+  const lineCanvas = h('canvas.marquee__line', { 'aria-hidden': 'true' });
+  const eyebrow = h('div.t-eyebrow', { 'data-cue': '' }, greeting);
+  const headline = pxText('THE HALL IS DARK', { scale: 5 });
+  const headlineWrap = h('div', { 'data-cue': '' }, headline);
+  const lede = h('p.marquee__lede', { 'data-cue': '' },
+    'Nine ensembles. Twenty records. ',
+    h('b', {}, `${CATALOG_STATS.tracks} movements`),
+    ', none of which exist as a file: every note is composed and synthesised '
+    + 'the moment you press play. Beside it, a photograph of a conductor\u2019s hands, '
+    + 'screened into dots that swell on every beat of the bar.',
+  );
+  const actions = h('div.marquee__actions', { 'data-cue': '' },
+    h('div', {}, contextPlayButton(featuredContext, { large: true })),
+    h('a.btn.btn--lg', { href: `#/album/${featured.id}` }, 'OPEN THE RECORD'),
+    h('button.btn.btn--lg.btn--ghost', {
+      type: 'button',
+      onClick: () => { window.location.hash = '#/concert'; },
+    }, icon('expand', { size: 12 }), 'CONCERT HALL'),
+  );
+  const stats = h('div.marquee__stats', { 'data-cue': '' },
+    h('div', {}, h('b', {}, String(CATALOG_STATS.tracks)), 'MOVEMENTS'),
+    h('div', {}, h('b', {}, String(CATALOG_STATS.albums)), 'RECORDS'),
+    h('div', {}, h('b', {}, String(CATALOG_STATS.artists)), 'ENSEMBLES'),
+    h('div', {}, h('b', {}, formatDuration(CATALOG_STATS.totalDuration).replace(' MIN', 'M')), 'RUNTIME'),
+  );
+  const stageWrap = h('div.marquee__stage', { 'data-cue': '' }, stageCanvas);
+  const closingRule = h('div.marquee__rule.rule-draw', { 'aria-hidden': 'true' });
+
+  const marquee = h('div.marquee.overture', {},
+    lineCanvas,
+    h('div.marquee__copy', {}, eyebrow, headlineWrap, lede, actions, stats),
+    stageWrap,
+    closingRule,
   );
 
   /* --- Quick picks: recents, or a starter set --------------------------- */
@@ -137,7 +148,7 @@ export function homeView() {
 
   const el = h('div', {},
     marquee,
-    h('div.t-eyebrow', { style: 'margin-bottom:var(--s-4)' },
+    h('div.t-eyebrow.t-eyebrow--standalone', { style: 'margin-bottom:var(--s-4)' },
       s.recent.length ? 'PICK UP WHERE YOU LEFT OFF' : 'START HERE'),
     quick,
     programmes,
@@ -147,16 +158,44 @@ export function homeView() {
     everything,
   );
 
+  /** @type {(() => void)|null} */
+  let cancelOverture = null;
+
   return {
     el,
     onMount() {
       marqueeConductor.mount(stageCanvas, {
         src: REFERENCE.a, cell: 6, maxWidth: 460, maxHeight: 340,
         framing: { zoom: 1.2, offsetX: -0.03, offsetY: -0.05 },
+        // The photograph assembles itself out of the dark rather than cutting in.
+        revealSeconds: 2.2,
       });
+      marqueeLine.mount(lineCanvas);
+
+      // The cue sheet. Slow, even, and in one direction — the eye is led from
+      // the greeting, through the title, to the record it is being offered.
+      const lit = (el) => () => el.setAttribute('data-lit', 'true');
+      cancelOverture = sequence([
+        [80, lit(eyebrow)],
+        [220, () => { lit(headlineWrap)(); revealText(headline, { duration: 1500 }); }],
+        [900, lit(lede)],
+        [1200, lit(stageWrap)],
+        [1450, lit(actions)],
+        [1650, lit(stats)],
+        [1900, lit(closingRule)],
+      ]);
+
+      // Everything below the fold arrives as it is scrolled to.
+      reveal(el.querySelectorAll('.section, .quick, .t-eyebrow--standalone'), { stagger: 0 });
+      for (const cards of el.querySelectorAll('.cards')) {
+        revealChildren(cards, { stagger: 55 });
+      }
+      revealChildren(el.querySelector('.quick'), { stagger: 45 });
     },
     onUnmount() {
+      cancelOverture?.();
       marqueeConductor.unmount();
+      marqueeLine.unmount();
     },
   };
 }

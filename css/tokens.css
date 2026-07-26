@@ -1,9 +1,10 @@
 /* ============================================================================
    MAESTRO — Design Tokens
    The single source of truth for the visual system.
-   Aesthetic brief: a dark concert hall. One light source. Bone-white pixels
-   carved out of the void, one gold accent for the baton. Nothing is rounded —
-   every edge lands on the pixel grid.
+   Aesthetic brief: a dark concert hall. One light source. The image is a
+   photograph screened into fine bone-white dots, one gold accent for the baton.
+   Everything structural is square and hairline-thin; the only round things in
+   the interface are the dots themselves.
    ========================================================================== */
 
 :root {
@@ -50,7 +51,7 @@
   --a-void-70:     rgba(5, 5, 6, 0.70);
   --a-void-92:     rgba(5, 5, 6, 0.92);
 
-  /* --- Spacing: 4px pixel grid, no exceptions ------------------------------ */
+  /* --- Spacing: a 4px grid, no exceptions ---------------------------------- */
   --s-px:  1px;
   --s-1:   4px;
   --s-2:   8px;
@@ -88,7 +89,7 @@
   --ls-wider:  0.16em;
   --ls-widest: 0.24em;
 
-  /* --- Elevation: hard-edged, no blur halos. Pixels don't feather ---------- */
+  /* --- Elevation: hairlines first, hard offsets second, never a blur ------- */
   --e-1: 0 1px 0 0 var(--c-line);
   --e-2: 0 2px 0 0 rgba(0, 0, 0, 0.6);
   --e-3: 0 4px 0 0 rgba(0, 0, 0, 0.55), 0 0 0 1px var(--c-line);
@@ -105,7 +106,7 @@
   --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-snap:  cubic-bezier(0.16, 1.24, 0.42, 1);
-  /* Stepped easing — motion that lands on the pixel grid */
+  /* Stepped easing, kept for the boot meter and the few mechanical readouts */
   --ease-pixel-6: steps(6, end);
   --ease-pixel-4: steps(4, end);
 
@@ -128,7 +129,7 @@
   --z-boot:    100;
 }
 
-/* Fine-grained pixel grid overlay texture, reused by several components. */
+/* Fine overlay textures, reused by several components. */
 :root {
   --tex-scanline: repeating-linear-gradient(
     to bottom,

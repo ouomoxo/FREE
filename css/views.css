@@ -42,7 +42,6 @@
 }
 .boot__hands {
   width: 240px; height: 320px;
-  image-rendering: pixelated;
   margin-bottom: var(--s-2);
 }
 .boot__word { animation: boot-flicker 1.6s steps(2, end) 1; }
@@ -99,7 +98,6 @@
   width: 48px; height: 48px;
   flex: 0 0 auto;
   border: 1px solid var(--c-line);
-  image-rendering: pixelated;
   background: var(--c-surface);
   transition: transform var(--m-base) var(--ease-out);
 }
@@ -163,7 +161,7 @@
   display: grid;
   place-items: center;
 }
-.np__stage canvas { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+.np__stage canvas { width: 100%; height: 100%; object-fit: contain; }
 .np__stage-label {
   position: absolute;
   left: var(--s-3); top: var(--s-3);
@@ -185,9 +183,12 @@
 }
 .np__beat i {
   width: 5px; height: 5px;
+  border-radius: 50%;
   background: var(--c-surface-3);
   display: block;
+  transition: background var(--m-fast), transform var(--m-fast) var(--ease-snap);
 }
+.np__beat i[data-on="true"] { transform: scale(1.25); }
 .np__beat i[data-on="true"] { background: var(--c-gold); }
 .np__beat i[data-downbeat="true"][data-on="true"] { background: var(--c-bone-bright); }
 
@@ -199,7 +200,11 @@
   padding: var(--s-2);
   background: var(--c-void);
 }
-.np__meter canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+.np__meter canvas { width: 100%; height: 100%; }
+
+/* The desk faders are read at a glance, not stared at. */
+.mixer .slider__fill { background: var(--c-text-mid); }
+.mixer .slider:hover .slider__fill { background: var(--c-gold); }
 
 .np__title { display: flex; flex-direction: column; gap: var(--s-1); }
 .np__facts { display: flex; flex-wrap: wrap; gap: var(--s-1); }
@@ -211,7 +216,7 @@
   flex-direction: column;
   gap: var(--s-2);
 }
-.np__sectionbar { display: flex; gap: 2px; height: 22px; align-items: stretch; }
+.np__sectionbar { display: flex; gap: 2px; height: 12px; align-items: stretch; }
 .np__sectionbar i {
   display: block;
   background: var(--c-surface-2);
@@ -232,7 +237,7 @@
   text-align: left;
 }
 .np__qitem:hover { background: var(--a-bone-04); border-color: var(--c-line-soft); }
-.np__qitem img { width: 30px; height: 30px; image-rendering: pixelated; border: 1px solid var(--c-line-soft); flex: 0 0 auto; }
+.np__qitem img { width: 30px; height: 30px; border: 1px solid var(--c-line-soft); flex: 0 0 auto; }
 
 /* ============================================================================
    Concert hall (full screen)
@@ -269,7 +274,6 @@
   overflow: hidden;
 }
 .concert__hands {
-  image-rendering: pixelated;
   max-width: min(92vw, 900px);
   max-height: 100%;
   position: relative;
@@ -279,7 +283,6 @@
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 36%;
-  image-rendering: pixelated;
   opacity: 0.9;
   transition: height var(--m-slow) var(--ease-out);
   pointer-events: none;
@@ -370,7 +373,7 @@
 }
 .palette__item[aria-selected="true"] { background: var(--a-bone-06); border-color: var(--c-line); }
 .palette__item mark { background: none; color: var(--c-gold); }
-.palette__item img { width: 28px; height: 28px; image-rendering: pixelated; border: 1px solid var(--c-line-soft); }
+.palette__item img { width: 28px; height: 28px; border: 1px solid var(--c-line-soft); }
 .palette__hint {
   margin-left: auto;
   font-family: var(--f-mono);
@@ -431,7 +434,7 @@ kbd {
   background: linear-gradient(120deg, var(--c-surface-2), var(--c-surface));
   border: 1px solid var(--c-line);
 }
-.spotlight img { width: 100%; image-rendering: pixelated; border: 1px solid var(--c-line); }
+.spotlight img { width: 100%; border: 1px solid var(--c-line); }
 @media (max-width: 720px) { .spotlight { grid-template-columns: 1fr; } }
 
 /* ============================================================================
@@ -472,7 +475,6 @@ kbd {
   width: 100%;
 }
 .marquee__stage canvas {
-  image-rendering: pixelated;
   max-width: 100%;
   max-height: 100%;
 }
@@ -511,7 +513,7 @@ kbd {
   min-width: 0;
 }
 .quick__item:hover { background: var(--c-surface-2); border-color: var(--c-line-strong); }
-.quick__item img { width: 52px; height: 52px; flex: 0 0 auto; image-rendering: pixelated; }
+.quick__item img { width: 52px; height: 52px; flex: 0 0 auto; }
 .quick__item span { font-size: var(--t-sm); color: var(--c-bone); min-width: 0; }
 
 /* ============================================================================
@@ -553,7 +555,6 @@ kbd {
 .artist-hero__bg {
   position: absolute;
   inset: 0;
-  image-rendering: pixelated;
   width: 100%; height: 100%;
   object-fit: cover;
   opacity: 0.5;
@@ -587,7 +588,7 @@ kbd {
   transition: background var(--m-fast), border-color var(--m-fast);
 }
 .lib-row:hover { background: var(--a-bone-04); border-color: var(--c-line-soft); }
-.lib-row img { width: 40px; height: 40px; flex: 0 0 auto; image-rendering: pixelated; border: 1px solid var(--c-line-soft); }
+.lib-row img { width: 40px; height: 40px; flex: 0 0 auto; border: 1px solid var(--c-line-soft); }
 .lib-row__text { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
 
 /* ============================================================================
@@ -598,3 +599,29 @@ kbd {
 .mixer__row { display: grid; grid-template-columns: 92px 1fr 28px; gap: var(--s-3); align-items: center; }
 .mixer__name { font-size: var(--t-2xs); letter-spacing: var(--ls-wide); color: var(--c-text-dim); text-transform: uppercase; }
 .mixer__val { font-family: var(--f-mono); font-size: var(--t-2xs); color: var(--c-text-faint); text-align: right; }
+
+/* The melodic line drifting behind the marquee.
+   Masked away on the left so it never competes with the copy — it enters from
+   behind the text and runs out under the photograph. */
+.marquee__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(to right, transparent 4%, #000 46%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 4%, #000 46%, #000 88%, transparent 100%);
+}
+@media (max-width: 1000px) {
+  .marquee__line { opacity: 0.55; }
+}
+
+/* A hairline that draws itself along the foot of the marquee. */
+.marquee__rule {
+  position: absolute;
+  left: var(--pad-x); right: var(--pad-x); bottom: 0;
+  height: 1px;
+  background: linear-gradient(to right, var(--a-gold-40), var(--c-line) 55%, transparent);
+  z-index: 1;
+}

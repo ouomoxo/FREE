@@ -19,6 +19,7 @@ import { mountAside } from './ui/aside.js';
 import { mountConcert } from './ui/concert.js';
 import { mountPalette, mountToast } from './ui/overlays.js';
 import { mountLiveRegion, mountShortcuts, bindRouteFocus } from './ui/a11y.js';
+import { reveal, revealChildren } from './ui/reveal.js';
 import { homeView } from './views/home.js';
 import { albumView, playlistView, artistView, queueView, notFoundView } from './views/album.js';
 import { searchView, libraryView } from './views/search.js';
@@ -111,6 +112,17 @@ function mountView(factory, name, params = {}, title = '') {
 
   try { next.onMount?.(); }
   catch (err) { console.error('[app] view mount failed', err); }
+
+  // Views that stage their own opening opt out; everything else gets the
+  // standard scroll entrance.
+  if (!host.querySelector('.overture')) {
+    reveal(host.querySelectorAll('.hero, .artist-hero, .section, .credits, .bio, .tracks'));
+    for (const cards of host.querySelectorAll('.cards')) revealChildren(cards, { stagger: 50 });
+  }
+
+  // The page itself settles rather than cutting in.
+  host.setAttribute('data-entering', 'true');
+  host.addEventListener('animationend', () => host.removeAttribute('data-entering'), { once: true });
 
   view.scrollTop = 0;
   bus.emit(EVT.ROUTE_RENDERED, { name, params });

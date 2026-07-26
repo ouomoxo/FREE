@@ -82,6 +82,12 @@ export class Halftone {
    * @returns {Promise<Halftone>}
    */
   async load(source) {
+    // A canvas is already decoded and drawable — that is how generated artwork
+    // gets screened through exactly the same pipeline as a photograph.
+    if (typeof source !== 'string' && !(source instanceof HTMLImageElement)) {
+      this.#image = source;
+      return this;
+    }
     const img = typeof source === 'string' ? new Image() : source;
     if (typeof source === 'string') {
       img.decoding = 'async';
@@ -95,6 +101,16 @@ export class Halftone {
     }
     this.#image = img;
     return this;
+  }
+
+  /** Intrinsic size of the loaded source, image or canvas. */
+  get sourceSize() {
+    const s = this.#image;
+    if (!s) return { width: 0, height: 0 };
+    return {
+      width: s.naturalWidth ?? s.width ?? 0,
+      height: s.naturalHeight ?? s.height ?? 0,
+    };
   }
 
   /**
@@ -130,7 +146,9 @@ export class Halftone {
     bctx.imageSmoothingQuality = 'high';
 
     // Fit or cover the source into the sample buffer.
-    const ir = img.naturalWidth / img.naturalHeight;
+    const iw = img.naturalWidth ?? img.width;
+    const ih = img.naturalHeight ?? img.height;
+    const ir = iw / ih;
     const br = sw / sh;
     let dw;
     let dh;
@@ -201,6 +219,12 @@ export class Halftone {
    * @param {number} [o.jitter=0]  Random displacement, in fractions of a cell.
    * @param {number} [o.wave=0]    Amplitude of a travelling ripple, 0..1.
    * @param {number} [o.phase=0]   Ripple phase in radians.
+   * @param {number} [o.reveal=1]  0..1. The image assembles itself along a
+   *                               diagonal: each dot grows from nothing as the
+   *                               sweep reaches it, so the picture arrives
+   *                               rather than appears.
+   * @param {number} [o.revealAngle=0.6] Direction of the sweep, 0 = left-to-
+   *                               right, 1 = top-to-bottom.
    */
   render(o = {}) {
     const ctx = this.#ctx;
@@ -223,6 +247,13 @@ export class Halftone {
     const jitter = o.jitter ?? 0;
     const wave = o.wave ?? 0;
     const phase = o.phase ?? 0;
+    const reveal = o.reveal ?? 1;
+    // How much of the sweep is "in flight" at once. A wide band makes the
+    // assembly feel like a slow exposure rather than a wipe.
+    const BAND = 0.62;
+    const revealing = reveal < 1;
+    const rax = 1 - (o.revealAngle ?? 0.6);
+    const ray = o.revealAngle ?? 0.6;
 
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -265,6 +296,16 @@ export class Halftone {
         if (wave) {
           const d = (x + y) / cell;
           r *= 1 + wave * Math.sin(d * 0.35 + phase);
+        }
+        if (revealing) {
+          // Position along the sweep, 0..1, plus a small deterministic offset
+          // so the leading edge breaks up instead of arriving as a straight rule.
+          const seed = Math.sin(i * 91.7 + j * 47.3) * 43758.5453;
+          const grain = (seed - Math.floor(seed)) * 0.14;
+          const along = (x / W) * rax + (y / H) * ray + grain;
+          const local = clamp((reveal * (1 + BAND) - along) / BAND, 0, 1);
+          // easeOutCubic — the dot decelerates into its final size.
+          r *= 1 - Math.pow(1 - local, 3);
         }
         if (r < minR) continue;
         r = Math.min(r, cell * 0.98);

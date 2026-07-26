@@ -231,14 +231,15 @@ export function setVar(el, name, value) {
 /**
  * A `<px-text>` element, as a function.
  * @param {string} text
- * @param {{scale?:number, color?:string, tracking?:number, gap?:number, class?:string}} [o]
+ * @param {{scale?:number, color?:string, tracking?:number, weight?:number, square?:boolean, class?:string}} [o]
  */
 export function pxText(text, o = {}) {
   return h('px-text', {
     text,
-    scale: o.scale ?? 2,
-    tracking: o.tracking ?? 1,
-    gap: o.gap ?? 0,
+    scale: o.scale ?? 3,
+    tracking: o.tracking ?? 1.2,
+    ...(o.weight !== undefined ? { weight: o.weight } : {}),
+    ...(o.square ? { square: true } : {}),
     ...(o.color ? { color: o.color } : {}),
     ...(o.class ? { class: o.class } : {}),
   });

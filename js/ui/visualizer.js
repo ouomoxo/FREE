@@ -1,11 +1,11 @@
 /**
  * MAESTRO — Dot-matrix spectrum.
  *
- * Reads the analyser node and renders it as a literal dot matrix: logarithmic
+ * Reads the analyser node and renders it as a field of round dots: logarithmic
  * frequency columns, quantised into cells, with peak-hold markers that fall at
- * a fixed rate. Every cell is an integer-aligned square, so the display is a
- * grid of dots rather than a smooth curve — the same visual grammar as the
- * artwork and the typeface.
+ * a fixed rate. Each cell holds one dot that never quite fills it, so the
+ * display reads as points rather than as a curve — the same grammar as the
+ * halftone artwork and the typeface.
  *
  * @module ui/visualizer
  */
@@ -98,7 +98,6 @@ export class Visualizer {
     this.#dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = Math.round(rect.width * this.#dpr);
     canvas.height = Math.round(rect.height * this.#dpr);
-    if (this.#ctx) this.#ctx.imageSmoothingEnabled = false;
   }
 
   start() {
@@ -215,12 +214,17 @@ export class Visualizer {
     const cellH = H / rows;
     const cellW = Math.max(2, Math.round(W / 150));
 
-    // Faint lattice, so the empty register still reads as a grid.
-    ctx.fillStyle = 'rgba(236,231,220,0.035)';
+    // Faint lattice, so the empty register still reads as a field of points.
+    ctx.fillStyle = 'rgba(236,231,220,0.08)';
+    ctx.beginPath();
     for (let r = 0; r < rows; r++) {
-      const y = Math.round(H - (r + 1) * cellH);
-      for (let x = 0; x < W; x += cellW * 3) ctx.fillRect(x, y, 1, 1);
+      const y = H - (r + 0.5) * cellH;
+      for (let x = cellW; x < W; x += cellW * 3) {
+        ctx.moveTo(x + 0.7, y);
+        ctx.arc(x, y, 0.7, 0, Math.PI * 2);
+      }
     }
+    ctx.fill();
 
     // Bar lines.
     const barLen = score.secPerBeat * score.meter[0];
@@ -254,46 +258,60 @@ export class Visualizer {
         : ink;
       ctx.globalAlpha = sounding ? 1 : clamp(0.32 + e.v * 0.68, 0.2, 1);
 
-      // Notes are drawn as runs of discrete cells, never a smooth bar.
+      // Notes are drawn as runs of discrete dots, never a smooth bar.
+      const dr = Math.min(cellW, cellH) * 0.36;
+      ctx.beginPath();
       for (let cx = x; cx < x + w; cx += cellW) {
         if (cx + cellW < 0 || cx > W) continue;
-        ctx.fillRect(cx, y, cellW - 1, Math.max(1, Math.floor(cellH) - 1));
+        ctx.moveTo(cx + dr, y + cellH / 2);
+        ctx.arc(cx, y + cellH / 2, dr, 0, Math.PI * 2);
       }
+      ctx.fill();
       ctx.globalAlpha = 1;
     }
 
-    // The playhead.
+    // The playhead, as a dotted rule.
     ctx.fillStyle = accent;
-    const px = Math.round(playhead * W);
-    for (let y = 0; y < H; y += 4) ctx.fillRect(px, y, 1, 2);
+    const px = playhead * W;
+    ctx.beginPath();
+    for (let y = 2; y < H; y += 6) {
+      ctx.moveTo(px + 0.9, y);
+      ctx.arc(px, y, 0.9, 0, Math.PI * 2);
+    }
+    ctx.fill();
   }
 
   #drawMatrix(ctx, W, H) {
-    const { columns, rows, gap, ink, inkBright, accent } = this.#opts;
+    const { columns, rows, ink, inkBright, accent } = this.#opts;
     const cw = W / columns;
     const ch = H / rows;
-    const dw = Math.max(1, Math.floor(cw - gap * this.#dpr));
-    const dh = Math.max(1, Math.floor(ch - gap * this.#dpr));
+    // Round dots on the same lattice as the rest of the application. The dot
+    // never quite fills its cell, so the grid stays legible as points.
+    const r0 = Math.min(cw, ch) * 0.34;
+
+    const dot = (x, y, radius, fill) => {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    };
 
     for (let c = 0; c < columns; c++) {
       const level = this.#levels[c];
       const lit = Math.round(level * rows);
       const peakRow = Math.round(this.#peaks[c] * rows);
-      const x = Math.floor(c * cw);
+      const x = c * cw + cw / 2;
 
       for (let r = 0; r < rows; r++) {
-        const y = Math.floor(H - (r + 1) * ch);
+        const y = H - (r + 0.5) * ch;
         if (r < lit) {
-          // The top two cells of each bar take the accent colour.
-          ctx.fillStyle = r >= lit - 2 ? accent : (r > rows * 0.55 ? inkBright : ink);
-          ctx.fillRect(x, y, dw, dh);
+          // The top of each column takes the accent colour.
+          dot(x, y, r0, r >= lit - 2 ? accent : (r > rows * 0.55 ? inkBright : ink));
         } else if (r === peakRow - 1 && peakRow > lit) {
-          ctx.fillStyle = accent;
-          ctx.fillRect(x, y, dw, Math.max(1, Math.floor(dh * 0.34)));
+          dot(x, y, r0 * 0.62, accent);
         } else {
-          // The unlit lattice — faint, but present, so the grid reads.
-          ctx.fillStyle = 'rgba(236,231,220,0.045)';
-          ctx.fillRect(x, y, dw, Math.max(1, Math.floor(dh * 0.22)));
+          // The unlit lattice — faint, but present, so the field reads.
+          dot(x, y, r0 * 0.24, 'rgba(236,231,220,0.14)');
         }
       }
     }
@@ -301,19 +319,23 @@ export class Visualizer {
 
   #drawWave(ctx, W, H) {
     const data = engine.sampleWaveform();
-    const cell = Math.max(2, Math.round(W / 220));
-    ctx.fillStyle = this.#opts.inkBright;
+    const cell = Math.max(3, Math.round(W / 190));
+    const r = cell * 0.34;
+    const plot = (x, y, fill) => {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    };
     if (!data) {
-      ctx.fillStyle = 'rgba(236,231,220,0.12)';
-      for (let x = 0; x < W; x += cell * 2) ctx.fillRect(x, Math.floor(H / 2), cell, cell);
+      for (let x = cell; x < W; x += cell * 2) plot(x, H / 2, 'rgba(236,231,220,0.16)');
       return;
     }
     const step = Math.max(1, Math.floor(data.length / (W / cell)));
     for (let i = 0, x = 0; i < data.length; i += step, x += cell) {
       const v = (data[i] - 128) / 128;
-      const y = Math.round((H / 2) * (1 - v * 0.86) / cell) * cell;
-      ctx.fillStyle = Math.abs(v) > 0.5 ? this.#opts.accent : this.#opts.inkBright;
-      ctx.fillRect(x, clamp(y, 0, H - cell), cell, cell);
+      const y = Math.round(((H / 2) * (1 - v * 0.86)) / cell) * cell;
+      plot(x, clamp(y, r, H - r), Math.abs(v) > 0.5 ? this.#opts.accent : this.#opts.inkBright);
     }
   }
 
@@ -327,11 +349,11 @@ export class Visualizer {
         const t = r / rows;
         const on = level > t * 0.9 + 0.04;
         if (!on) continue;
-        const size = Math.max(1, Math.floor(Math.min(cw, ch) * (0.3 + (1 - t) * 0.5)));
-        const x = Math.floor(c * cw + (cw - size) / 2);
-        const y = Math.floor(H - (r + 1) * ch + (ch - size) / 2);
+        const radius = Math.min(cw, ch) * (0.15 + (1 - t) * 0.26);
         ctx.fillStyle = t > 0.7 ? this.#opts.accent : this.#opts.ink;
-        ctx.fillRect(x, y, size, size);
+        ctx.beginPath();
+        ctx.arc(c * cw + cw / 2, H - (r + 0.5) * ch, radius, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
   }

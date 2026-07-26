@@ -106,6 +106,10 @@ const ACTIONS = {
     await page.click('.concert__top .btn');
     await page.waitForTimeout(2600);
   },
+  /** Catch the opening sequence mid-flight. */
+  async overture(page) {
+    await page.waitForTimeout(220);
+  },
   /** Open the keyboard shortcuts sheet. */
   async help(page) {
     await page.keyboard.press('?');
@@ -127,7 +131,9 @@ const ACTIONS = {
 const SHOTS = [
   { name: 'lab',          path: '/dev/art-lab.html',  width: 1280, height: 1200, full: true },
   { name: 'halftone',     path: '/dev/halftone-lab.html', width: 1500, height: 1200, full: true, wait: 900 },
-  { name: 'home-desktop', path: '/',                  width: 1600, height: 1000, wait: 1400 },
+  { name: 'home-desktop', path: '/',                  width: 1600, height: 1000, wait: 3000 },
+  { name: 'overture-1',   path: '/',                  width: 1600, height: 1000, wait: 700,  action: 'overture' },
+  { name: 'overture-2',   path: '/',                  width: 1600, height: 1000, wait: 1250, action: 'overture' },
   { name: 'home-wide',    path: '/',                  width: 1920, height: 1080, wait: 1400 },
   { name: 'home-laptop',  path: '/',                  width: 1280, height: 800,  wait: 1400 },
   { name: 'home-tablet',  path: '/',                  width: 900,  height: 1000, wait: 1400 },

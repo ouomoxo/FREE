@@ -15,8 +15,8 @@
  * @module pixel/art
  */
 
-import { PixelSurface } from './surface.js';
 import { PALETTES } from './dither.js';
+import { Halftone } from './halftone.js';
 import { Random, TAU, clamp } from '../core/utils.js';
 
 const SIZE = 64;
@@ -62,7 +62,7 @@ export const MOTIFS = {
     glow.addColorStop(1, g(0.02));
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, horizon + 2);
-    vignette(ctx, w, h, 0.66);
+    vignette(ctx, w, h, 0.36);
   },
 
   /** Constructivist nesting — the quartet's sleeve language. */
@@ -82,11 +82,11 @@ export const MOTIFS = {
         ctx.fillStyle = g(v * 0.22);
         ctx.fillRect(-size / 2, -size / 2, size, size);
         ctx.strokeStyle = g(v);
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.8;
         ctx.strokeRect(-size / 2, -size / 2, size, size);
       } else {
         ctx.strokeStyle = g(v * 0.9);
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.arc(0, 0, size / 2, 0, TAU);
         ctx.stroke();
@@ -95,7 +95,7 @@ export const MOTIFS = {
     }
     ctx.fillStyle = g(1);
     ctx.fillRect(cx - 2, cy - 2, 4, 4);
-    vignette(ctx, w, h, 0.5);
+    vignette(ctx, w, h, 0.28);
   },
 
   /** Five lines and a few notes. */
@@ -119,7 +119,7 @@ export const MOTIFS = {
         ctx.fillRect(x + 2, y - 11, 1, 11);
       }
     }
-    vignette(ctx, w, h, 0.55);
+    vignette(ctx, w, h, 0.3);
   },
 
   /** Moon over a flat horizon. */
@@ -159,7 +159,7 @@ export const MOTIFS = {
       ctx.fillStyle = g(rnd.float(0.4, 0.95));
       ctx.fillRect(rnd.int(w), rnd.int(h * 0.6), 1, 1);
     }
-    vignette(ctx, w, h, 0.44);
+    vignette(ctx, w, h, 0.24);
   },
 
   /** A bar meter — eight bits, eight bars. */
@@ -180,7 +180,7 @@ export const MOTIFS = {
     }
     ctx.fillStyle = g(0.3);
     ctx.fillRect(pad, h * 0.83, w - pad * 2, 1);
-    vignette(ctx, w, h, 0.5);
+    vignette(ctx, w, h, 0.28);
   },
 
   /** A rose window. */
@@ -197,7 +197,7 @@ export const MOTIFS = {
         const x = cx + Math.cos(a) * rr * 0.62;
         const y = cy + Math.sin(a) * rr * 0.62;
         ctx.strokeStyle = g(0.3 + (3 - ring) * 0.22);
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.ellipse(x, y, rr * 0.34, rr * 0.2, a, 0, TAU);
         ctx.stroke();
@@ -214,7 +214,7 @@ export const MOTIFS = {
     ctx.beginPath();
     ctx.arc(cx, cy, w * 0.12, 0, TAU);
     ctx.fill();
-    vignette(ctx, w, h, 0.6);
+    vignette(ctx, w, h, 0.33);
   },
 
   /** A lit arch at the end of a dark nave. */
@@ -243,7 +243,7 @@ export const MOTIFS = {
     refl.addColorStop(1, g(0.02));
     ctx.fillStyle = refl;
     ctx.fillRect(w * 0.3, h * 0.9, w * 0.4, h * 0.1);
-    vignette(ctx, w, h, 0.68);
+    vignette(ctx, w, h, 0.37);
   },
 
   /** A standing wave. */
@@ -257,7 +257,7 @@ export const MOTIFS = {
       const freq = 1.4 + l * 0.42;
       const phase = rnd.float(TAU);
       ctx.strokeStyle = g(0.24 + (1 - Math.abs(t - 0.5) * 2) * 0.72);
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       for (let x = 2; x <= w - 2; x++) {
         const y = yc + Math.sin((x / w) * TAU * freq + phase) * amp;
@@ -265,7 +265,7 @@ export const MOTIFS = {
       }
       ctx.stroke();
     }
-    vignette(ctx, w, h, 0.52);
+    vignette(ctx, w, h, 0.29);
   },
 
   /** Curtains of light. */
@@ -298,7 +298,7 @@ export const MOTIFS = {
       ctx.fillStyle = g(rnd.float(0.5, 1));
       ctx.fillRect(rnd.int(w), rnd.int(h * 0.4), 1, 1);
     }
-    vignette(ctx, w, h, 0.5);
+    vignette(ctx, w, h, 0.28);
   },
 
   /** A receding lattice — the harpsichord's jack rail. */
@@ -308,7 +308,7 @@ export const MOTIFS = {
     for (let i = 0; i <= 12; i++) {
       const x = (i / 12) * w;
       ctx.strokeStyle = g(0.14 + (1 - Math.abs(i / 12 - 0.5) * 2) * 0.6);
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.moveTo(x, h);
       ctx.lineTo(vp[0], vp[1]);
@@ -323,13 +323,13 @@ export const MOTIFS = {
       ctx.lineTo(w, y);
       ctx.stroke();
     }
-    const glow = ctx.createRadialGradient(vp[0], vp[1], 0, vp[0], vp[1], w * 0.16);
+    const glow = ctx.createRadialGradient(vp[0], vp[1], 0, vp[0], vp[1], w * 0.3);
     glow.addColorStop(0, g(1));
-    glow.addColorStop(0.5, g(0.28));
+    glow.addColorStop(0.35, g(0.5));
     glow.addColorStop(1, g(0));
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, h);
-    vignette(ctx, w, h, 0.72);
+    vignette(ctx, w, h, 0.4);
   },
 
   /** A spiral of dots — thirty variations on one point. */
@@ -349,7 +349,7 @@ export const MOTIFS = {
       ctx.fillStyle = g(0.25 + (1 - t) * 0.75);
       ctx.fillRect(Math.round(x - size / 2), Math.round(y - size / 2), Math.ceil(size), Math.ceil(size));
     }
-    vignette(ctx, w, h, 0.55);
+    vignette(ctx, w, h, 0.3);
   },
 
   /** Sun over banded ground. */
@@ -382,13 +382,13 @@ export const MOTIFS = {
     ctx.fillRect(0, h * 0.72, w, h * 0.28);
     ctx.fillStyle = g(0.3);
     ctx.fillRect(0, h * 0.72, w, 1);
-    vignette(ctx, w, h, 0.42);
+    vignette(ctx, w, h, 0.23);
   },
 
   /** Traces on a board. */
   circuit(ctx, w, h, rnd) {
     backdrop(ctx, w, h, 0.05);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.8;
     for (let i = 0; i < 14; i++) {
       let x = rnd.int(4, w - 4);
       let y = rnd.int(4, h - 4);
@@ -414,7 +414,7 @@ export const MOTIFS = {
       ctx.strokeStyle = g(0.7);
       ctx.strokeRect(x + 0.5, y + 0.5, 9, 5);
     }
-    vignette(ctx, w, h, 0.5);
+    vignette(ctx, w, h, 0.28);
   },
 
   /** A single figure under a spotlight — used for ensemble portraits. */
@@ -436,7 +436,7 @@ export const MOTIFS = {
     ctx.closePath();
     ctx.fillStyle = g(0.62);
     ctx.fill();
-    vignette(ctx, w, h, 0.7);
+    vignette(ctx, w, h, 0.39);
   },
 };
 
@@ -477,30 +477,60 @@ function vignette(ctx, w, h, strength = 0.6) {
 const dataUrlCache = new Map();
 
 /**
+ * Ink colour for a sleeve: the brightest tone of its palette. The screen is
+ * monochrome — a palette here chooses one ink, not a ramp.
+ * @param {string} name
+ */
+function inkFor(name) {
+  const pal = PALETTES[name] ?? PALETTES.bone;
+  const [r, gr, b] = pal[pal.length - 1];
+  return `rgb(${r},${gr},${b})`;
+}
+
+/**
  * Render a sleeve to a fresh canvas.
+ *
+ * The motif is drawn as a small greyscale scene and then put through the same
+ * halftone screen as the photographs, so every image in the application — a
+ * generated sleeve, a portrait, the conductor — is made of the same round dots.
  *
  * @param {object} o
  * @param {string} o.seed
  * @param {string} [o.motif]
  * @param {string} [o.palette]
- * @param {number} [o.scale=4]  Integer upscale (64 * scale px).
- * @param {number} [o.dotGap=0]
+ * @param {number} [o.scale=4]  Output is 64 * scale px square.
+ * @param {number} [o.cell]     Dot pitch; derived from the size if omitted.
  * @returns {HTMLCanvasElement}
  */
 export function renderCover(o) {
-  const canvas = document.createElement('canvas');
-  const surface = new PixelSurface(canvas, { width: SIZE, height: SIZE, scale: o.scale ?? 4 });
+  const scale = o.scale ?? 4;
+  const size = SIZE * scale;
   const rnd = Random(o.seed);
+
+  // 1. Draw the scene, large enough that the screen has real detail to sample.
+  const source = document.createElement('canvas');
+  source.width = SIZE * 4;
+  source.height = SIZE * 4;
+  const sctx = source.getContext('2d');
+  sctx.scale(4, 4);
   const motif = MOTIFS[o.motif] ?? MOTIFS[MOTIF_NAMES[rnd.int(MOTIF_NAMES.length)]];
-  const ctx = surface.ctx;
-  ctx.clearRect(0, 0, SIZE, SIZE);
-  motif(ctx, SIZE, SIZE, rnd);
-  surface.present({
-    palette: PALETTES[o.palette] ?? PALETTES.bone,
-    strength: 0.72,
-    gamma: 1.18,
-    dotGap: o.dotGap ?? 0,
+  motif(sctx, SIZE, SIZE, rnd);
+
+  // 2. Screen it. The pitch scales with the output so a 96px thumbnail is not a
+  //    solid mass and a 384px sleeve is not a fine grey mist.
+  const canvas = document.createElement('canvas');
+  const ht = new Halftone(canvas, {
+    cell: o.cell ?? Math.max(2.6, size / 46),
+    angle: 0.3927,
+    ink: inkFor(o.palette),
+    maxDot: 0.5,
+    contrast: 1.3,
+    gamma: 0.86,
+    floor: 0.03,
   });
+  ht.load(source);
+  ht.measure(size, size, { cover: true });
+  ht.render();
   return canvas;
 }
 

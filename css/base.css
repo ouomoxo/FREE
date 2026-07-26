@@ -30,7 +30,6 @@ body {
 }
 
 img, canvas, svg, video { display: block; max-width: 100%; }
-canvas { image-rendering: pixelated; }
 
 button, input, select, textarea {
   font: inherit;
@@ -132,7 +131,8 @@ px-text {
 px-text canvas {
   max-width: 100%;
   height: auto;
-  image-rendering: pixelated;
+  /* Round dots want the smoothing; only the square-pixel surfaces disable it. */
+  image-rendering: auto;
 }
 
 /* Screen-reader-only, used heavily since much of the type is canvas-drawn. */

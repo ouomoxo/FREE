@@ -29,12 +29,18 @@ size.
 
 Everything else in the interface follows from that.
 
+It is a fine screen, not a coarse one. The whole interface follows the same
+discipline — points and hairlines, nothing thick.
+
 - **Bone-white on void black**, with a single warm gold for the baton and for
   whatever is currently sounding. Nothing else is coloured.
-- **Nothing is rounded** except the dots. Every corner is square, every shadow
-  is a hard offset, every measurement lands on a 4-pixel grid.
-- **The type is a bitmap face** — a hand-authored 5×7 pixel font drawn to canvas
-  — so headings sit on the same lattice as everything else.
+- **Everything is dots or hairlines.** The display face is a 5×7 bitmap drawn as
+  round dots rather than square pixels; generated sleeves go through the same
+  halftone screen as the photographs; the spectrum, the piano roll, the beat
+  lamps, the seek markers and the slider handles are all points.
+- **The chrome recedes.** Icons are hairline geometry, panels are outlined
+  rather than filled, corners are square, and the grid is 4px throughout. The
+  only solid mass in the interface is the play button.
 - **The dots move.** The screen is re-laid every frame, so the photograph
   breathes with the music.
 
@@ -68,6 +74,32 @@ pitch around F4); FM bells; a formant chorus; timpani with a pitch drop. The
 hall is a convolution reverb whose impulse response is generated at start-up
 from decaying noise with a handful of early reflections.
 
+## The opening
+
+The hall page is staged rather than laid out. Nothing is present when it loads;
+a cue sheet releases the elements one at a time over about two seconds, in the
+order the eye should travel — greeting, title, sentence, photograph, the record
+being offered.
+
+Three things move, and only three:
+
+- **The photograph assembles.** The halftone screen takes a `reveal` parameter:
+  a sweep crosses the frame on a diagonal and each dot grows from nothing as it
+  is reached, with a little deterministic grain on the leading edge so it reads
+  as an exposure rather than a wipe.
+- **The title is set, column by column.** The bitmap face takes the same
+  parameter, so a heading arrives one dot column at a time.
+- **A line drifts.** Three hairlines cross the marquee — the only curved,
+  continuous thing in the interface. Idle, they are layered sines at periods
+  that never coincide. Once a score is playing, the front line stops
+  improvising and traces the melody's actual pitch contour, scrolling under the
+  playhead. They are masked away behind the copy so they never compete with it.
+
+Below the fold, blocks arrive as they are scrolled to: a few pixels up, a slow
+resolve, staggered across a grid. Nothing bounces, nothing scales, nothing
+overshoots. `prefers-reduced-motion` removes all of it and simply shows the
+page.
+
 ## Architecture
 
 ```
@@ -79,6 +111,7 @@ css/
   layout.css          app shell grid and its responsive collapse order
   components.css      buttons, cards, track table, sliders, empty states
   views.css           boot, transport, now-playing, concert hall, overlays
+  motion.css          entrances, the cue sheet, reduced-motion opt-outs
 js/
   core/               store, router, event bus, DOM layer, storage, utils
   pixel/              halftone screen, photo sleeves, bitmap font,
@@ -86,7 +119,8 @@ js/
   audio/              engine, instruments, theory, composer, transport
   data/catalog.js     the repertoire
   ui/                 shell, transport bar, now-playing, concert, overlays,
-                      conductor, visualiser, icons, slider, a11y
+                      conductor, visualiser, melody line, entrances, icons,
+                      slider, a11y
   views/              home, album/artist/playlist/queue, search/library
   state.js            one store, one shape, all the actions
   player.js           queue, score cache, playhead broadcast, media session
@@ -103,9 +137,10 @@ dev/
 The records whose subject is the conductor use the photograph, screened
 (`pixel/photo.js`), each at a different dot pitch and crop so the sleeves are
 distinguishable at thumbnail size. Everything else in the catalogue gets a
-generated motif (`pixel/art.js`) — drawn with ordinary smooth canvas calls into
-a 64×64 buffer, then quantised to a five-tone palette through an ordered Bayer
-matrix and blitted nearest-neighbour at an integer scale.
+generated motif (`pixel/art.js`) — a small greyscale scene drawn with ordinary
+canvas calls, then put through the *same* halftone screen, inked in one colour
+drawn from the record's palette. The dot pitch scales with the display size, so
+a 96px thumbnail is not a solid mass and a 384px sleeve is not a grey mist.
 
 ### State
 
