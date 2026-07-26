@@ -243,52 +243,71 @@ export class Visualizer {
    * ------------------------------------------------------------------ */
 
   /**
-   * The contour of the music, as a continuous function of time.
+   * The wave.
    *
-   * Sampled coarsely across the window and then smoothed several times over,
-   * so what comes out is not a sequence of notes but the shape they make —
-   * a wave. Nothing here is quantised to anything.
+   * Two things are added together, and neither of them is a note.
    *
-   * @returns {Float32Array} 0..1, low to high, one value per sample.
+   * The first is where the music *is* — the melodic contour, smoothed until it
+   * is a slow swell rather than a sequence of pitches, read against its own
+   * register so a tune that lives inside a fifth still fills the frame.
+   *
+   * The second is where the music *strikes* — every attack in the window laid
+   * in as a sharp two-sided spike, up if the line is rising into it and down if
+   * it is falling, its height the note's own force. This is the part that makes
+   * the shape a wave and not a curve, and it is given by the rhythm alone.
+   *
+   * @returns {Float32Array} Signed, roughly -1..1 about the centre line.
    */
-  #ariaContour(score, t0, window, N) {
+  #ariaWave(score, t0, window, N) {
     const events = score.events;
     const melody = melodyPart(score);
     const LO = 36;
     const HI = 88;
-    const raw = new Float32Array(N).fill(-1);
 
-    // The tune where it is singing, and the top of the texture where it is
-    // not — because a window in which the melody happens to be resting is
-    // still a window with music in it.
-    const fallback = new Float32Array(N).fill(-1);
+    const pitch = new Float32Array(N).fill(-1);
+    const under = new Float32Array(N).fill(-1);
+    const hit = new Float32Array(N);
+
+    // A spike about eight samples wide, whatever the window length.
+    const K = Math.max(3, Math.round(N * 0.035));
+    let prevM = -1;
+
     let i = findEventIndex(events, t0 - 16);
     for (; i < events.length; i++) {
       const e = events[i];
       if (e.t > t0 + window) break;
       if (e.t + e.d < t0) continue;
-      if (UNPITCHED.has(e.i)) continue;
-      const s0 = Math.max(0, Math.floor(((e.t - t0) / window) * N));
-      const s1 = Math.min(N - 1, Math.ceil(((e.t + e.d - t0) / window) * N));
-      const v = clamp((e.m - LO) / (HI - LO), 0, 1);
-      const into = e.i === melody ? raw : fallback;
-      for (let s = s0; s <= s1; s++) if (v > into[s]) into[s] = v;
-    }
-    for (let s = 0; s < N; s++) if (raw[s] < 0) raw[s] = fallback[s];
+      if (UNPITCHED.has(e.i) === false) {
+        const s0 = Math.max(0, Math.floor(((e.t - t0) / window) * N));
+        const s1 = Math.min(N - 1, Math.ceil(((e.t + e.d - t0) / window) * N));
+        const v = clamp((e.m - LO) / (HI - LO), 0, 1);
+        const into = e.i === melody ? pitch : under;
+        for (let s = s0; s <= s1; s++) if (v > into[s]) into[s] = v;
+      }
 
-    // Silence is not a hole in the line — the line keeps going where it was.
+      // The attack. Percussion counts double: it is nothing but attack.
+      const at = Math.round(((e.t - t0) / window) * N);
+      if (at < -K || at > N + K) continue;
+      const rising = prevM < 0 || e.m >= prevM;
+      if (!UNPITCHED.has(e.i)) prevM = e.m;
+      const force = (e.v ?? 0.6) * (UNPITCHED.has(e.i) ? 1.5 : 1) * (rising ? 1 : -1);
+      for (let d = -K; d <= K; d++) {
+        const s = at + d;
+        if (s < 0 || s >= N) continue;
+        // Sharp at the centre, gone by the edge — a struck shape, not a bump.
+        hit[s] += force * Math.pow(1 - Math.abs(d) / (K + 1), 2.2);
+      }
+    }
+
+    for (let s = 0; s < N; s++) if (pitch[s] < 0) pitch[s] = under[s];
     let last = 0.5;
-    for (let s = 0; s < N; s++) {
-      if (raw[s] < 0) raw[s] = last; else last = raw[s];
-    }
-    for (let s = N - 1; s >= 0; s--) {
-      if (raw[s] < 0) raw[s] = last; else last = raw[s];
-    }
+    for (let s = 0; s < N; s++) { if (pitch[s] < 0) pitch[s] = last; else last = pitch[s]; }
+    for (let s = N - 1; s >= 0; s--) { if (pitch[s] < 0) pitch[s] = last; else last = pitch[s]; }
 
-    // Three passes of a box, which is what turns a staircase into silk.
-    let src = raw;
+    // Smooth the swell hard; leave the strikes alone.
+    let src = pitch;
     let dst = new Float32Array(N);
-    const R = Math.max(2, Math.round(N * 0.012));
+    const R = Math.max(2, Math.round(N * 0.03));
     for (let pass = 0; pass < 3; pass++) {
       let sum = 0;
       for (let k = -R; k <= R; k++) sum += src[clamp(k, 0, N - 1)];
@@ -299,115 +318,99 @@ export class Visualizer {
       const t = src; src = dst; dst = t;
     }
 
-    // Then opened out to fill the frame.
-    //
-    // A tune that stays inside a fifth would otherwise be a flat line on a
-    // scale wide enough for a piccolo, which is the truth and is also nothing
-    // to look at. The window is read against its own range instead of against
-    // the piano — and the range is chased rather than set, so the drawing
-    // breathes open and closed as the music's tessitura moves instead of
-    // jumping whenever one high note enters or leaves.
     let lo = 1;
     let hi = 0;
     for (let s = 0; s < N; s++) {
       if (src[s] < lo) lo = src[s];
       if (src[s] > hi) hi = src[s];
     }
-    if (hi - lo < 0.06) { const c = (hi + lo) / 2; lo = c - 0.03; hi = c + 0.03; }
-    this.#gainLo = damp(this.#gainLo, lo, 0.7, 1 / 60);
-    this.#gainHi = damp(this.#gainHi, hi, 0.7, 1 / 60);
-    const span = Math.max(0.05, this.#gainHi - this.#gainLo);
-    for (let s = 0; s < N; s++) src[s] = clamp((src[s] - this.#gainLo) / span, -0.15, 1.15);
+    if (hi - lo < 0.04) { const c = (hi + lo) / 2; lo = c - 0.02; hi = c + 0.02; }
+    this.#gainLo = damp(this.#gainLo, lo, 0.9, 1 / 60);
+    this.#gainHi = damp(this.#gainHi, hi, 0.9, 1 / 60);
+    const span = Math.max(0.04, this.#gainHi - this.#gainLo);
 
-    return src;
-  }
-
-  /** One thread, drawn through the contour with a curve and never a corner. */
-  #ariaThread(ctx, contour, W, H, o) {
-    const N = contour.length;
-    const mid = H * 0.5;
-    const reach = H * 0.31 * o.amp;
-    const lag = o.lag ?? 0;
-    const sway = o.sway ?? 0;
-
-    /** @type {number[]} */
-    const xs = [];
-    /** @type {number[]} */
-    const ys = [];
+    const out = new Float32Array(N);
     for (let s = 0; s < N; s++) {
-      const k = clamp(s - lag, 0, N - 1);
-      const u = s / (N - 1);
-      xs.push(u * W);
-      // A slow independent drift, so two threads carrying the same contour are
-      // never the same line twice.
-      ys.push(mid - (contour[k] - 0.5) * 2 * reach
-        + Math.sin(u * 4.3 + o.phase) * H * 0.012 * sway
-        + Math.sin(u * 9.1 - o.phase * 1.6) * H * 0.006 * sway);
+      const swell = clamp((src[s] - this.#gainLo) / span, -0.2, 1.2) - 0.5;
+      out[s] = clamp(swell * 1.0 + hit[s] * 0.9, -1.3, 1.3);
     }
-
-    ctx.beginPath();
-    ctx.moveTo(xs[0], ys[0]);
-    // Midpoint quadratics: every joint is a tangent, so the thread has no
-    // corners anywhere along its length.
-    for (let s = 1; s < N - 1; s++) {
-      ctx.quadraticCurveTo(xs[s], ys[s], (xs[s] + xs[s + 1]) / 2, (ys[s] + ys[s + 1]) / 2);
-    }
-    ctx.lineTo(xs[N - 1], ys[N - 1]);
-    ctx.stroke();
+    return out;
   }
 
+  /**
+   * The bundle.
+   *
+   * One line would be a diagram. What is drawn instead is fifty of them, each
+   * a hair, each carrying the same wave a little later and a little wider than
+   * the last, with its own slow independent drift. None of them is legible on
+   * its own and none of them is meant to be: what you read is the braid they
+   * make — dense where they agree, opening into a haze where they do not.
+   *
+   * It is the background. Nothing here asks to be looked at directly.
+   */
   #drawAria(ctx, W, H) {
     const score = transport.score;
     if (!score) { this.#drawAriaIdle(ctx, W, H); return; }
 
     const dpr = this.#dpr;
     const now = transport.position;
-    // Two bars, and never more than about eight seconds: a window long enough
-    // to hold a phrase and short enough that the phrase is still visible in it.
+    // Two bars, and never more than about eight seconds: long enough to hold a
+    // phrase, short enough that the phrase is still visible in it.
     const window = clamp(score.secPerBeat * score.meter[0] * 2, 4.5, 8);
     const t0 = now - window * 0.5;
-    const N = 240;
-    const contour = this.#ariaContour(score, t0, window, N);
+    const N = 260;
+    const wave = this.#ariaWave(score, t0, window, N);
 
-    // How loud it is, softly — the threads swell and are never still.
     let level = 0;
     for (let c = 0; c < this.#levels.length; c++) level += this.#levels[c];
     level = clamp(level / Math.max(1, this.#levels.length) * 2.4, 0, 1);
-    this.#figureWeight = damp(this.#figureWeight, level, 0.22, 1 / 60);
-    const amp = 0.62 + this.#figureWeight * 0.5;
+    this.#figureWeight = damp(this.#figureWeight, level, 0.25, 1 / 60);
+
+    // Set low and kept small. The conductor is the subject of this room; the
+    // wave is the ground he is standing on, and a ground that competed with
+    // him would be a worse drawing and a worse idea.
+    const mid = H * 0.63;
+    const reach = H * 0.17 * (0.5 + this.#figureWeight * 0.6);
+    const STRANDS = 52;
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.lineWidth = dpr * 0.6;
 
-    // Three threads of one music: the line, and two slower memories of it.
-    // Nothing else is drawn. There is no grid, no bar, no scale, no playhead —
-    // the emptiness around them is the greater part of the picture.
-    const THREADS = [
-      { lag: 0, amp: 1, sway: 0.35, width: 1.15, alpha: 0.8, ink: '236,231,220' },
-      { lag: N * 0.045, amp: 0.94, sway: 0.7, width: 0.85, alpha: 0.3, ink: '236,231,220' },
-      { lag: N * 0.1, amp: 0.87, sway: 1.1, width: 0.7, alpha: 0.15, ink: '217,185,120' },
-    ];
+    for (let k = 0; k < STRANDS; k++) {
+      const u = k / (STRANDS - 1);
+      // Fanned about the middle: the centre strands are tight and carry the
+      // wave true, the outer ones lag and overshoot and are barely there.
+      const off = (u - 0.5) * 2;
+      const lag = off * N * 0.03;
+      const gain = 1 + off * 0.28;
+      const sway = Math.abs(off);
+      const phase = now * 0.11 + k * 0.7;
 
-    for (let k = THREADS.length - 1; k >= 0; k--) {
-      const th = THREADS[k];
-      ctx.lineWidth = th.width * dpr;
-      ctx.strokeStyle = `rgba(${th.ink},${th.alpha.toFixed(3)})`;
-      this.#ariaThread(ctx, contour, W, H, {
-        lag: th.lag,
-        amp: amp * th.amp,
-        sway: th.sway,
-        phase: now * 0.14 + k * 2.4,
-      });
+      ctx.strokeStyle = k % 9 === 4
+        ? `rgba(217,185,120,${(0.025 + (1 - Math.abs(off)) * 0.03).toFixed(3)})`
+        : `rgba(236,231,220,${(0.018 + (1 - Math.abs(off)) * 0.05).toFixed(3)})`;
+
+      ctx.beginPath();
+      let px = 0;
+      let py = 0;
+      for (let s = 0; s < N; s++) {
+        const x = (s / (N - 1)) * W;
+        const j = clamp(s - lag, 0, N - 1);
+        const f = Math.floor(j);
+        const frac = j - f;
+        const v = wave[f] * (1 - frac) + wave[Math.min(N - 1, f + 1)] * frac;
+        const y = mid - v * reach * gain
+          + Math.sin(s / N * 5.7 + phase) * H * 0.014 * sway
+          + Math.sin(s / N * 13.1 - phase * 1.4) * H * 0.006 * sway;
+        if (s === 0) { ctx.moveTo(x, y); px = x; py = y; continue; }
+        // Midpoint quadratics: no corner anywhere along a strand.
+        ctx.quadraticCurveTo(px, py, (px + x) / 2, (py + y) / 2);
+        px = x; py = y;
+      }
+      ctx.lineTo(px, py);
+      ctx.stroke();
     }
-
-    // One warm point, riding the thread at the centre of the frame. It is the
-    // only thing on the screen that marks a moment, and it is four pixels wide.
-    const c = clamp(Math.round(N * 0.5), 0, N - 1);
-    const y = H * 0.5 - (contour[c] - 0.5) * 2 * (H * 0.31 * amp);
-    ctx.fillStyle = 'rgba(217,185,120,0.85)';
-    ctx.beginPath();
-    ctx.arc(W * 0.5, y, 2 * dpr, 0, Math.PI * 2);
-    ctx.fill();
   }
 
   /**

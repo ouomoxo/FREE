@@ -297,12 +297,10 @@
 
 /* The aria is not an accessory to the photograph — while it is on, the music
    is the picture, and the photograph is the wall it is written on. */
-.concert[data-viz="aria"] .concert__spectrum { height: 100%; opacity: 1; }
-.concert[data-viz="aria"] .concert__hands {
-  opacity: 0.12;
-  max-width: min(56vw, 560px);
-  transition: opacity var(--m-slow) var(--ease-out);
-}
+/* The wave has the whole frame to move in, but it is not the subject. The
+   hands are. It runs behind them, at the height of a horizon. */
+.concert[data-viz="aria"] .concert__spectrum { height: 100%; opacity: 1; z-index: 0; }
+.concert[data-viz="aria"] .concert__hands { z-index: 1; }
 
 .concert__bottom {
   display: flex;
