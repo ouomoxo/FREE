@@ -17,6 +17,7 @@
  */
 
 import { clamp } from '../core/utils.js';
+import { loadPiano } from './piano.js';
 
 export class AudioEngine {
   /** @type {AudioContext|null} */ ctx = null;
@@ -107,6 +108,11 @@ export class AudioEngine {
     this.tone.connect(this.compressor);
     this.compressor.connect(this.analyser);
     this.analyser.connect(ctx.destination);
+
+    // The piano is a string model in an AudioWorklet, and a worklet module has
+    // to be compiled before a note can be played on it. Everything else here is
+    // built from native nodes and needs no such warning.
+    await loadPiano(ctx);
 
     this.#ready = true;
     return this.resume();

@@ -13,6 +13,7 @@
 
 import { mtof } from './theory.js';
 import { clamp } from '../core/utils.js';
+import { pianoBus } from './piano.js';
 
 /** @type {Map<string, AudioBuffer>} */
 const pluckCache = new Map();
@@ -574,12 +575,18 @@ export function cymbal(engine, n) {
 /** @type {Record<string, Voice>} */
 
 /**
- * Piano.
+ * Piano — the fallback.
  *
- * The other voices here are instruments that happen to be synthesised. This one
- * has to be a piano or the whole record is a demo, so it is built out of the
- * four things that actually make a struck string sound like a struck string —
- * and none of them is a filter preset.
+ * The instrument proper is a string model in an AudioWorklet (`piano.js`,
+ * `piano-worklet.js`), and this is what plays if a browser will not give us
+ * one. It is additive: a stack of sine partials with the four things that most
+ * distinguish a struck string written into their amplitudes and envelopes.
+ *
+ * It is a decent impression and it is not the instrument. The difference is
+ * that here every one of those four things is *drawn* — an amplitude law, a
+ * pair of envelopes, a detune table — where in the string model each is a
+ * consequence of the geometry. Additive synthesis has a ceiling below "piano",
+ * which is why the other exists.
  *
  * **Inharmonicity.** A piano string is stiff, so its partials are not integer
  * multiples: the nth partial sits at n·f₀·√(1+Bn²). B is tiny in the treble and
@@ -602,7 +609,7 @@ export function cymbal(engine, n) {
  * The damper is the note's end: a fast fade, not a release tail, unless the
  * note is short enough that the string would still be ringing.
  */
-export function piano(engine, n) {
+function pianoAdditive(engine, n) {
   const ctx = engine.ctx;
   const t = n.time;
   const vel = clamp(n.vel ?? 0.7, 0.02, 1);
@@ -720,6 +727,29 @@ export function piano(engine, n) {
   hammer.start(t); hammer.stop(t + 0.12);
   if (oscs.length) oscs[0].onended = () => { chain.dispose(); hg.disconnect(); };
   else { hammer.onended = () => { chain.dispose(); hg.disconnect(); }; }
+}
+
+/**
+ * Piano.
+ *
+ * Unlike every other voice here, this one builds no graph. The instrument is
+ * already standing — one worklet, one soundboard, for the whole performance —
+ * and a note is a message to it: which key, how hard, when, and for how long.
+ * Which is all a note ever was.
+ *
+ * @type {Voice}
+ */
+export function piano(engine, n) {
+  const bus = pianoBus(engine);
+  if (!bus) { pianoAdditive(engine, n); return; }
+  bus.port.postMessage({
+    type: 'note',
+    midi: n.midi,
+    vel: clamp(n.vel ?? 0.7, 0.02, 1),
+    dur: Math.max(0.05, n.dur ?? 0.5),
+    pan: clamp(n.pan ?? 0, -1, 1),
+    time: n.time,
+  });
 }
 
 export const VOICES = {
