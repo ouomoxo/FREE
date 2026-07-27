@@ -39,8 +39,11 @@ function loadPlaywright() {
 const { chromium } = loadPlaywright();
 
 const CHROME = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const FFMPEG = process.env.FFMPEG_PATH
-  || '/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2';
+const FFMPEG = process.env.FFMPEG_PATH || [
+  '/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2',
+  '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux',
+  '/usr/bin/ffmpeg',
+].find((p) => existsSync(p));
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -52,6 +55,25 @@ const MIME = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+};
+
+/**
+ * Whether the ffmpeg we found can actually make an MP3. Some builds shipped
+ * alongside a browser are video-only and will not even open a WAV; the takes
+ * are worth having anyway, so the MP3 is a convenience and not a requirement.
+ * @type {() => Promise<boolean>}
+ */
+let lame = async () => {
+  let ok = false;
+  if (FFMPEG) {
+    try {
+      const { stdout } = await run(FFMPEG, ['-hide_banner', '-encoders']);
+      ok = stdout.includes('libmp3lame');
+    } catch { ok = false; }
+  }
+  if (!ok) console.log('  (no MP3 encoder here — leaving the WAVs)');
+  lame = async () => ok;
+  return ok;
 };
 
 function serve() {
@@ -76,6 +98,7 @@ const RENDER_IN_PAGE = async (trackId) => {
   const { orchestrate } = await import('/js/audio/orchestra.js');
   const { VOICES } = await import('/js/audio/instruments.js');
   const { engine } = await import('/js/audio/engine.js');
+  const { pianoFlush } = await import('/js/audio/piano.js');
 
   const track = TRACKS.find((t) => t.id === trackId);
   if (!track) throw new Error(`no track ${trackId}`);
@@ -101,13 +124,28 @@ const RENDER_IN_PAGE = async (trackId) => {
   window.AudioContext = RealCtx;
 
   engine.setVolume(1);
+  // A voice that throws used to be discarded in silence, which is how a
+  // movement came out at digital zero with nothing at all to show for it.
+  // A take can survive one bad note; it cannot survive not being told.
+  const failures = new Map();
+  let missing = 0;
   for (const ev of score.events) {
     const voice = VOICES[ev.i];
-    if (!voice) continue;
+    if (!voice) { missing++; continue; }
     try {
       voice(engine, { midi: ev.m, time: ev.t + LEAD, dur: ev.d, vel: ev.v, pan: ev.p });
-    } catch { /* one voice failing must not lose the take */ }
+    } catch (err) {
+      const key = `${ev.i}: ${err && err.message ? err.message : err}`;
+      const seen = failures.get(key);
+      if (seen) seen.count++;
+      else failures.set(key, { count: 1, midi: ev.m, dur: ev.d, vel: ev.v });
+    }
   }
+
+  // The piano is a worklet, and its notes are messages. Messages that have not
+  // crossed to the audio thread when rendering starts are not late — they are
+  // gone. One round trip proves they arrived.
+  await pianoFlush(engine);
 
   const buffer = await offline.startRendering();
 
@@ -151,6 +189,8 @@ const RENDER_IN_PAGE = async (trackId) => {
     parts: score.instruments.length,
     notes: score.events.length,
     peak,
+    missing,
+    failures: [...failures].map(([reason, o]) => ({ reason, ...o })),
   };
 };
 
@@ -163,10 +203,25 @@ async function main() {
     executablePath: existsSync(CHROME) ? CHROME : undefined,
     args: ['--autoplay-policy=no-user-gesture-required'],
   });
-  const page = await browser.newPage();
-  page.on('console', (m) => { if (m.type() === 'error') console.error('  page:', m.text()); });
-  await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
+  /**
+   * A page per take.
+   *
+   * `engine` is a module singleton, and `init()` is a no-op once the graph
+   * exists — so a second track rendered in the same page schedules its notes
+   * into the *first* track's OfflineAudioContext, which has already finished.
+   * The take comes out at digital zero with no error anywhere, because nothing
+   * went wrong: the notes were played, into a room nobody was listening to.
+   * A fresh page is a fresh module registry, and so a fresh engine.
+   */
+  const fresh = async () => {
+    const p = await browser.newPage();
+    p.on('console', (m) => { if (m.type() === 'error') console.error('  page:', m.text()); });
+    p.on('pageerror', (e) => console.error('  page:', e.message));
+    await p.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
+    return p;
+  };
 
+  const page = await fresh();
   const ids = WANTED.length ? WANTED : await page.evaluate(async () => {
     const { TRACKS } = await import('/js/data/catalog.js');
     // One from each of three different ensembles, so the sample is not all
@@ -179,21 +234,35 @@ async function main() {
     return [...byAlbum.values()].slice(0, 3).map((t) => t.id);
   });
 
+  await page.close();
+
   for (const id of ids) {
     process.stdout.write(`· ${id} `);
-    const out = await page.evaluate(RENDER_IN_PAGE, id);
+    const take = await fresh();
+    const out = await take.evaluate(RENDER_IN_PAGE, id);
+    await take.close();
+    for (const f of out.failures) {
+      console.log(`\n  ! ${f.count} note${f.count > 1 ? 's' : ''} threw — ${f.reason}`
+        + `\n    first: midi ${f.midi}, ${f.dur.toFixed(2)}s, vel ${f.vel.toFixed(2)}`);
+    }
+    if (out.missing) console.log(`\n  ! ${out.missing} notes had no voice at all`);
     const wav = join(OUT, `${id}.wav`);
     const mp3 = join(OUT, `${id}.mp3`);
     await writeFile(wav, Buffer.from(out.wav, 'base64'));
-    await run(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-i', wav,
-      '-c:a', 'libmp3lame', '-b:a', '256k',
-      '-metadata', `title=${out.title}`, '-metadata', 'artist=MAESTRO',
-      '-metadata', 'album=Synthesised at the moment you ask for it', mp3]);
+
     // A take that came out silent is a failed take, not a quiet one. Nothing
-    // leaves here without having made a sound.
+    // leaves here without having made a sound — and this is checked before the
+    // MP3, so that a missing encoder can never hide a silent render.
     const dbfs = 20 * Math.log10(Math.max(1e-9, out.peak));
     if (dbfs < -50) {
       throw new Error(`${id} rendered silent (peak ${dbfs.toFixed(1)} dBFS) — refusing to ship it`);
+    }
+
+    if (await lame()) {
+      await run(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-i', wav,
+        '-c:a', 'libmp3lame', '-b:a', '256k',
+        '-metadata', `title=${out.title}`, '-metadata', 'artist=MAESTRO',
+        '-metadata', 'album=Synthesised at the moment you ask for it', mp3]);
     }
     console.log(`— ${out.title} · ${out.duration.toFixed(0)}s · ${out.parts} parts · `
       + `${out.notes} notes · peak ${dbfs.toFixed(1)} dBFS`);
