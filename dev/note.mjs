@@ -314,6 +314,8 @@ async function main() {
     const a = analyse(x, n.midi);
     const name = `${NAMES[n.midi % 12]}${Math.floor(n.midi / 12) - 1}`;
     const label = `${name.padEnd(4)} midi ${String(n.midi).padStart(2)} vel ${n.vel.toFixed(2)}`;
+    // Is it even in tune? Everything else is decoration if it is not.
+    const cents = a.partials[0] ? 1200 * Math.log2(a.partials[0].ratio) : NaN;
 
     if (a.peak < 1e-4) {
       console.log(`${label}  SILENT (peak ${(20 * Math.log10(a.peak + 1e-12)).toFixed(1)} dBFS)`);
@@ -329,6 +331,7 @@ async function main() {
 
     console.log(
       `${label}  peak ${(20 * Math.log10(a.peak)).toFixed(1)} dBFS  `
+      + `f0 ${cents >= 0 ? '+' : ''}${cents.toFixed(1)}¢  `
       + `B ${a.B.toExponential(1)}  stretch ${stretch}  `
       + `8th ${Number.isNaN(notchDb) ? '—' : `${notchDb.toFixed(1)} dB`}  `
       + `2-6th ${Number.isNaN(a.tilt) ? '—' : `${a.tilt > 0 ? '+' : ''}${a.tilt.toFixed(1)} dB`}  `

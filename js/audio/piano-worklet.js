@@ -96,12 +96,36 @@ function inharmonicity(midi) {
 }
 
 /**
- * How long the note would ring if nobody lifted the key: seconds to -60 dB for
- * the fundamental.
+ * The aftersound: how long the note goes on once the strings have drifted out
+ * of step with each other and stopped driving the bridge. Seconds to -60 dB.
+ *
+ * This is the *slow* decay, and it is very long — a held middle C is still
+ * audible twenty seconds later, and a bottom A for the best part of a minute.
+ * Getting this wrong is the difference between a piano and a toy: a first
+ * attempt here used seven seconds at middle C and the note was gone in three,
+ * which is a plink.
+ *
  * @param {number} midi
  */
 function ringTime(midi) {
-  return clamp(22 * Math.pow(2, (40 - midi) / 13), 0.9, 32);
+  return clamp(60 * Math.pow(2, (40 - midi) / 15), 2, 90);
+}
+
+/**
+ * The prompt sound: how fast the note falls at first, while all its strings
+ * are still pushing the bridge together. Decibels per second.
+ *
+ * Wogram measured this on a real instrument as T20 — the time to fall 20 dB —
+ * and got 3.8 s at C3, 1.7 s at C4, 2.3 s at A4. That is 5 to 12 dB/s, and it
+ * is what the numbers below are fitted to. (He also measured 0.7 s at the G
+ * above middle C, a fifth of its neighbour's: real soundboards have holes in
+ * them. This model does not, which is one of the ways it is politer than a
+ * piano.)
+ *
+ * @param {number} freq
+ */
+function promptRate(freq) {
+  return clamp(5 + 0.015 * freq, 5, 40);
 }
 
 /**
@@ -155,8 +179,13 @@ function designString(sr, freq, midi, o = {}) {
 
      Each trip round the loop takes one period, so a partial decays by |g(ω)|
      every 1/f₀ seconds; T60 = -3 / (f₀·log₁₀|g(ω)|).                        */
+  // The decay *rate* of a partial goes as the square of its frequency — that
+  // is the analytical result for a waveguide with a one-pole loss filter, and
+  // it is also what a piano does. A gentler law leaves the upper partials
+  // ringing for seconds and the note sounds like an electric piano: a bell on
+  // top of a tone rather than one sound.
   const kHigh = Math.max(2, Math.min(12, Math.floor(sr * 0.42 / freq)));
-  const ringHigh = ring * Math.pow(kHigh, -0.85);      // the top goes first
+  const ringHigh = ring / (1 + (kHigh / 2.2) * (kHigh / 2.2));
   const gFund = Math.pow(10, -3 / (freq * ring));
   const gHigh = Math.pow(10, -3 / (freq * ringHigh));
   const wantRatio = gHigh / gFund;                     // < 1
@@ -347,8 +376,14 @@ class Note {
     // any partial with a node there, so the 8th, 16th, 24th are hollowed out —
     // one of the most recognisable things about the instrument, and here it is
     // a consequence of a position rather than a notch someone dialled in.
+    //
+    // The delay is the strike fraction times the *period*, not twice it. The
+    // period is a round trip of the whole string, so the trip to the near end
+    // and back is β of it, and getting that factor of two wrong puts the notch
+    // on the 4th partial instead of the 8th — which hollows out the middle of
+    // every note on the instrument and makes the whole keyboard sound covered.
     const strike = n.midi <= 72 ? 0.125 : 0.125 - (n.midi - 72) * 0.0022;
-    this.combDelay = Math.max(1, Math.round(2 * strike * period));
+    this.combDelay = Math.max(1, Math.round(strike * period));
 
     this.pulseAmp = this.vel * 0.9 / Math.sqrt(this.pulseLen);
     this.pulsePos = 0;
@@ -374,8 +409,15 @@ class Note {
     // tune, they drift out of step, the bridge stops moving, and what is left
     // rings on for a very long time. That is the double decay. It is not two
     // envelopes added together; it is two strings disagreeing.
+    //
+    // How much it yields is not a taste decision. The loop gain already sets
+    // the aftersound; the bridge has to account for the difference between
+    // that and the prompt decay, and nothing more. Set by ear it came out at
+    // 0.016, which is four times too much and turns every note into a plink.
+    const ring = ringTime(n.midi);
+    const extra = Math.max(0.4, promptRate(f0) - 60 / ring);
     this.bridgeZ = 0;
-    this.coupling = 0.016;
+    this.coupling = 1 - Math.pow(10, -extra / (20 * f0));
 
     this.damp = 1;
     this.dampTarget = clamp(0.86 + (60 - clamp(n.midi, 21, 96)) * 0.0016, 0.84, 0.94);
@@ -390,8 +432,8 @@ class Note {
     // Levelling. A hammer that covers a fixed fraction of the string puts more
     // into a short string than a long one, so the keyboard needs a gentle tilt
     // back the other way to come out even.
-    this.level = 1.2 * Math.pow(clamp(this.vel, 0.05, 1), 0.85)
-      * Math.pow(261.6 / f0, 0.15);
+    this.level = 0.62 * Math.pow(clamp(this.vel, 0.05, 1), 0.85)
+      * Math.pow(261.6 / f0, 0.32);
   }
 
   /**
@@ -408,12 +450,16 @@ class Note {
     for (let i = from; i < to; i++) {
       const f = frame + i;
 
-      if (f >= this.offFrame && !this.released) this.released = true;
+      if (f >= this.offFrame && !this.released) {
+        this.released = true;
+        // The damper landing on a string that is still moving. Scaled by what
+        // is actually still there: felt arriving on a string that stopped
+        // ringing ten seconds ago makes no sound, and a burst of noise after
+        // silence is the most obviously synthetic thing a note can do.
+        this.thump = Math.min(0.5, this.env * 2.2);
+      }
       if (this.released && this.damp > this.dampTarget) {
         this.damp = Math.max(this.dampTarget, this.damp - this.dampRate);
-        if (this.thump === 0) {
-          this.thump = 0.008 * this.vel;               // the key coming home
-        }
       }
 
       // Hammer, combed by where it struck, softened by the felt.
@@ -458,18 +504,19 @@ class Note {
 
       let y = sum / nS;
 
-      if (this.thump > 1e-6) {
-        this.thumpZ += ((Math.random() * 2 - 1) - this.thumpZ) * 0.06;
-        y += this.thumpZ * this.thump;
-        this.thump *= 0.9992;
-      }
-
       // A waveguide accumulates DC the way a real string does not.
       const dcIn = y;
       y = dcIn - this.dc1 + 0.9995 * this.dc2;
       this.dc1 = dcIn; this.dc2 = y;
 
       y *= this.level;
+
+      // Felt arriving on wire: thirty milliseconds of it, not two hundred.
+      if (this.thump > 1e-7) {
+        this.thumpZ += ((Math.random() * 2 - 1) - this.thumpZ) * 0.06;
+        y += this.thumpZ * this.thump;
+        this.thump *= 0.995;
+      }
       const mag = y < 0 ? -y : y;
       this.env += (mag - this.env) * 0.002;
 
