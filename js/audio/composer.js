@@ -107,11 +107,25 @@ export const STYLES = {
     meter: [4, 4], bpmRange: [50, 60],
     melody: 'piano', counter: 'piano', pad: 'piano',
     bass: 'piano', accent: null,
-    // Where the hands actually are. The right hand's figure sits around
-    // middle C, the tune just above it, the left hand two octaves below.
-    melodyOctave: 5, padOctave: 3, bassOctave: 2,
+    // Where the hands actually are. The right hand's figure sits around middle
+    // C, the tune just above it, the left hand two octaves below.
+    //
+    // These three numbers are not in the same units, which is a trap and cost a
+    // session to find. `melodyOctave` is relative — the melody is written at
+    // (melodyOctave - 4) octaves from the tonic. `padOctave` is absolute: it is
+    // the bottom of the chord voicing, measured up from the tonic. And the bass
+    // is written at (padOctave - bassOctave) octaves *below the chord*, so
+    // moving the pad moves the bass with it unless bassOctave follows.
+    //
+    // With 5/3/2 the figure came out at E5–B5, the tune at G#3 underneath it,
+    // and the octave in the bass louder than both: the texture upside down. The
+    // piece is a figure in the middle of the keyboard with a tune over it.
+    melodyOctave: 6, padOctave: 2, bassOctave: 1,
     figuration: 'triplet', harmonicRhythm: 1, density: 0.34,
-    swing: 0, reverb: 0.66, padLevel: 0.3,
+    // The figure is the piece, so it cannot be an accompaniment level. At 0.3
+    // it was struck at a velocity of 0.12 against the bass octave's 0.59 —
+    // twelve decibels down, and inaudible under the note it is meant to carry.
+    swing: 0, reverb: 0.66, padLevel: 0.86,
     solo: true,
   },
   /**
