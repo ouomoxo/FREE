@@ -94,8 +94,13 @@ def render(notes, out_path, pedal=None, tempo=None, samples=None,
     pedal_s = [when(b) for b in pedal] + [1e9]
 
     def pedal_end(t):
+        # Syncopated pedalling: the foot comes up *on* the new harmony and goes
+        # straight back down after it has sounded, so the old harmony is cut
+        # and the new one is caught. A note struck at the change is therefore
+        # never damped by it — it is still under the finger. Liszt thought this
+        # was the most important thing that ever happened to piano playing.
         for p in pedal_s:
-            if p > t + 0.06:
+            if p > t + 0.075:
                 return p
         return 1e9
 
@@ -113,7 +118,10 @@ def render(notes, out_path, pedal=None, tempo=None, samples=None,
         # It rings until the key is up *or* the pedal comes up, whichever is
         # later. Under the pedal a quaver lasts as long as the harmony does,
         # which is the whole reason the instrument has one.
-        ring = max(offset, pedal_end(onset)) - onset + 0.3
+        if note >= 90:                        # no damper up here
+            ring = 60.0
+        else:
+            ring = max(offset, pedal_end(onset)) - onset + 0.3
         n_out = int(min(ring, len(src) / ratio / SR) * SR)
         start = int((onset + lead) * SR)
         n_out = min(n_out, len(buf) - start)
@@ -132,8 +140,16 @@ def render(notes, out_path, pedal=None, tempo=None, samples=None,
             a = float(np.exp(-2 * np.pi * (900 + 6000 * vel) / SR))
             seg = lfilter([1 - a], [1, -a], seg, axis=0).astype(np.float32) * 1.4
 
+        # The damper. It is a strip of felt with mass, and it takes time to
+        # stop a string — a long time in the bass, where the string is heavy
+        # and the felt is wide. Cutting every note off in the same tenth of a
+        # second is the sound of a sampler, not of a piano.
+        #
+        # And above the top F# there are no dampers at all. Those strings ring
+        # whatever the pedal does, which is why the top of the instrument
+        # sounds like it is in a different, larger room.
         env = np.ones(n_out, dtype=np.float32)
-        rel = min(int(0.3 * SR), n_out)
+        rel = min(int((0.08 + 0.55 * max(0.0, (64 - note) / 43)) * SR), n_out)
         env[n_out - rel:] = np.linspace(1, 0, rel, dtype=np.float32) ** 1.6
         att = min(int(0.002 * SR), n_out)
         env[:att] = np.linspace(0, 1, att, dtype=np.float32)
