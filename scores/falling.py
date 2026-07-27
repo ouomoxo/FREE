@@ -10,13 +10,16 @@ changes what they mean, and the last time it does so by force.
     II   THE GROUND     the four notes go into the bass. Three turns, and the
                         figure doubles in speed each time
     III  THE CLIMB      it rises, and leaves the key on the way up
-    IV   THE LIGHT      A major. The same four notes — A, G#, F#, E — and in
-                        this key they are the most ordinary consoling phrase
-                        in music. Nothing has been added or taken away
-    V    THE CURDLING   C sharp becomes C natural, and it does not calm down
+    IV   THE LIGHT      A major, a second subject, and a chorale — the first
+                        music in the piece with no figuration in it at all.
+                        The four notes are in the tenor, for anyone listening
+    V    THE CURDLING   C sharp becomes C natural. The chorale collapses into
+                        bare octaves: unison, four octaves apart, no harmony
     VI   PRESTO AGITATO the storm. Semiquavers, both hands, thirty-six bars,
-                        and the four notes at the top of every second arpeggio
-    VII  THE CLIMAX     the tonic, five octaves of it, and then the fall
+                        with the four notes in augmentation underneath it from
+                        bar 61 and two bars of near-silence cut into it
+    VII  THE CLIMAX     the four notes descending against the same four notes
+                        rising, and then the fall
     VIII AFTER          the opening in the wrong register, unfinished
 
 Three measurements shaped it, all taken from Beethoven's Op. 27 No. 2, which
@@ -229,6 +232,20 @@ s.n(11, 2.5, 0.45, 'A4', 'mp', off=-0.02)
 s.n(11, 3, 1.9, 'G#4', 'mp', off=-0.02)
 s.n(12, 1, 3.4, 'A4', 'mp', off=-0.02)
 
+# An inner voice, in the tenor, singing the same phrase one bar behind the
+# top one. Two voices doing the same thing at different times is the oldest
+# trick in counterpoint and it is the first time in this piece that anything
+# has been in more than one place at once.
+s.n(14, 1, 1.45, 'C#4', 'mp', off=0.01)
+s.n(14, 2.5, 0.45, 'D4', 'mp', off=0.01)
+s.n(14, 3, 1.9, 'E4', 'mp', off=0.01)
+s.n(15, 1, 1.45, 'F#4', 'mp', off=0.01)
+s.n(15, 2.5, 0.45, 'E4', 'mp', off=0.01)
+s.n(15, 3, 1.9, 'D4', 'mp', off=0.01)
+s.n(16, 1, 0.95, 'C#4', 'mp', off=0.01)
+s.n(16, 2, 0.95, 'B3', 'mp', off=0.01)
+s.n(16, 3, 1.9, 'A3', 'mp', off=0.01)
+
 s.bend(13, 1, 1.45, 'C#5', 'mf')
 s.n(13, 2.5, 0.45, 'D5', 'mf', off=-0.02)
 s.n(13, 3, 1.9, 'E5', 'mf', off=-0.02)
@@ -299,174 +316,225 @@ s.octaves(28, 1, [('G#5', 1.5), ('A5', 0.5), ('B5', 2)], 'f')
 # The only major-key music in the piece. It lasts about twenty seconds.
 # ============================================================================
 
+# It is also the only place in the piece with a *tune* rather than a motif —
+# a second subject, in the sonata sense: different key, different character,
+# different texture. The four notes are still there, underneath, in the tenor,
+# where they can be heard by anyone who is listening for them.
+#
+# And the texture is a chorale. Block chords, four voices moving together, no
+# figuration at all — after twenty-eight bars of broken chords the absence of
+# them is itself an event.
 LIGHT = [
-    (29, ['A1', 'C#2', 'E2'], [('A5', 1.5), ('G#5', 0.5), ('F#5', 2)]),
-    (30, ['E1', 'G#1', 'B1'], [('E5', 1.5), ('F#5', 0.5), ('G#5', 2)]),
-    (31, ['A1', 'C#2', 'E2'], [('A5', 1.5), ('B5', 0.5), ('C#6', 2)]),
-    (32, ['D1', 'F#1', 'A1'], [('D6', 1.5), ('C#6', 0.5), ('B5', 2)]),
-    (33, ['E1', 'G#1', 'B1'], [('C#6', 1.5), ('B5', 0.5), ('A5', 2)]),
-    (34, ['A1', 'C#2', 'E2'], [('A5', 4)]),
+    (29, ['A1', 'A2', 'E3', 'A3', 'C#4'], [('E5', 1.5), ('F#5', 0.5), ('A5', 2)], 'A4'),
+    (30, ['F#1', 'F#2', 'C#3', 'A3', 'D4'], [('A5', 1.5), ('G#5', 0.5), ('F#5', 2)], 'G#4'),
+    (31, ['B1', 'B2', 'F#3', 'B3', 'D4'], [('E5', 1.5), ('F#5', 0.5), ('G#5', 2)], 'F#4'),
+    (32, ['E1', 'E2', 'B2', 'G#3', 'D4'], [('B5', 1.5), ('A5', 0.5), ('G#5', 2)], 'E4'),
+    (33, ['A1', 'A2', 'E3', 'A3', 'C#4'], [('A5', 1.5), ('B5', 0.5), ('C#6', 2)], 'A4'),
+    (34, ['D1', 'D2', 'A2', 'F#3', 'D4'], [('D6', 1.5), ('C#6', 0.5), ('B5', 2)], 'F#4'),
+    (35, ['E1', 'E2', 'B2', 'G#3', 'D4'], [('C#6', 1.5), ('B5', 0.5), ('A5', 2)], 'E4'),
+    (36, ['A1', 'A2', 'E3', 'A3', 'C#4'], [('A5', 4)], 'A4'),
 ]
-for bar, chord, cell in LIGHT:
+for bar, chord, cell, tenor in LIGHT:
     s.ped(bar)
     s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(chord, pitch(chord[0]), 79), 'ff', accent='fff')
-    s.octaves(bar, 1, cell, 'fff')
+    s.ch(bar, 1, 2.9, chord, 'f', roll=0.035)
+    s.ch(bar, 3, 1.9, chord, 'f', roll=0.03)
+    s.n(bar, 1, 3.7, tenor, 'mf', off=0.015)      # the four notes, in the tenor
+    beat = 1
+    for name, dur in cell:
+        s.n(bar, beat, dur * 0.96, name, 'ff', off=-0.03)
+        beat += dur
 
 # ============================================================================
-# V. THE CURDLING (bars 35–38)
+# V. THE CURDLING (bars 37–40)
 #
 # One note. C sharp becomes C natural and A major becomes A minor — the same
-# chord, the same bass, the same figuration, one finger a semitone to the left.
-# Everything after it is consequence: the bass walks down, a diminished seventh
-# takes the floor away, and by bar 38 there is no key left to be in.
+# chord, the same bass, one finger a semitone to the left.
 #
-# And it does not calm down. It accelerates.
+# And the texture goes with it. The chorale collapses into bare octaves: both
+# hands playing the same line four octaves apart with no harmony under it at
+# all. Unison is the loneliest sound a piano can make, and after eight bars of
+# five-part writing it is the sound of everyone leaving.
 # ============================================================================
 
-CURDLE = [
-    (35, ['A1', 'C2', 'E2'], [('C6', 1.5), ('A5', 0.5), ('E5', 2)]),
-    (36, ['G#1', 'B1', 'D2', 'F2'], [('B5', 1.5), ('A5', 0.5), ('F5', 2)]),
-    (37, ['G1', 'B1', 'D2'], [('G5', 1.5), ('F#5', 0.5), ('E5', 2)]),
-    (38, ['C#1', 'E#1', 'G#1', 'B1'], [('E#5', 1.5), ('D#5', 0.5), ('C#5', 2)]),
+UNISON = [
+    (37, [('C6', 1.5), ('A5', 0.5), ('E5', 2)], 'ff'),
+    (38, [('C6', 1.5), ('B5', 0.5), ('A5', 2)], 'ff'),
+    (39, [('G5', 1.5), ('F#5', 0.5), ('E5', 2)], 'f'),
+    (40, [('E#5', 1.5), ('D#5', 0.5), ('C#5', 2)], 'ff'),
 ]
-for bar, chord, cell in CURDLE:
+for bar, cell, dyn in UNISON:
     s.ped(bar)
-    s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(chord, pitch(chord[0]), 72), 'ff', accent='fff')
-    s.octaves(bar, 1, cell, 'fff')
+    beat = 1
+    for name, dur in cell:
+        for drop in (0, 1, 2, 3):
+            s.n(bar, beat, dur * 0.9,
+                name[:-1] + str(int(name[-1]) - drop), dyn, off=-0.02 + drop * 0.006)
+        beat += dur
 
 # ============================================================================
-# VI. PRESTO AGITATO (bars 39–70)
+# VI. PRESTO AGITATO (bars 41–76)
 #
-# Semiquavers, both hands, and nothing in the section slower than a crotchet.
-# Each bar is one chord taken up the whole keyboard and back down again, and
-# every second bar has the four notes over the top of it in octaves — which is
-# all that is left of the tune, and is enough.
-#
-# The chords are the ground from section II, an octave lower and four times as
-# fast: the same descent, F#, E#, E, D#, D, C#, B, C#, that has been under
-# everything since bar 9. It has not changed. What has changed is that it is
+# Semiquavers, both hands. Every bar is one chord taken up the keyboard and
+# back, and the chords are the ground from section II an octave lower and four
+# times as fast: the same descent that has been under everything since bar 7,
 # now impossible to ignore.
+#
+# Three things keep it from being weather rather than music.
+#
+# **The bars with almost nothing in them.** Beethoven's Presto has bars of
+# forty-one notes and bars of two, next to each other. An earlier version of
+# this section had thirty-six bars of exactly sixteen, and measured against his
+# it was more varied in every way except the one that matters.
+#
+# **The four notes in augmentation.** From bar 61 they are in the bottom octave
+# at one note to the bar, four times slower than anything else and under all
+# of it.
+#
+# **The subito piano at 59.** Same speed, same figure, nothing prepared.
 # ============================================================================
 
-#
-# It also has a shape. A storm at one volume for thirty bars is weather, not
-# music: this one starts at forte, builds for sixteen bars, and then at 55 —
-# with no warning and nothing prepared — drops to piano and starts again from
-# underneath. The hole in the middle is what makes the second half possible.
-STORM = [
-    # bar, chord, lowest, highest, the note in the tune, how loud
-    (39, ['F#1', 'A1', 'C#2'], 30, 66, None, 'mf'),
-    (40, ['F#1', 'A1', 'C#2'], 30, 69, 'F#5', 'mf'),
-    (41, ['E#1', 'G#1', 'C#2'], 29, 68, None, 'f'),
-    (42, ['E#1', 'G#1', 'C#2'], 29, 71, 'E5', 'f'),
-    (43, ['E1', 'A1', 'C#2'], 28, 69, None, 'f'),
-    (44, ['E1', 'A1', 'C#2'], 28, 73, 'D5', 'f'),
-    (45, ['D#1', 'F#1', 'B1'], 27, 71, None, 'f'),
-    (46, ['D#1', 'F#1', 'B1'], 27, 74, 'C#5', 'ff'),
-    (47, ['D1', 'F#1', 'A1'], 26, 73, None, 'ff'),
-    (48, ['D1', 'F#1', 'A1'], 26, 76, 'B5', 'ff'),
-    (49, ['C#1', 'E#1', 'G#1'], 25, 75, None, 'ff'),
-    (50, ['C#1', 'E#1', 'G#1'], 25, 78, 'A5', 'ff'),
-    (51, ['B0', 'D1', 'F#1'], 23, 76, None, 'ff'),
-    (52, ['B0', 'D1', 'F#1'], 23, 79, 'G#5', 'ff'),
-    (53, ['C#1', 'E#1', 'G#1', 'B1'], 25, 78, None, 'ff'),
-    (54, ['C#1', 'E#1', 'G#1', 'B1'], 25, 81, 'F#5', 'ff'),
+def storm_bar(bar, chord, low, high, dyn, tune=None, accent='fff', step=0.25):
+    """One chord, taken up the keyboard and back, in one bar.
 
-    # 55: subito piano. Same speed, same figure, nothing else changed.
-    (55, ['F#1', 'A1', 'C#2'], 30, 66, 'F#4', 'p'),
-    (56, ['E#1', 'G#1', 'C#2'], 29, 68, 'E#4', 'p'),
-    (57, ['E1', 'A1', 'C#2'], 28, 69, 'E4', 'mp'),
-    (58, ['D#1', 'F#1', 'B1'], 27, 71, 'D#4', 'mp'),
-    (59, ['D1', 'F#1', 'A1'], 26, 74, 'D5', 'mf'),
-    (60, ['C#1', 'E#1', 'G#1'], 25, 76, 'C#5', 'mf'),
-    (61, ['B0', 'D1', 'F#1'], 23, 78, 'B5', 'f'),
-    (62, ['C#1', 'E#1', 'G#1', 'B1'], 25, 81, 'C#6', 'f'),
-    (63, ['F#1', 'A1', 'C#2'], 30, 83, 'F#6', 'ff'),
-    (64, ['E#1', 'G#1', 'C#2'], 29, 85, 'E#6', 'ff'),
-    (65, ['E1', 'A1', 'C#2'], 28, 85, 'E6', 'ff'),
-    (66, ['D#1', 'F#1', 'B1'], 27, 87, 'D#6', 'fff'),
-]
-for bar, chord, low, high, tune, dyn in STORM:
+    `step` of 0.25 is semiquavers and 0.125 is twice that — used only where the
+    section has to go past what it has already been doing, since a torrent that
+    has been at one speed for twenty bars is not a torrent any more."""
     s.ped(bar)
     s.ped(bar, 3)
+    span = int(round(4 / step))
     notes = spread(chord, low, high)
     up = notes + notes[-2:0:-1]
-    while len(up) < 16:
+    while len(up) < span:
         up = up + up
-    s.run(bar, 1, 0.25, up[:16], dyn,
-          accent='fff' if dyn in ('ff', 'fff') else None)
+    s.run(bar, 1, step, up[:span], dyn, accent=accent,
+          every=4 if step >= 0.25 else 8)
     if tune:
-        s.octaves(bar, 1, [(tune, 3.7)], dyn if dyn in ('p', 'mp', 'mf') else 'fff')
+        s.octaves(bar, 1, [(tune, 3.7)], 'fff' if dyn in ('ff', 'fff') else dyn)
 
-# 67–68: the Neapolitan, where no G major belongs. The only consolation in
-# the whole storm, and it lasts two bars.
-for bar in (67, 68):
-    s.ped(bar)
-    s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(['G1', 'B1', 'D2'], 31, 86)[:16], 'fff')
-s.octaves(67, 1, [('G6', 1.45), ('D6', 0.45), ('B5', 1.9)], 'fff')
-s.sigh(68, 1, 1.5, 'D6', 'B5', 'fff')
-s.bend(68, 3, 1.9, 'G5', 'fff')
 
-# 69–70: a diminished seventh, which is in no key at all.
-for bar in (69, 70):
-    s.ped(bar)
-    s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(['E#1', 'G#1', 'B1', 'D2'], 29, 88)[:16], 'fff')
-s.octaves(69, 1, [('D6', 3.7)], 'fff')
-s.octaves(70, 1, [('B5', 1.9), ('G#5', 1.8)], 'fff')
+def hammer_bar(bar, root, dyn='fff'):
+    """One octave, struck twice, and then two beats of nothing.
 
-# 71–74: the dominant. Four bars of it, which is three longer than anyone can
-# stand, and that is the point.
-for bar in (71, 72, 73, 74):
+    Four notes in a bar, between bars of twenty-four. Beethoven's Presto puts
+    bars of two next to bars of forty-one and that ratio is the whole reason it
+    sounds like weather happening to somebody rather than weather."""
     s.ped(bar)
-    s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(['C#1', 'E#1', 'G#1', 'B1'], 25, 85)[:16], 'fff')
-s.octaves(71, 1, [('C#6', 3.7)], 'fff')
-s.octaves(72, 1, [('B5', 3.7)], 'fff')
-s.octaves(73, 1, [('A5', 1.9), ('G#5', 1.8)], 'fff')
-s.octaves(74, 1, [('A5', 1.45), ('G#5', 0.45), ('E#5', 1.9)], 'fff')
+    for beat in (1, 2.5):
+        s.n(bar, beat, 1.2, root, dyn)
+        s.n(bar, beat, 1.2, root[:-1] + str(int(root[-1]) + 1), dyn)
+
+
+GROUND_CHORDS = [
+    (['F#1', 'A1', 'C#2'], 30), (['E#1', 'G#1', 'C#2'], 29),
+    (['E1', 'A1', 'C#2'], 28), (['D#1', 'F#1', 'B1'], 27),
+    (['D1', 'F#1', 'A1'], 26), (['C#1', 'E#1', 'G#1'], 25),
+    (['B0', 'D1', 'F#1'], 23), (['C#1', 'E#1', 'G#1', 'B1'], 25),
+]
+
+# 41–48: it starts.
+for i, (chord, low) in enumerate(GROUND_CHORDS):
+    dyn = ['mf', 'mf', 'f', 'f', 'f', 'f', 'ff', 'ff'][i]
+    tune = ['F#5', None, 'E5', None, 'D5', None, 'C#5', None][i]
+    storm_bar(41 + i, chord, low, 66 + i * 2, dyn, tune)
+
+# 49–50: and stops dead. Two bars, four chords, nothing else.
+hammer_bar(49, 'F#1')
+hammer_bar(50, 'C#1')
+
+# 51–58: again, higher, and the tune is in every bar now.
+for i, (chord, low) in enumerate(GROUND_CHORDS):
+    tune = ['F#6', 'E#6', 'E6', 'D#6', 'D6', 'C#6', 'B5', 'C#6'][i]
+    storm_bar(51 + i, chord, low, 78 + i, 'ff', tune)
+
+# 59–60: subito piano. Same speed, same figure, and the bottom drops out of the
+# volume with nothing prepared.
+storm_bar(59, GROUND_CHORDS[0][0], 30, 66, 'p', 'F#4', accent=None)
+storm_bar(60, GROUND_CHORDS[1][0], 29, 68, 'p', 'E#4', accent=None)
+
+# 61–68: it builds again, and this time the four notes are in the bottom octave
+# underneath, one to the bar — four times slower than anything above them,
+# which is what augmentation is for.
+AUGMENTED = ['F#1', 'F#1', 'E1', 'E1', 'D1', 'D1', 'C#1', 'C#1']
+for i, (chord, low) in enumerate(GROUND_CHORDS):
+    bar = 61 + i
+    dyn = ['mp', 'mp', 'mf', 'mf', 'f', 'f', 'ff', 'ff'][i]
+    tune = ['F#5', 'E#5', 'E5', 'D#5', 'D5', 'C#5', 'B5', 'C#6'][i]
+    storm_bar(bar, chord, low, 74 + i * 2, dyn, tune,
+              accent='fff' if dyn in ('ff', 'f') else None)
+    s.n(bar, 1, 3.9, AUGMENTED[i], 'fff', off=0.01)
+    s.n(bar, 1, 3.9, AUGMENTED[i][:-1] + '2', 'fff', off=0.01)
+
+# 69–70: the hammer bars again, and louder.
+hammer_bar(69, 'B0')
+hammer_bar(70, 'C#1')
+
+# 71–72: the Neapolitan, where no G major belongs. The only consolation in the
+# whole storm, and it lasts two bars.
+for bar in (71, 72):
+    storm_bar(bar, ['G1', 'B1', 'D2'], 31, 86, 'fff')
+s.octaves(71, 1, [('G6', 1.45), ('D6', 0.45), ('B5', 1.9)], 'fff')
+s.sigh(72, 1, 1.5, 'D6', 'B5', 'fff')
+s.bend(72, 3, 1.9, 'G5', 'fff')
+
+# 73–74: a diminished seventh, which is in no key at all.
+for bar in (73, 74):
+    storm_bar(bar, ['E#1', 'G#1', 'B1', 'D2'], 29, 88, 'fff')
+s.octaves(73, 1, [('D6', 3.7)], 'fff')
+s.octaves(74, 1, [('B5', 1.9), ('G#5', 1.8)], 'fff')
+
+# 75–76: the dominant, over a pedal point. The bass does not move for two bars
+# while everything above it does, which is the oldest way of making an arrival
+# unbearable before it arrives.
+for bar in (75, 76):
+    storm_bar(bar, ['C#1', 'E#1', 'G#1', 'B1'], 25, 85, 'fff', step=0.125)
+    s.n(bar, 1, 3.9, 'C#1', 'fff', off=0.01)
+    s.n(bar, 1, 3.9, 'C#2', 'fff', off=0.01)
+s.octaves(75, 1, [('C#6', 3.7)], 'fff')
+s.octaves(76, 1, [('B5', 1.45), ('A5', 0.45), ('G#5', 1.9)], 'fff')
 
 # ============================================================================
-# VII. THE CLIMAX (bars 75–82)
+# VII. THE CLIMAX (bars 77–84)
 #
-# F sharp minor, five octaves of it, and the four notes come down through the
-# middle in octaves for the last time. Then the fall: every semitone from the
-# top of the storm to the bottom of the instrument, in three octaves at once,
-# getting quieter the whole way — which is worse than getting louder.
+# The four notes descending in the right hand and the same four notes
+# *inverted* — rising — in the left, at the same time, in octaves, four octaves
+# apart. A subject against its own inversion is the thing counterpoint was
+# invented to be able to do, and there is nowhere else in this piece where it
+# would mean anything.
+#
+# Then the fall: every semitone from the top of the storm to the bottom of the
+# instrument, in three octaves at once, getting quieter the whole way, which is
+# worse than getting louder.
 # ============================================================================
 
-for bar in (75, 76, 77, 78):
-    s.ped(bar)
-    s.ped(bar, 3)
-    s.run(bar, 1, 0.25, spread(['F#1', 'A1', 'C#2'], 30, 90)[:16], 'fff')
-s.ch(75, 1, 3.8, ['F#1', 'F#2', 'C#3', 'F#3'], 'fff', roll=0.02)
-s.octaves(75, 1, [('F#6', 3.7)], 'fff')
-s.octaves(76, 1, [('E6', 1.45), ('D6', 0.45), ('C#6', 1.9)], 'fff')
-s.ch(77, 1, 3.8, ['F#1', 'F#2', 'C#3', 'F#3'], 'fff', roll=0.02)
-s.octaves(77, 1, [('F#6', 3.7)], 'fff')
-s.octaves(78, 1, [('E6', 1.45), ('D6', 0.45), ('C#6', 1.9)], 'fff')
+DOWN = ['F#6', 'E6', 'D6', 'C#6']
+UP = ['F#1', 'G#1', 'A1', 'B1']
+for i in range(4):
+    bar = 77 + i
+    storm_bar(bar, ['F#1', 'A1', 'C#2'], 30, 90, 'fff',
+              step=0.125 if i >= 2 else 0.25)
+    s.octaves(bar, 1, [(DOWN[i], 3.8)], 'fff')
+    s.n(bar, 1, 3.8, UP[i], 'fff', off=0.012)
+    s.n(bar, 1, 3.8, UP[i][:-1] + '2', 'fff', off=0.012)
 
-for bar in (79, 80, 81, 82):
+for bar in (81, 82, 83, 84):
     s.ped(bar)
     s.ped(bar, 3)
 for i in range(32):
     m = 90 - i
-    bar = 79 + i // 8
+    bar = 81 + i // 8
     beat = 1 + (i % 8) * 0.5
     dyn = ['fff', 'ff', 'f', 'mf'][i // 8]
     s.n(bar, beat, 0.5, m, dyn)
     s.n(bar, beat, 0.5, m - 12, dyn)
     s.n(bar, beat, 0.5, max(21, m - 24), dyn)
 
-# 83: what is left ringing has no key in it either.
-s.ped(83)
-s.ch(83, 1, 7, ['E#2', 'G#2', 'B2', 'D3', 'E#3'], 'p', roll=0.05)
+# 85: what is left ringing has no key in it either.
+s.ped(85)
+s.ch(85, 1, 7, ['E#2', 'G#2', 'B2', 'D3', 'E#3'], 'p', roll=0.05)
 
 # ============================================================================
-# VIII. AFTER (bars 85–89)
+# VIII. AFTER (bars 87–91)
 #
 # The opening, an octave and a half too low for it, and it cannot finish: three
 # notes the first time, two the second. The last sound is the tonic low on the
@@ -474,22 +542,21 @@ s.ch(83, 1, 7, ['E#2', 'G#2', 'B2', 'D3', 'E#3'], 'p', roll=0.05)
 # and the one note in the scale that cannot belong to this chord.
 # ============================================================================
 
-s.ped(85)
-s.ch(85, 1, 6, ['F#1', 'F#2'], 'ppp', roll=0.09)
-s.bend(85, 3, 1.45, 'F#3', 'pp')
-s.n(85, 4.5, 0.45, 'E3', 'pp', off=-0.03)
-s.n(86, 1, 3.4, 'D3', 'pp', off=-0.03)
 s.ped(87)
-s.n(87, 1, 3.6, 'C#3', 'ppp', off=-0.03)
-
-s.ped(87, 3)
-s.n(87, 3, 1.45, 'F#3', 'ppp', off=-0.04)
-s.n(87, 4.5, 0.45, 'E3', 'ppp', off=-0.04)
-s.n(88, 1, 2.4, 'D3', 'ppp', off=-0.04)         # and it stops there
-
+s.ch(87, 1, 6, ['F#1', 'F#2'], 'ppp', roll=0.09)
+s.bend(87, 3, 1.45, 'F#3', 'pp')
+s.n(87, 4.5, 0.45, 'E3', 'pp', off=-0.03)
+s.n(88, 1, 3.4, 'D3', 'pp', off=-0.03)
 s.ped(89)
-s.ch(89, 1, 7, ['F#1', 'F#2'], 'ppp', roll=0.12)
-s.n(89, 3, 5, 'G4', 'pp', off=-0.05)
+s.n(89, 1, 3.6, 'C#3', 'ppp', off=-0.03)
+s.ped(89, 3)
+s.n(89, 3, 1.45, 'F#3', 'ppp', off=-0.04)
+s.n(89, 4.5, 0.45, 'E3', 'ppp', off=-0.04)
+s.n(90, 1, 2.4, 'D3', 'ppp', off=-0.04)         # and it stops there
+
+s.ped(91)
+s.ch(91, 1, 7, ['F#1', 'F#2'], 'ppp', roll=0.12)
+s.n(91, 3, 5, 'G4', 'pp', off=-0.05)
 
 
 # ============================================================================
@@ -513,26 +580,32 @@ def tempo(beat):
         bpm = 62                                # the glimpse holds still
     elif bar < 29:
         bpm = 80
-    elif bar < 35:
-        bpm = 76                                # the light, broad
-    elif bar < 39:
-        bpm = 84 + (bar - 35) * 13              # the curdling accelerates
-    elif bar < 55:
+    elif bar < 37:
+        bpm = 72                                # the light, broad
+    elif bar < 41:
+        bpm = 80 + (bar - 37) * 14              # the curdling accelerates
+    elif bar < 49:
         bpm = 138                               # presto agitato
+    elif bar < 51:
+        bpm = 116                               # the hammer bars, given room
     elif bar < 59:
-        bpm = 132                               # the subito piano, a shade back
-    elif bar < 67:
-        bpm = 140 + (bar - 59)                  # and climbing again
-    elif bar < 75:
-        bpm = 150                               # it does not let up
-    elif bar < 79:
+        bpm = 144
+    elif bar < 61:
+        bpm = 138                               # the subito piano, a shade back
+    elif bar < 69:
+        bpm = 142 + (bar - 61)                  # and climbing again
+    elif bar < 71:
+        bpm = 116                               # the hammer bars again
+    elif bar < 77:
+        bpm = 152                               # it does not let up
+    elif bar < 81:
         bpm = 138                               # the climax, held back to land
-    elif bar < 83:
-        bpm = 146
     elif bar < 85:
+        bpm = 148
+    elif bar < 87:
         bpm = 58
     else:
-        bpm = 50 - min(8, (bar - 85) * 1.6)     # and stopping
+        bpm = 50 - min(8, (bar - 87) * 1.6)     # and stopping
     return 60.0 / bpm
 
 
