@@ -434,9 +434,36 @@ test('every reference resolves', () => {
   }
 });
 
+test('the written movements match their exported scores', async () => {
+  // The scores in scores/*.py are the source; js/data/scores/*.json is what
+  // the browser plays. If somebody edits a score and forgets to run
+  // dev/export.py, the site quietly plays the old piece — so check that the
+  // catalogue, the export and the notes in it all agree.
+  const { readFile } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  for (const t of catalog.TRACKS.filter((x) => x.score)) {
+    const doc = JSON.parse(await readFile(`${root}js/data/scores/${t.score}.json`, 'utf8'));
+    assert.ok(doc.notes.length > 200, `${t.score}: only ${doc.notes.length} notes`);
+    assert.ok(Math.abs(doc.duration - t.duration) < 25,
+      `${t.id}: catalogue says ${t.duration}s, the score is ${doc.duration}s`);
+    const last = Math.max(...doc.notes.map(([time, len]) => time + len));
+    assert.ok(last <= doc.duration + 1, `${t.score}: a note outlasts the movement`);
+    for (const [time, len, midi, vel] of doc.notes) {
+      assert.ok(time >= 0 && len > 0, `${t.score}: a note has no time or no length`);
+      assert.ok(midi >= 21 && midi <= 108, `${t.score}: midi ${midi} is not on a piano`);
+      assert.ok(vel > 0 && vel <= 1, `${t.score}: velocity ${vel}`);
+    }
+  }
+});
+
 test('track durations are plausible and match the composer', () => {
   for (const t of catalog.TRACKS) {
     assert.ok(t.duration > 40 && t.duration < 900, `${t.id}: ${t.duration}s`);
+    // A written movement's length is its notes, not an estimate — there is
+    // nothing for the composer to agree with. It is checked against its own
+    // exported score instead, below.
+    if (t.score) continue;
     const composed = composer.compose({
       seed: t.seed, style: t.style, key: t.key, mode: t.mode, bpm: t.bpm, targetBars: t.targetBars,
     });

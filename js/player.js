@@ -14,6 +14,7 @@ import { transport } from './audio/transport.js';
 import { compose } from './audio/composer.js';
 import { orchestrate } from './audio/orchestra.js';
 import { prewarm } from './audio/instruments.js';
+import { loadGrand } from './audio/grand.js';
 import { getTrack, getAlbum, getArtist, albumTracks } from './data/catalog.js';
 import { bus, EVT } from './core/bus.js';
 import { Random, clamp } from './core/utils.js';
@@ -22,6 +23,41 @@ import { read, write, STORAGE_KEYS as K } from './core/storage.js';
 /** Composed scores, keyed by track id. Composition is deterministic, so this
  *  is a pure memo — it never needs invalidating. */
 const scoreCache = new Map();
+
+/**
+ * A written movement, fetched and turned into the same shape the composer
+ * produces — so the transport, the visualiser, the desk and the drawn score
+ * cannot tell the difference and none of them needed changing.
+ *
+ * @param {import('./data/catalog.js').Track} track
+ */
+async function writtenScore(track) {
+  const url = new URL(`./data/scores/${track.score}.json`, import.meta.url);
+  const doc = await (await fetch(url)).json();
+  // [time, length, midi, velocity] — everything interpretive already resolved
+  // by dev/export.py: the tempo map is in the times and the pedal is in the
+  // lengths. A written piece is the same piece on every machine that opens it.
+  const events = doc.notes.map(([t, d, m, v]) => ({
+    t, d, m, v, i: 'grand', p: 0,
+  }));
+  return {
+    events,
+    duration: doc.duration,
+    sections: [],
+    bpm: 60,
+    meter: [4, 4],
+    secPerBeat: 1,
+    bars: 0,
+    key: track.key,
+    mode: track.mode,
+    instruments: ['grand'],
+    chords: [],
+    tonicClass: 0,
+    reverb: 0.3,
+    styleLabel: 'WRITTEN',
+    solo: true,
+  };
+}
 
 /** @param {import('./data/catalog.js').Track} track */
 function scoreFor(track) {
@@ -92,6 +128,10 @@ class Player {
         // Render the plucked-string tables in the background so the first
         // harpsichord entry does not stutter.
         requestIdleCallback?.(() => prewarm(engine.ctx, 45, 86)) ?? setTimeout(() => prewarm(engine.ctx, 45, 86), 400);
+        // A written movement is played on a recording of a real instrument
+        // and cannot start until it has been decoded. Two megabytes, once.
+        const track = getTrack(store.state.trackId);
+        if (track?.score) await loadGrand(engine.ctx);
       } else {
         bus.emit(EVT.AUDIO_BLOCKED, {});
       }
@@ -154,7 +194,16 @@ class Player {
     // Composition is synchronous but can take a few ms for long pieces; yield
     // once so the UI paints the new track before the work starts.
     await Promise.resolve();
-    const score = scoreFor(track);
+    let score;
+    if (track.score) {
+      score = scoreCache.get(track.id) ?? await writtenScore(track);
+      scoreCache.set(track.id, score);
+      // The instrument itself is fetched in unlock(), because the context it
+      // has to be decoded into does not exist until then.
+      if (engine.ctx) await loadGrand(engine.ctx);
+    } else {
+      score = scoreFor(track);
+    }
     this.score = score;
     store.set({ duration: score.duration, loadingTrack: false }, 'player:loaded');
 

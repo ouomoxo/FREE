@@ -64,64 +64,69 @@ def load(directory=None):
     return out
 
 
-def render(notes, out_path, pedal=None, tempo=None, samples=None,
-           lead=0.8, tail=6.0, normalise=-1.0):
-    """Play a score.
+def resolve(notes, pedal=None, tempo=None):
+    """Turn a score into what is actually going to sound.
 
-    notes   iterable of (beat, beats_long, midi, velocity)
-    pedal   sorted beats at which the pedal comes up and goes straight back
-            down. Everything sounding is damped at those moments and nothing
-            else ever is, which is what a pedalled piano does.
-    tempo   callable beat → seconds per beat, or a number
+    Beats become seconds through the tempo map, and each note's length becomes
+    the length it *rings* — its own value, or until the pedal comes up,
+    whichever is later. After this there is no metre and no pedal left in the
+    data, only notes with times and durations, which is all a player needs and
+    all a browser should have to be told.
+
+    @returns list of (seconds, seconds_long, midi, velocity)
     """
-    samples = samples if samples is not None else load()
-    keys = np.array(sorted(samples))
     pedal = sorted(pedal or [])
-
     if tempo is None:
         tempo = 60 / 52
     spb = tempo if callable(tempo) else (lambda _b, _v=tempo: _v)
 
-    # Beats to seconds, by walking the tempo map in small steps so that a
-    # gradual slowing is actually gradual and not a series of jumps.
     last = max(n[0] + n[1] for n in notes) + 2
     grid = np.arange(0, last + 0.05, 0.05)
     secs = np.concatenate([[0], np.cumsum(np.array([spb(b) for b in grid[:-1]]) * 0.05)])
-
-    def when(beat):
-        return float(np.interp(beat, grid, secs))
+    when = lambda beat: float(np.interp(beat, grid, secs))  # noqa: E731
 
     pedal_s = [when(b) for b in pedal] + [1e9]
 
     def pedal_end(t):
         # Syncopated pedalling: the foot comes up *on* the new harmony and goes
-        # straight back down after it has sounded, so the old harmony is cut
-        # and the new one is caught. A note struck at the change is therefore
-        # never damped by it — it is still under the finger. Liszt thought this
+        # straight back down after it has sounded, so the old harmony is cut and
+        # the new one is caught. A note struck at the change is never damped by
+        # it — it is still under the finger. Liszt thought the discovery of this
         # was the most important thing that ever happened to piano playing.
         for p in pedal_s:
             if p > t + 0.075:
                 return p
         return 1e9
 
-    total = when(last) + lead + tail
+    out = []
+    for beat, length, note, vel in sorted(notes):
+        onset = when(beat)
+        ring = (60.0 if note >= 90                 # no dampers up here
+                else max(when(beat + length), pedal_end(onset)) - onset + 0.3)
+        out.append((onset, ring, int(note), float(vel)))
+    return out, when(last)
+
+
+def render(notes, out_path, pedal=None, tempo=None, samples=None,
+           lead=0.8, tail=6.0, normalise=-1.0):
+    """Play a score.
+
+    notes   iterable of (beat, beats_long, midi, velocity)
+    pedal   beats at which the pedal comes up and goes straight back down
+    tempo   callable beat -> seconds per beat, or a number
+    """
+    samples = samples if samples is not None else load()
+    keys = np.array(sorted(samples))
+    events, last = resolve(notes, pedal, tempo)
+
+    total = last + lead + tail
     buf = np.zeros((int(total * SR) + SR, 2), dtype=np.float32)
 
-    for beat, length, note, vel in notes:
-        onset = when(beat)
-        offset = when(beat + length)
-
+    for onset, ring, note, vel in events:
         k = int(keys[np.argmin(np.abs(keys - note))])
         src = samples[k]
         ratio = 2.0 ** ((note - k) / 12.0)
 
-        # It rings until the key is up *or* the pedal comes up, whichever is
-        # later. Under the pedal a quaver lasts as long as the harmony does,
-        # which is the whole reason the instrument has one.
-        if note >= 90:                        # no damper up here
-            ring = 60.0
-        else:
-            ring = max(offset, pedal_end(onset)) - onset + 0.3
         n_out = int(min(ring, len(src) / ratio / SR) * SR)
         start = int((onset + lead) * SR)
         n_out = min(n_out, len(buf) - start)

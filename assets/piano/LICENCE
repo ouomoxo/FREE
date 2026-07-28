@@ -1,0 +1,13 @@
+Salamander Grand Piano
+Recorded by Alexander Holm.
+Licensed under Creative Commons Attribution 3.0 (CC-BY 3.0).
+https://creativecommons.org/licenses/by/3.0/
+
+Thirty samples, one every three semitones from A0 to C8, as distributed with
+Tone.js at https://tonejs.github.io/audio/salamander/
+
+These are the only recordings in this repository. Everything else here — every
+other instrument, every generated movement, the reverb, the artwork — is
+calculated at the moment you ask for it. The written scores in js/data/scores/
+are pieces rather than repertoire, and a piece deserves the instrument it was
+written for.

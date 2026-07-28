@@ -14,6 +14,7 @@
 import { mtof } from './theory.js';
 import { clamp } from '../core/utils.js';
 import { pianoBus } from './piano.js';
+import { grand } from './grand.js';
 
 /** @type {Map<string, AudioBuffer>} */
 const pluckCache = new Map();
@@ -753,13 +754,14 @@ export function piano(engine, n) {
 }
 
 export const VOICES = {
-  piano, strings, harpsichord, harp, pizzicato, celeste, glockenspiel,
+  piano, grand, strings, harpsichord, harp, pizzicato, celeste, glockenspiel,
   flute, choir, contrabass, timpani, cymbal,
 };
 
 /** Human-facing instrument labels for the UI. */
 export const INSTRUMENT_LABEL = Object.freeze({
   piano: 'PIANO',
+  grand: 'GRAND PIANO',
   strings: 'STRINGS',
   harpsichord: 'HARPSICHORD',
   harp: 'HARP',

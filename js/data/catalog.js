@@ -180,6 +180,24 @@ export const ARTISTS = [
 /** @type {AlbumSpec[]} */
 export const ALBUMS = [
   {
+    // The one record here that is *written* rather than generated. Its three
+    // movements are in `scores/` as source and in `js/data/scores/` as notes
+    // with times on them, and they are played on a recorded instrument rather
+    // than a synthesised one — see `js/audio/grand.js` for why.
+    id: 'written', artist: 'vantor', title: 'THREE ROOMS', year: 2026, kind: 'ALBUM',
+    palette: 'marble', motif: 'hands', photo: 'a', photoCell: 3, photoZoom: 2.1, photoOffsetY: -0.1,
+    style: 'notturno', key: 'C', mode: 'minor',
+    blurb: 'A sonata, and two pieces beside it. Three notes hold the sonata together — C, '
+      + 'A flat, G — and it does not develop them: the first movement never rises above '
+      + 'piano and goes five keys from home without saying so, the second is a waltz, and '
+      + 'the third is what comes up the stairs.',
+    tracks: [
+      ['I. ADAGIO / II. ALLEGRETTO / III. PRESTO', { score: 'three_rooms', minutes: 5.8 }],
+      ['COME BACK — nocturne in C minor', { score: 'comeback', minutes: 6.4 }],
+      ['THE SAME FOUR NOTES, FALLING', { score: 'falling', minutes: 4.4 }],
+    ],
+  },
+  {
     id: 'op27', artist: 'vantor', title: "THE CONDUCTOR'S HANDS", year: 2024, kind: 'ALBUM',
     palette: 'bone', motif: 'hands', photo: 'b', photoCell: 4, photoZoom: 1.45, photoOffsetY: -0.04, style: 'adagio', key: 'D', mode: 'minor',
     blurb: 'Six movements written to be conducted in darkness. The parts are identical; only the gesture changes.',
@@ -508,11 +526,15 @@ for (const spec of ALBUMS) {
     const minutes = over.minutes ?? rnd.float(2.6, 5.2);
     const targetBars = barsForMinutes(style, bpm, minutes);
     const trackSpec = { seed, style, key, mode, bpm, targetBars };
-    const duration = estimateDuration(trackSpec);
+    // A written movement has a fixed length because it has fixed notes. A
+    // generated one has to be estimated from its style and bar count.
+    const duration = over.score ? minutes * 60 : estimateDuration(trackSpec);
 
     TRACKS.push({
       id, title, albumId: spec.id, artistId: spec.artist, index: i + 1,
       seed, style, key, mode, bpm, targetBars, duration,
+      /** Set when the movement is written down rather than composed at load. */
+      score: over.score ?? null,
       meter: (STYLES[style] ?? STYLES.baroque).meter,
       plays: Math.round(rnd.float(0.04, 1) * artist.monthly * 0.6),
     });
